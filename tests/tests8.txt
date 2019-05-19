@@ -1,0 +1,118 @@
+ImagesVerify t10k-images-idx3-ubyte
+LabelsVerify t10k-labels-idx1-ubyte
+Images train-images-idx3-ubyte
+Labels train-labels-idx1-ubyte
+
+MaxTrainTime 60
+#Iterations set to arbitrary big nuber
+Iterations 20000000
+
+#This is evaluated pretty good topology
+Topology 32,16
+executable trainMnistParallel
+
+BatchSize 8
+LearningRateMin 0.001
+LearningRateMax 0.25
+
+
+File db_1.bin
+print e:$executable file:$File
+run
+File db_2.bin
+print e:$executable file:$File
+run
+File db_3.bin
+print e:$executable file:$File
+run
+File db_4.bin
+print e:$executable file:$File
+run
+File db_5.bin
+print e:$executable file:$File
+run
+File db_6.bin
+print e:$executable file:$File
+run
+File db_7.bin
+print e:$executable file:$File
+run
+File db_8.bin
+print e:$executable file:$File
+run
+File db_9.bin
+print e:$executable file:$File
+run
+File db_10.bin
+print e:$executable file:$File
+run
+File db_11.bin
+print e:$executable file:$File
+run
+File db_12.bin
+print e:$executable file:$File
+run
+File db_13.bin
+print e:$executable file:$File
+run
+File db_14.bin
+print e:$executable file:$File
+run
+File db_15.bin
+print e:$executable file:$File
+run
+File db_16.bin
+print e:$executable file:$File
+run
+File db_17.bin
+print e:$executable file:$File
+run
+File db_18.bin
+print e:$executable file:$File
+run
+File db_19.bin
+print e:$executable file:$File
+run
+File db_20.bin
+print e:$executable file:$File
+run
+File db_21.bin
+print e:$executable file:$File
+run
+File db_22.bin
+print e:$executable file:$File
+run
+File db_23.bin
+print e:$executable file:$File
+run
+File db_24.bin
+print e:$executable file:$File
+run
+File db_25.bin
+print e:$executable file:$File
+run
+File db_26.bin
+print e:$executable file:$File
+run
+File db_27.bin
+print e:$executable file:$File
+run
+File db_28.bin
+print e:$executable file:$File
+run
+File db_29.bin
+print e:$executable file:$File
+run
+File db_30.bin
+print e:$executable file:$File
+run
+File db_31.bin
+print e:$executable file:$File
+run
+File db_32.bin
+print e:$executable file:$File
+run
+
+Hard false
+Extra db_1.bin,db_2.bin,db_3.bin,db_4.bin,db_5.bin,db_6.bin,db_7.bin,db_8.bin,db_9.bin,db_10.bin,db_11.bin,db_12.bin,db_13.bin,db_14.bin,db_15.bin,db_16.bin,db_17.bin,db_18.bin,db_19.bin,db_20.bin,db_21.bin,db_22.bin,db_23.bin,db_24.bin,db_25.bin,db_26.bin,db_27.bin,db_28.bin,db_29.bin,db_30.bin,db_31.bin,db_32.bin
+ensemble

@@ -1,0 +1,61 @@
+ImagesVerify t10k-images-idx3-ubyte
+LabelsVerify t10k-labels-idx1-ubyte
+Images train-images-idx3-ubyte
+Labels train-labels-idx1-ubyte
+
+executable trainMnist
+LearningRateMin 0.0001
+LearningRateMax 0.03
+MaxTrainTime 40
+Iterations 20000000
+
+File d1.bin
+Topology 16
+print $executable $Topology
+run
+ 
+File d2.bin
+Topology 32
+print $executable $Topology
+run
+
+File d3.bin
+Topology 16,16
+print $executable $Topology
+run
+
+File d4.bin
+Topology 16,16,16
+print $executable $Topology
+run
+
+File d5.bin
+Topology 32,16
+print $executable $Topology
+run
+
+File d6.bin
+Topology 128
+print $executable $Topology
+run
+
+File d7.bin
+Topology 256,128
+print $executable $Topology
+run
+
+File d8.bin
+Topology 128,32,16
+print $executable $Topology
+run
+
+Extra d1.bin,d2.bin,d3.bin,d4.bin,d5.bin,d6.bin,d7.bin,d8.bin
+Hard false
+print Ensemble Hard=$Hard $Extra
+ensemble
+
+Extra d1.bin,d2.bin,d3.bin,d4.bin,d5.bin,d6.bin,d7.bin,d8.bin
+Hard true
+print Ensemble Hard=$Hard $Extra
+ensemble
+

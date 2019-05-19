@@ -1,0 +1,16 @@
+Neuropia.pro.user*
+data
+mnistdata.bin
+neuropia_run*.txt 
+.vs
+CMakeSettings.json
+CMakeCache.txt
+CMakeFiles
+*.cmake
+builds
+Neuropia.pro.user*
+*.autosave
+dump.txt
+dump.text
+*.bin
+

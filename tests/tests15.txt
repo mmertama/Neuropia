@@ -1,0 +1,24 @@
+ImagesVerify t10k-images-idx3-ubyte
+LabelsVerify t10k-labels-idx1-ubyte
+Images train-images-idx3-ubyte
+Labels train-labels-idx1-ubyte
+
+Topology 700
+executable trainMnist
+InitStrategy auto
+ActivationFunction relu
+
+Iterations 100000
+
+DropoutRate 0.5
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+#run
+
+#first is default and then and subsequent explicit starting form 1st hidden, input has no af
+#ActivationFunction relu,relu,relu,relu
+#first is default applied to all, then subsequent is implicit (output has no dropout)
+#DropoutRate 0.5,0.5,0.5
+
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+

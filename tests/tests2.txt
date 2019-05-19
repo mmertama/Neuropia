@@ -1,0 +1,29 @@
+ImagesVerify t10k-images-idx3-ubyte
+LabelsVerify t10k-labels-idx1-ubyte
+Images train-images-idx3-ubyte
+Labels train-labels-idx1-ubyte
+ 
+Iterations 10000
+Topology 32
+print Train Mnist 32
+trainMnist
+
+Iterations 10000
+Topology 32,16
+print Train Mnist 16,16
+trainMnist
+
+Iterations 10000
+Topology 27,15
+print Train Mnist 27,15
+trainMnist
+
+Iterations 100000
+Topology 256
+print Train Mnist 256
+trainMnist
+ 
+Iterations 30000
+Topology 32,16,16
+print Train Mnist 32,16,16
+trainMnist

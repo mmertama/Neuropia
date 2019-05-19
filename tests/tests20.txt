@@ -1,0 +1,37 @@
+ImagesVerify t10k-images-idx3-ubyte
+LabelsVerify t10k-labels-idx1-ubyte
+Images train-images-idx3-ubyte
+Labels train-labels-idx1-ubyte
+
+
+executable trainMnist
+InitStrategy relu
+ActivationFunction relu
+LearningRateMin 0.00001
+LearningRateMax 0.02
+#TestFrequency 2000
+
+#L2 0.0001
+Topology 500,200
+Iterations 30000
+
+File t20_5.b
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+File t20_6.b
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+File t20_7.b
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+File t20_8.b
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+Extra  t20_1.b,t20_2.b,t20_3.b,t20_4.b t20_5.b,t20_6.b,t20_7.b,t20_8.b
+Hard false
+print Ensemble Hard=$Hard $Extra
+ensemble

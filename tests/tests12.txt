@@ -1,0 +1,38 @@
+ImagesVerify t10k-images-idx3-ubyte
+LabelsVerify t10k-labels-idx1-ubyte
+Images train-images-idx3-ubyte
+Labels train-labels-idx1-ubyte
+
+
+Iterations 50000
+Topology 500
+executable trainMnist
+InitStrategy auto
+
+ActivationFunction sigmoid
+
+DropoutRate 0.0
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+DropoutRate 0.5
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+ActivationFunction elu
+DropoutRate 0.0
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+DropoutRate 0.5
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+ActivationFunction relu
+DropoutRate 0.0
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+DropoutRate 0.5
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run

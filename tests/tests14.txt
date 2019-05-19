@@ -1,0 +1,149 @@
+ImagesVerify t10k-images-idx3-ubyte
+LabelsVerify t10k-labels-idx1-ubyte
+Images train-images-idx3-ubyte
+Labels train-labels-idx1-ubyte
+
+Topology 500
+executable trainMnist
+InitStrategy auto
+
+ActivationFunction sigmoid
+DropoutRate 0.0
+Iterations 80000
+
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+ActivationFunction elu
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+ActivationFunction relu
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+
+DropoutRate 0.5
+Iterations 150000
+
+ActivationFunction sigmoid
+
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+ActivationFunction elu
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+ActivationFunction relu
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+DropoutRate 0.0
+Topology 500,100
+Iterations 80000
+
+ActivationFunction sigmoid
+
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+ActivationFunction elu
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+ActivationFunction relu
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+DropoutRate 0.5
+Topology 500,100
+Iterations 150000
+
+ActivationFunction sigmoid
+
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+ActivationFunction elu
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+ActivationFunction relu
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+Iterations 1000
+Topology 500
+executable trainMnistParallel
+InitStrategy auto
+BatchSize 20
+Jobs 6
+
+
+ActivationFunction sigmoid
+DropoutRate 0.0
+Iterations 1000
+
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+ActivationFunction elu
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+ActivationFunction relu
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+
+DropoutRate 0.5
+Iterations 1500
+
+ActivationFunction sigmoid
+
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+ActivationFunction elu
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+ActivationFunction relu
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+DropoutRate 0.0
+Topology 500,100
+Iterations 1000
+
+ActivationFunction sigmoid
+
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+ActivationFunction elu
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+ActivationFunction relu
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+DropoutRate 0.5
+Topology 500,100
+Iterations 1500
+
+ActivationFunction sigmoid
+
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+ActivationFunction elu
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+
+ActivationFunction relu
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+run
+

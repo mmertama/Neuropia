@@ -1,0 +1,77 @@
+ImagesVerify t10k-images-idx3-ubyte
+LabelsVerify t10k-labels-idx1-ubyte
+Images train-images-idx3-ubyte
+Labels train-labels-idx1-ubyte
+
+Topology 500,100
+executable trainMnist
+InitStrategy auto
+LearningRateMin 0.00001
+LearningRateMax 0.02
+#TestFrequency 2000
+L2 0.001
+ActivationFunction relu,relu,sigmoid
+
+Iterations 50000
+
+#DropoutRate 0.0
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+#run
+
+#DropoutRate 0.0,0.5
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+#run
+
+Iterations 100000
+#DropoutRate 0.0
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+#run
+
+#DropoutRate 0.0,0.5
+print $executable $Topology $Iterations $ActivationFunction $DropoutRate
+#run
+
+Iterations 150000
+ActivationFunction relu
+#DropoutRate 0.0
+L2 0.0
+print $executable $Topology $Iterations $ActivationFunction $L2 $DropoutRate
+#run
+
+L2 0.001
+#DropoutRate 0.0,0.5
+print $executable $Topology $Iterations $ActivationFunction $L2 $DropoutRate
+#run
+
+L2 0.0
+Iterations 150000
+ActivationFunction relu,relu,sigmoid
+DropoutRate 0.0
+print $executable $Topology $Iterations $ActivationFunction $L2 $DropoutRate
+#run
+
+L2 0.001
+#DropoutRate 0.0,0.5
+print $executable $Topology $Iterations $ActivationFunction $L2 $DropoutRate
+#run
+
+DropoutRate 0.0
+
+Iterations 200000
+ActivationFunction relu
+L2 0.0
+print $executable $Topology $Iterations $ActivationFunction $L2
+run
+
+L2 0.001
+print $executable $Topology $Iterations $ActivationFunction $L2
+run
+
+L2 0.0
+ActivationFunction relu,relu,sigmoid
+print $executable $Topology $Iterations $ActivationFunction $L2
+run
+
+L2 0.001
+print $executable $Topology $Iterations $ActivationFunction $L2
+run

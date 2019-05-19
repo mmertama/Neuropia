@@ -1,0 +1,33 @@
+ImagesVerify t10k-images-idx3-ubyte
+LabelsVerify t10k-labels-idx1-ubyte
+Images train-images-idx3-ubyte
+Labels train-labels-idx1-ubyte
+ 
+Iterations 1000000
+MaxTrainTime 30
+LearningRate 0.01
+
+Topology 16,16
+executable trainMnist
+print $executable $Topology $Iterations
+run
+
+Topology 32,16
+executable trainMnist
+print $executable $Topology $Iterations
+run
+
+Topology 32
+executable trainMnist
+print $executable $Topology $Iterations
+run
+
+Topology 256,128
+executable trainMnist
+print $executable $Topology $Iterations
+run
+
+Topology 32,16,16
+executable trainMnist
+print $executable $Topology $Iterations
+run

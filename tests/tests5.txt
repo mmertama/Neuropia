@@ -1,0 +1,39 @@
+ImagesVerify t10k-images-idx3-ubyte
+LabelsVerify t10k-labels-idx1-ubyte
+Images train-images-idx3-ubyte
+Labels train-labels-idx1-ubyte
+
+MaxTrainTime 30
+#Iterations set to arbitrary big nuber
+Iterations 20000000
+
+#This is evaluated pretty good topology
+Topology 32,16
+
+#LearningRateMin 0.001
+#LearningRateMax 0.025
+executable trainMnist
+print $executable $Topology
+#run
+
+executable trainMnistEvo
+
+BatchSize 8
+LearningRateMin 0.001
+LearningRateMax 0.25
+BatchVerifySize 8
+print $executable $Topology
+run
+
+BatchSize 8
+LearningRateMin 0.001
+LearningRateMax 0.25
+executable trainMnistParallel
+print $executable $Topology
+
+Jobs 4
+run
+
+
+
+

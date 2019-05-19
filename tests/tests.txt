@@ -1,0 +1,46 @@
+ ImagesVerify t10k-images-idx3-ubyte
+ LabelsVerify t10k-labels-idx1-ubyte
+ Images train-images-idx3-ubyte
+ Labels train-labels-idx1-ubyte
+ TestFrequency 2000
+ Iterations 70000
+ Topology 16,16
+ print Train Mnist 16,16
+ trainMnist
+ 
+ Iterations 70000
+ Topology 32,16
+ print Train Mnist 32,16
+ trainMnist
+ 
+ Iterations 50000
+ Topology 128,32
+ print Train Mnist 128,32
+ trainMnist
+ 
+ Topology 128,32
+ Iterations 10
+ Jobs 4
+ BatchSize 600
+ print Train Mnist Evo 128,32
+ trainMnistEvo
+ 
+ Topology 32,32
+ Iterations 10
+ Jobs 8
+ BatchSize 800
+ print Train Mnist Evo 32,32
+ trainMnistEvo
+ 
+ BatchSize 600
+ BatchVerifySize 100
+ print Train Mnist Parallel 32,32
+ trainMnistParallel
+ 
+ Topology 128,32
+ BatchSize 800
+ BatchVerifySize 100
+ Jobs 10
+ print Train Mnist Parallel 128,32
+ trainMnistParallel
+ 
