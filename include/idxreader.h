@@ -70,10 +70,10 @@ protected:
      * @param n amount of the elements to read, note that in little endian device read(b, 1, 64) is different than read(b, 8, 8) even amount of read bytes is the same, later
      * may have bytes swapped to native as IDX data is BE.
      */
-    size_t read(char* b, int size, int n);
+    size_t read(char* b, size_t size, size_t n);
     void moveTo(size_t dataPosition);
 private:
-    void readBE(char* b, int size);
+    void readBE(char* b, size_t size);
 private:
     mutable std::ifstream m_stream;
     Type m_type = Type::Invalid;

@@ -25,13 +25,13 @@ std::tuple<int, unsigned> verify(const Neuropia::Layer& network,
  * @brief verifyEnseble
  * @param ensebles
  * @param hard
- * @param imageFiles
- * @param labelFiles
+ * @param imageFile
+ * @param labelFile
  */
 void verifyEnseble(const std::vector<Neuropia::Layer>& ensebles,
                    bool hard,
-                   const std::string& imageFiles,
-                   const std::string& labelFiles);
+                   const std::string& imageFile,
+                   const std::string& labelFile);
 }
 
 #endif // VERIFY_H

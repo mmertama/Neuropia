@@ -17,17 +17,17 @@ using namespace Neuropia;
 #endif
 #endif
 
-size_t IdxReaderBase::read(char* data, int size, int n) {
-   std::streamsize count = 0;
+size_t IdxReaderBase::read(char* data, size_t size, size_t n) {
+   size_t count = 0;
 #if defined(LITTLE_ENDIAN) || !defined(BIG_ENDIAN)
     assert(size > 0  && n > 0);
     if(size == 1) {
-        m_stream.read(data, size * n);
-        count = m_stream.gcount();
+        m_stream.read(data, static_cast<std::streamsize>(size * n));
+        count = static_cast<size_t>(m_stream.gcount());
     } else {
-        for(int d = 0; d < size * n; d += size) {
+        for(auto d = 0ULL; d < size * n; d += size) {
             readBE(data + d, size);
-            count += m_stream.gcount();
+            count += static_cast<size_t>(m_stream.gcount());
         }
     }
 #else
@@ -40,7 +40,7 @@ size_t IdxReaderBase::read(char* data, int size, int n) {
     return static_cast<size_t>(count);
 }
 
-void IdxReaderBase::readBE(char* data, int size) {
+void IdxReaderBase::readBE(char* data, size_t size) {
 #if defined(LITTLE_ENDIAN) || !defined(BIG_ENDIAN)
     switch(size) {
     case 1: {

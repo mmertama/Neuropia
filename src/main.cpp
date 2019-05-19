@@ -210,10 +210,4 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-//some stuff
-//trainMnistEvo ../neuropia/data/t10k-images.idx3-ubyte ../neuropia/data/t10k-labels-idx1-ubyte ../neuropia/data/train-images-idx3-ubyte ../neuropia/data/train-labels-idx1-ubyte 10 8
-// training params: ../neuropia/data/t10k-images.idx3-ubyte ../neuropia/data/t10k-labels-idx1-ubyte ../neuropia/data/train-images-idx3-ubyte ../neuropia/data/train-labels-idx1-ubyte 100000
-// ../neuropia/data/t10k-images.idx3-ubyte ../neuropia/data/t10k-labels-idx1-ubyte ../neuropia/data/train-images-idx3-ubyte ../neuropia/data/train-labels-idx1-ubyte 30 4
-
-
 

@@ -426,6 +426,27 @@ public:
         return output;
     }
 
+    friend Matrix<T> operator-(const Matrix<T>& m1, const Matrix<T>& m2) {
+        return Matrix<T>::map(m1, m2, [](const T & a, const T & b) {return a - b;});
+    }
+
+    friend Matrix<T> operator+(const Matrix<T>& m1, const Matrix<T>& m2) {
+        return Matrix<T>::map(m1, m2, [](const T & a, const T & b) {return a + b;});
+    }
+
+    friend Matrix<T> operator*(const Matrix<T>& m1, const Matrix<T>& m2) {
+        return Matrix<T>::map(m1, m2, [](const T & a, const T & b) {return a * b;});
+    }
+
+    friend Matrix<T> operator*(const Matrix<T>& m1, const T& v) {
+        return m1.map([v](const T & a) {return a * v;});
+    }
+
+    friend  Matrix<T> operator*(const T& v, const Matrix<T>& m1) {
+        return m1.map([v](const T & a) {return a * v;});
+    }
+
+
 private:
     void makeUnique() {
         const auto compare = [](const std::vector<T>& a, const std::vector<T>& b)-> int {
@@ -451,32 +472,6 @@ private:
     index_type m_colSize = 0;
 };
 
-
-template <class T>
-Matrix<T> operator-(const Matrix<T>& m1, const Matrix<T>& m2) {
-    return Matrix<T>::map(m1, m2, [](const T & a, const T & b) {return a - b;});
-}
-
-template <class T>
-Matrix<T> operator+(const Matrix<T>& m1, const Matrix<T>& m2) {
-    return Matrix<T>::map(m1, m2, [](const T & a, const T & b) {return a + b;});
-}
-
-template <class T>
-Matrix<T> operator*(const Matrix<T>& m1, const Matrix<T>& m2) {
-    return Matrix<T>::map(m1, m2, [](const T & a, const T & b) {return a * b;});
-}
-
-
-template <class T>
-Matrix<T> operator*(const Matrix<T>& m1, const T& v) {
-    return m1.map([v](const T & a) {return a * v;});
-}
-
-template <class T>
-Matrix<T> operator*(const T& v, const Matrix<T>& m1) {
-    return m1.map([v](const T & a) {return a * v;});
-}
 
 }
 

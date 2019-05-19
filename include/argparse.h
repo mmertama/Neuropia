@@ -7,6 +7,13 @@
 #include <set>
 #include <iostream>
 
+
+/**
+ * @brief The ArgParse class
+ *
+ * Yet another implementation of Python style ArgumentParser
+ *
+ */
 class ArgParse {
 public:
     ArgParse& addOpt(char shortName, std::string longName = "", bool hasValue = false, std::string defaultValue = "");

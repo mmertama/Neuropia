@@ -36,7 +36,6 @@ HEADERS += \
     include/idxreader.h \
     include/matrix.h \
     include/paralleltrain.h \
-    include/psrand.h \
     include/utils.h \
     include/evotrain.h \
     include/verify.h \

@@ -497,9 +497,6 @@ void Layer::initialize(InitStrategy strategy) {
         }
     } else {
         for(auto& n : m_neurons) {
-          //  for(size_t i = 0; i < n.size(); i++) {
-          //      n.setWeight(i, 1.0);
-          //  }
             n.setBias(0);
         }
     }
@@ -586,9 +583,9 @@ const Layer* Layer::get(int offset) const {
 }
 
 
-bool Layer::isValid() const {
+bool Layer::isValid(bool testNext) const {
     if(isInput())
-        return true;
+        return !testNext || !m_next || m_next->isValid(true);
     const auto prevLayer = previousLayer(this);
     auto weights =
             Matrix<NeuronType>::fromArray(m_neurons,
@@ -596,5 +593,5 @@ bool Layer::isValid() const {
     [](const Neuron & n, Matrix<NeuronType>::index_type index) {
         return n.weight(index);
     });
-    return weights.reduce<bool>(false, [](bool a, auto r){return a || std::isnan(r) || std::isinf(r);});
+    return weights.reduce<bool>(false, [](bool a, auto r){return a || std::isnan(r) || std::isinf(r);}) && (!testNext || !m_next || m_next->isValid(true));
 }

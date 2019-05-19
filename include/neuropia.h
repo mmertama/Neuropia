@@ -188,10 +188,6 @@ DerivativeFunction derivativeMap(ActivationFunction af);
  */
 class Neuron {
 
-    //xavier and he init
-    //support for relu and elu and derivatives
-    //dropout
-
 public:
 
     Neuron() = default;
@@ -687,9 +683,10 @@ public:
 
     /**
      * @brief isValid
+     * @param testNext
      * @return
      */
-    bool isValid() const;
+    bool isValid(bool testNext = false) const;
 
     /**
      * @brief outLayer

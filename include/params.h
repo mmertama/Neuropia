@@ -10,6 +10,38 @@
 
 namespace Neuropia {
 
+/**
+ * @brief The Params class
+ *
+ * read parameter file
+ *
+ * e.g.
+ * Neuropia::Params params = {
+        {"ImagesVerify", "", Neuropia::Params::String},
+        {"LabelsVerify", "", Neuropia::Params::String},
+        {"Images", "", Neuropia::Params::String},
+        {"Labels", "", Neuropia::Params::String},
+        {"Iterations", "1", Neuropia::Params::Int},
+        {"Jobs", "1", Neuropia::Params::Int},
+        {"LearningRate", "0", Neuropia::Params::Real},
+        {"LearningRateMin", "0.02", Neuropia::Params::Real},
+        {"LearningRateMax", "0.02", Neuropia::Params::Real},
+        {"BatchSize", "800", Neuropia::Params::Int},
+        {"BatchVerifySize", "100", Neuropia::Params::Int},
+        {"Topology", "64,32", topologyRe},
+        {"MaxTrainTime", std::to_string(MaxTrainTime), Neuropia::Params::Int},
+        {"File", "mnistdata.bin", Neuropia::Params::String},
+        {"Extra", "", Neuropia::Params::String},
+        {"Hard", "false", Neuropia::Params::Bool},
+        {"ActivationFunction", "sigmoid", activationFunctionRe},
+        {"InitStrategy", "auto", R"((auto|logistic|norm|relu)$)"},
+        {"DropoutRate", "0.0", dropoutRateRe},
+        {"TestFrequency", "9999999", Neuropia::Params::Int},
+        {"L2", "0.0", Neuropia::Params::Real},
+        {"Classes", "10", Neuropia::Params::Int}
+    };
+ *
+ */
 class Params {
 public:
     static constexpr char Execute[] = "executable";
