@@ -56,29 +56,29 @@ auto lrMax(const Neuropia::Params & p) {
 
 
 TrainerBase::TrainerBase(const std::string & root, const Neuropia::Params& params, bool quiet) :
-    imageFile(Neuropia::absPath(root, params["Images"])),
-    labelFile(Neuropia::absPath(root, params["Labels"])),
-    images(imageFile),
-    labels(labelFile),
-    m_network(Neuropia::Layer(images.size(1) * images.size(2), toFunction(params["ActivationFunction"])[0])),
-    dropoutRate(toRealVec(params["DropoutRate"])),
-    start(std::chrono::high_resolution_clock::now()),
-    learningRate(lrMax(params)),
-    learningRateMin(lrMin(params)),
-    learningRateMax(lrMax(params)),
-    iterations(params.uinteger("Iterations")),
-    testVerifyFrequency(params.uinteger("TestFrequency")),
-    lambdaL2(params.real("L2")),
-    quiet(quiet),
-    maxTrainTime(params.real("MaxTrainTime")),control(maxTrainTime >= MaxTrainTime ?
-                                           static_cast<decltype (control)>(Neuropia::timed) :
-                                           static_cast<decltype (control)>([this](const std::function<void ()>& f, const std::string & label) {
+    m_imageFile(Neuropia::absPath(root, params["Images"])),
+    m_labelFile(Neuropia::absPath(root, params["Labels"])),
+    m_images(m_imageFile),
+    m_labels(m_labelFile),
+    m_network(Neuropia::Layer(m_images.size(1) * m_images.size(2), toFunction(params["ActivationFunction"])[0])),
+    m_dropoutRate(toRealVec(params["DropoutRate"])),
+    m_start(std::chrono::high_resolution_clock::now()),
+    m_learningRate(lrMax(params)),
+    m_learningRateMin(lrMin(params)),
+    m_learningRateMax(lrMax(params)),
+    m_iterations(params.uinteger("Iterations")),
+    m_testVerifyFrequency(params.uinteger("TestFrequency")),
+    m_lambdaL2(params.real("L2")),
+    m_quiet(quiet),
+    m_maxTrainTime(params.real("MaxTrainTime")),m_control(m_maxTrainTime >= MaxTrainTime ?
+                                           static_cast<decltype (m_control)>(Neuropia::timed) :
+                                           static_cast<decltype (m_control)>([this](const std::function<void ()>& f, const std::string & label) {
                                                f();
-                                               std::cout << (label.size() > 0 ? label + " " : "") << "iterations:" << passedIterations << std::endl;
+                                               std::cout << (label.size() > 0 ? label + " " : "") << "iterations:" << m_passedIterations << std::endl;
                                                })){
 
-    neuropia_assert_always(images.ok(), imageFile);
-    neuropia_assert_always(labels.ok(), labelFile);
+    neuropia_assert_always(m_images.ok(), m_imageFile);
+    neuropia_assert_always(m_labels.ok(), m_labelFile);
     const auto topology = toIntVec(params["Topology"]);
     const auto afs = toFunction(params["ActivationFunction"]);
     const auto initStrategy = toInitStrategy(params["InitStrategy"], toFunction(params["ActivationFunction"])[0]);
@@ -98,12 +98,12 @@ TrainerBase::TrainerBase(const std::string & root, const Neuropia::Params& param
 }
 
 void TrainerBase::setDropout() {
-    if(dropoutRate.size() > 0) {
-        m_network.dropout(dropoutRate[0], true);
-        for(auto i = 1U; i < dropoutRate.size(); i++) {
+    if(m_dropoutRate.size() > 0) {
+        m_network.dropout(m_dropoutRate[0], true);
+        for(auto i = 1U; i < m_dropoutRate.size(); i++) {
             auto npt = m_network.get(static_cast<int>(i));
             neuropia_assert_always(npt, "Too many items in list");
-            npt->dropout(dropoutRate[i], false);
+            npt->dropout(m_dropoutRate[i], false);
         }
     }
 }

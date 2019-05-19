@@ -11,36 +11,36 @@ bool Trainer::train() {
     #ifdef DO_DUMP_DEBUG
     std::ofstream strm("dump.text", std::ios::app);
 #endif
-    auto testVerify = testVerifyFrequency;
+    auto testVerify = m_testVerifyFrequency;
 
     bool failed = false;
-control([&]() {
-    Neuropia::iterator(iterations, [&](size_t it)->bool {
+m_control([&]() {
+    Neuropia::iterator(m_iterations, [&](size_t it)->bool {
 #ifdef DO_DUMP_DEBUG
         Neuropia::debug(Trainer<inputSize>::network, strm, {1,4});
 #endif
-        if(maxTrainTime >= MaxTrainTime) {
-            if(!quiet)
-                persentage(it + 1, iterations);
-            learningRate += (1.0 / static_cast<double>(iterations)) * (learningRateMin - learningRateMax);
+        if(m_maxTrainTime >= MaxTrainTime) {
+            if(!m_quiet)
+                persentage(it + 1, m_iterations);
+            m_learningRate += (1.0 / static_cast<double>(m_iterations)) * (m_learningRateMin - m_learningRateMax);
         } else {
-            passedIterations = it;
+            m_passedIterations = it;
             const auto stop = std::chrono::high_resolution_clock::now();
-            const auto delta = static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(stop - start).count());
-            if(delta > maxTrainTime) {
+            const auto delta = static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(stop - m_start).count());
+            if(delta > m_maxTrainTime) {
                 return false;
             }
-            const auto change = delta - gap;
-            gap = delta;
-            if(!quiet)
-                persentage(delta, maxTrainTime, " " + std::to_string(learningRate));
-            this->learningRate += (static_cast<double>(change) / static_cast<double>(maxTrainTime)) * (learningRateMin - learningRateMax);
+            const auto change = delta - m_gap;
+            m_gap = delta;
+            if(!m_quiet)
+                persentage(delta, m_maxTrainTime, " " + std::to_string(m_learningRate));
+            this->m_learningRate += (static_cast<double>(change) / static_cast<double>(m_maxTrainTime)) * (m_learningRateMin - m_learningRateMax);
         }
 
-        const auto imageSize = images.size(1) * images.size(2);
-        const auto at = images.random();
-        const auto image = images.next(at, imageSize);
-        const auto label = static_cast<unsigned>(labels.next(at));
+        const auto imageSize = m_images.size(1) * m_images.size(2);
+        const auto at = m_images.random();
+        const auto image = m_images.next(at, imageSize);
+        const auto label = static_cast<unsigned>(m_labels.next(at));
 
 #ifdef DEBUG_SHOW
             Neuropia::printimage(image.data()); //ASCII print images
@@ -54,16 +54,16 @@ control([&]() {
 
         std::vector<Neuropia::NeuronType> outputs(m_network.outLayer()->size());
         outputs[label] = 1.0; //correct one is 1
-        if(!this->m_network.train(inputs.begin(), outputs.begin(), learningRate, lambdaL2)) {
+        if(!this->m_network.train(inputs.begin(), outputs.begin(), m_learningRate, m_lambdaL2)) {
             failed = true;
             return false;
         }
 
         if(--testVerify == 0) {
             m_network.inverseDropout();
-            printVerify(Neuropia::verify(m_network, imageFile, labelFile, 0, 200), "Test");
+            printVerify(Neuropia::verify(m_network, m_imageFile, m_labelFile, 0, 200), "Test");
             setDropout();
-            testVerify = testVerifyFrequency;
+            testVerify = m_testVerifyFrequency;
         }
 
         return true;

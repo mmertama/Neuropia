@@ -15,13 +15,12 @@ namespace Neuropia {
 
 class TrainerEvo : public TrainerBase {
 public:
-    TrainerEvo(const std::string & root, const Neuropia::Params& params, bool quiet);
-
- bool train();
+    TrainerEvo(const std::string & root, const Neuropia::Params& params, bool m_quiet);
+    bool train();
 protected:
-    unsigned jobs;
-    size_t batchSize;
-    size_t batchVerifySize;
+    unsigned m_jobs;
+    size_t m_batchSize;
+    size_t m_batchVerifySize;
 };
 
 }

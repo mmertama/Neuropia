@@ -5,46 +5,46 @@ using namespace Neuropia;
 
 TrainerEvo::TrainerEvo(const std::string& root, const Neuropia::Params& params, bool quiet)
     : TrainerBase(root, params, quiet),
-      jobs(params.uinteger("Jobs")),
-      batchSize(params.uinteger("BatchSize")),
-      batchVerifySize(params.uinteger("BatchVerifySize")){
+      m_jobs(params.uinteger("Jobs")),
+      m_batchSize(params.uinteger("BatchSize")),
+      m_batchVerifySize(params.uinteger("BatchVerifySize")){
 }
 
 bool TrainerEvo::train() {
     //copy network for jobs
-    std::vector<Neuropia::Layer> offsprings(jobs);
+    std::vector<Neuropia::Layer> offsprings(m_jobs);
     std::fill(offsprings.begin(), offsprings.end(), this->m_network);
 
-    std::vector<std::thread> threads(jobs);
-    std::vector<int> results(jobs);
-    const auto inputSize = images.size(1) * images.size(2);
-    std::vector<std::vector<std::tuple<std::vector<unsigned char>, unsigned char>>> batches(jobs);
-    std::vector<std::vector<std::tuple<std::vector<unsigned char>, unsigned char>>> batchesVerify(jobs);
+    std::vector<std::thread> threads(m_jobs);
+    std::vector<int> results(m_jobs);
+    const auto inputSize = m_images.size(1) * m_images.size(2);
+    std::vector<std::vector<std::tuple<std::vector<unsigned char>, unsigned char>>> batches(m_jobs);
+    std::vector<std::vector<std::tuple<std::vector<unsigned char>, unsigned char>>> batchesVerify(m_jobs);
 
     auto maxNet = 0U;
 
     int progressCount = 0;
-    const auto load = iterations;
+    const auto load = m_iterations;
 
     Neuropia::timed([&]() {
-        Neuropia::iterator(iterations, [&](size_t it)  {
+        Neuropia::iterator(m_iterations, [&](size_t it)  {
             ++progressCount;
-            for(auto job = 0U; job < jobs; ++job)  {
+            for(auto job = 0U; job < m_jobs; ++job)  {
 
                 auto& batchData = batches[job];
-                batchData.resize(batchSize);
+                batchData.resize(m_batchSize);
 
-                for(auto i = 0U; i < batchSize; i++)  {
-                    const auto at = images.random();
-                    batchData[i] = {images.next(at, inputSize), labels.next(at)};
+                for(auto i = 0U; i < m_batchSize; i++)  {
+                    const auto at = m_images.random();
+                    batchData[i] = {m_images.next(at, inputSize), m_labels.next(at)};
                 }
 
                 auto& batchVerifyData = batchesVerify[job];
-                batchVerifyData.resize(batchVerifySize);
+                batchVerifyData.resize(m_batchVerifySize);
 
-                for(auto i = 0U; i < batchVerifySize; i++)  {
-                    const auto at = images.random();
-                batchVerifyData[i] = {images.next(at, inputSize), labels.next(at)};
+                for(auto i = 0U; i < m_batchVerifySize; i++)  {
+                    const auto at = m_images.random();
+                batchVerifyData[i] = {m_images.next(at, inputSize), m_labels.next(at)};
                 }
 
                 // start thread
@@ -52,7 +52,7 @@ bool TrainerEvo::train() {
 
                     //first we train
 
-                    for(auto i = 0U; i < batchSize; i++) {
+                    for(auto i = 0U; i < m_batchSize; i++) {
                         std::vector<Neuropia::NeuronType> inputData(inputSize);
                         const auto& batch = batchData[i];
                         std::transform(std::get<0>(batch).begin(), std::get<0>(batch).end(), inputData.begin(), [](unsigned char c) {
@@ -63,7 +63,7 @@ bool TrainerEvo::train() {
                         const auto index = batchData[i];
                         outputs[std::get<1>(index)] = 1.0;
 
-                        offsprings[currentJob].train(inputData.begin(), outputs.begin(), learningRate, lambdaL2);
+                        offsprings[currentJob].train(inputData.begin(), outputs.begin(), m_learningRate, m_lambdaL2);
                     }
                     //then we verify,
                     //it may be debatable to use potentially overlaprogressCounting data for verify batches, but
@@ -71,7 +71,7 @@ bool TrainerEvo::train() {
                     // have any risk to contaminate verification data
                     int found = 0;
                     std::vector<Neuropia::NeuronType> inputs(inputSize);
-                    for(auto i = 0U; i < batchVerifySize; i++) {
+                    for(auto i = 0U; i < m_batchVerifySize; i++) {
 
                         std::transform(std::get<0>(batchVerifyData[i]).begin(), std::get<0>(batchVerifyData[i]).end(), inputs.begin(), [](unsigned char c) {
                             return Neuropia::normalize(static_cast<Neuropia::NeuronType>(c), 0, 255);
@@ -95,7 +95,7 @@ bool TrainerEvo::train() {
 
             //then find best network
             int maxmax = 0;
-            for(auto index = 0U;  index < jobs ; index++) {
+            for(auto index = 0U;  index < m_jobs ; index++) {
                 if(results[index] > maxmax) {
                     maxmax = results[index];
                     maxNet = index;
@@ -104,25 +104,25 @@ bool TrainerEvo::train() {
             //copy best of network for jobs
             std::fill(offsprings.begin(), offsprings.end(), offsprings[maxNet]);
 
-            if(maxTrainTime >= MaxTrainTime) {
-                if(!quiet)
+            if(m_maxTrainTime >= MaxTrainTime) {
+                if(!m_quiet)
                     std::cout << "\r" << it << " " << maxmax << " " << results << " "
                               << std::setprecision(3) << (100.0 * (static_cast<double>(progressCount) / static_cast<double>(load))) << '%' << std::flush;
-                learningRate += (1.0 / static_cast<double>(iterations)) * (learningRateMin - learningRateMax);
+                m_learningRate += (1.0 / static_cast<double>(m_iterations)) * (m_learningRateMin - m_learningRateMax);
             } else {
-                passedIterations = it;
+                m_passedIterations = it;
                 const auto stop = std::chrono::high_resolution_clock::now();
-                const auto delta = static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(stop - start).count());
-                if(delta > maxTrainTime) {
+                const auto delta = static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(stop - m_start).count());
+                if(delta > m_maxTrainTime) {
                     return false;    //out of time, exit
                 }
-                const auto change = delta - gap;
-                this->gap = delta;
-                this->learningRate += (static_cast<double>(change) / static_cast<double>(this->maxTrainTime)) * (this->learningRateMin - this->learningRateMax);
+                const auto change = delta - m_gap;
+                this->m_gap = delta;
+                this->m_learningRate += (static_cast<double>(change) / static_cast<double>(this->m_maxTrainTime)) * (this->m_learningRateMin - this->m_learningRateMax);
 
-                if(!this->quiet)
+                if(!this->m_quiet)
                     std::cout << "\r" << it << " " << maxmax << " " << results << " "
-                              << std::setprecision(3) << (100.0 * (delta / static_cast<double>(this->maxTrainTime))) << '%' << std::flush;
+                              << std::setprecision(3) << (100.0 * (delta / static_cast<double>(this->m_maxTrainTime))) << '%' << std::flush;
 
             }
             return true;

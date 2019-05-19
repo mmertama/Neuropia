@@ -10,7 +10,7 @@ namespace Neuropia {
  */
 class Trainer : public TrainerBase {
 public:
-   Trainer(const std::string& root, const Neuropia::Params& params, bool quiet);
+   Trainer(const std::string& root, const Neuropia::Params& params, bool m_quiet);
    bool train();
 };
 
