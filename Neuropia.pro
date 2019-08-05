@@ -21,6 +21,7 @@ CONFIG += c++14
 SOURCES += src/main.cpp \
     src/neuropia.cpp \
     src/idxreader.cpp \
+    src/neuropia_simple.cpp \
     src/utils.cpp \
     src/testports.cpp \
     src/params.cpp \
@@ -35,6 +36,7 @@ HEADERS += \
     include/neuropia.h \
     include/idxreader.h \
     include/matrix.h \
+    include/neuropia_simple.h \
     include/paralleltrain.h \
     include/utils.h \
     include/evotrain.h \

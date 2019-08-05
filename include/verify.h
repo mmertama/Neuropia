@@ -28,10 +28,13 @@ std::tuple<int, unsigned> verify(const Neuropia::Layer& network,
  * @param imageFile
  * @param labelFile
  */
-void verifyEnseble(const std::vector<Neuropia::Layer>& ensebles,
+std::tuple<int, unsigned> verifyEnseble(const std::vector<Neuropia::Layer>& ensebles,
                    bool hard,
                    const std::string& imageFile,
-                   const std::string& labelFile);
+                   const std::string& labelFile,
+                   size_t from = 0,
+                   size_t count = std::numeric_limits<unsigned>::max());
 }
+
 
 #endif // VERIFY_H

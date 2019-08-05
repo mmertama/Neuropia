@@ -3,6 +3,7 @@
 
 using namespace Neuropia;
 
+
 std::tuple<int, unsigned> Neuropia::verify(const Neuropia::Layer& network,
                  const std::string& imageFile,
                  const std::string& labelFile,
@@ -44,7 +45,12 @@ std::tuple<int, unsigned> Neuropia::verify(const Neuropia::Layer& network,
     return std::make_tuple(found, std::min(count, testLabels.size()) - from);
 }
 
-void Neuropia::verifyEnseble(const std::vector<Neuropia::Layer>& ensebles, bool hard, const std::string& imageFiles, const std::string& labelFiles) {
+std::tuple<int, unsigned> Neuropia::verifyEnseble(const std::vector<Neuropia::Layer>& ensebles,
+                                                  bool hard,
+                                                  const std::string& imageFiles,
+                                                  const std::string& labelFiles,
+                                                  size_t from,
+                                                  size_t count) {
     Neuropia::IdxReader<unsigned char> testImages(imageFiles);
     neuropia_assert_always(testImages.ok(), imageFiles);
     Neuropia::IdxReader<unsigned char> testLabels(labelFiles);
@@ -55,7 +61,7 @@ void Neuropia::verifyEnseble(const std::vector<Neuropia::Layer>& ensebles, bool 
     int found = 0;
     Neuropia::timed([&]() {
         std::vector<Neuropia::NeuronType> inputs(imageSize);
-        for(size_t i = 0; i < testLabels.size(); i++) {
+        for(auto i = from; i < std::min(count, testLabels.size()); i++) {
             const auto image = testImages.next(imageSize);
             const size_t label = testLabels.next();
 
@@ -97,8 +103,5 @@ void Neuropia::verifyEnseble(const std::vector<Neuropia::Layer>& ensebles, bool 
         }
     }, "Verify");
 
-    std::cout << std::endl;
-    std::cout << "Success fate:" << 100.0 * (static_cast<double>(found) / static_cast<double>(testLabels.size()))
-              << "%, found:" << found
-              << " of " << testLabels.size() << std::endl;
+    return std::make_tuple(found, std::min(count, testLabels.size()) - from);
 }

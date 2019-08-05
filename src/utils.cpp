@@ -75,7 +75,8 @@ void  Neuropia::save(const std::string& filename, const std::vector<Layer>& ense
     str.close();
 }
 
-const std::vector<Layer> Neuropia::load(const std::string& filename) {
+
+std::vector<Layer> Neuropia::load(const std::string& filename) {
     std::vector<Layer> ensembles;
     std::ifstream str;
     str.open(filename, std::ios::in | std::ios::binary);

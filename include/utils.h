@@ -21,7 +21,7 @@ void save(const std::string& filename, const Layer& network);
 
 void save(const std::string& filename, const std::vector<Layer>& ensembles);
 
-const std::vector<Layer> load(const std::string& filename);
+std::vector<Layer> load(const std::string& filename);
 
 void debug(const Layer& network, std::ostream& strm = std::cout, const std::set<int>& excluded = {});
 

@@ -150,9 +150,9 @@ int main(int argc, char* argv[]) {
                     }
                     str.close();
                 }
-                Neuropia::verifyEnseble(ensebles, params.boolean("Hard"),
+                Neuropia::printVerify(Neuropia::verifyEnseble(ensebles, params.boolean("Hard"),
                         Neuropia::absPath(root, params["ImagesVerify"]),
-                        Neuropia::absPath(root, params["LabelsVerify"]));
+                        Neuropia::absPath(root, params["LabelsVerify"])), "Verify data");
                 std::cout << std::endl;
             }
         }
