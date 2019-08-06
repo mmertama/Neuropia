@@ -4,24 +4,38 @@
 #include <string>
 #include <limits>
 #include <vector>
+#include <memory>
+#include <map>
+
+namespace NeuropiaSimple {
+
 
 class NeuropiaEnv;
+using NeuropiaPtr = std::shared_ptr<NeuropiaEnv>;
 
-NeuropiaEnv* createNeuropia(const std::string& root);
-void free(NeuropiaEnv* env);
+NeuropiaPtr create(const std::string& root);
+void free(NeuropiaPtr env);
 
-std::vector<double> feed(NeuropiaEnv* env, const std::vector<double>& input);
+std::vector<double> feed(NeuropiaPtr env, const std::vector<double>& input);
 
-bool setParam(NeuropiaEnv* env, const std::string& name, const std::string& value);
+bool setParam(NeuropiaPtr env, const std::string& name, const std::string& value);
+std::map<std::string, std::string> params(NeuropiaPtr env);
 
-bool trainSimple(NeuropiaEnv* env);
-bool trainEvo(NeuropiaEnv* env);
-bool trainParallel(NeuropiaEnv* env);
+enum class TrainType {
+    Basic,
+    Evolutional,
+    Parallel
+};
 
-void save(NeuropiaEnv* env, const std::string& filename);
 
-bool load(NeuropiaEnv* env, const std::string& filename);
+bool train(NeuropiaPtr env, TrainType type);
 
-int verify(NeuropiaEnv* env);
+void save(NeuropiaPtr env, const std::string& filename);
+
+bool load(NeuropiaPtr env, const std::string& filename);
+
+int verify(NeuropiaPtr env);
+
+}
 
 #endif // NEUROPIA_SIMPLE_H

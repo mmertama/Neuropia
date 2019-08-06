@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+        <title>Foo</title>
+        <script>
+            var neuropia = null;
+            var Module = {
+        onRuntimeInitialized: function() {
+        neuropia = Module.create()
+        console.log('params result: ' + Module.params(neuropia));
+      }
+    };
+            function foo() {
+            console.log('params daa' + Module.params(neuropia).size());
+        }
+		</script>
+        <script src="Neuropia.js"></script>
+	</head>
+	<body>
+        <button onclick="foo()">click</button>
+	</body>
+</html>

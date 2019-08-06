@@ -10,7 +10,7 @@
 /**
  * @brief The ArgParse class
  *
- * Yet another implementation of Python style ArgumentParser
+ * ** This has issues, do not reuse elsewhere **
  *
  */
 class ArgParse {
