@@ -7,10 +7,11 @@
             var neuropia = null;
             var Module = {
         onRuntimeInitialized: function() {
-            for(var tt in Module)
-                console.log('roo ' + tt);
-            neuropia = Module.create()
-            console.log('params result: ' + Module.params(neuropia));
+            neuropia = Module.create(".")
+            let params = Module.params(neuropia);
+            for (var p in params.keys()) {
+                console.log('params result: ' + p +  '->' + params[p]);
+            }
         }
     };
             function foo() {

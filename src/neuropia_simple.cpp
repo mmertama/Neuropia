@@ -8,14 +8,11 @@
 
 using namespace Neuropia;
 
-#ifndef __EMSCRIPTEN__
-#define __EMSCRIPTEN__
-#endif
 
-//#ifdef __EMSCRIPTEN__
+#ifdef __EMSCRIPTEN__
 #include <emscripten/bind.h>
 using namespace emscripten;
-//#endif
+#endif
 
 bool fatal(const char* t, const char* f, int line) {
     std::cerr << "Assert:" << t << " in line " << line << " at " << f << "." << std::endl;
@@ -132,10 +129,10 @@ int NeuropiaSimple::verify(NeuropiaPtr env) {
 }
 
 
-//#ifdef __EMSCRIPTEN__
+#ifdef __EMSCRIPTEN__
 EMSCRIPTEN_BINDINGS(Neuropia) {
     class_<NeuropiaEnv>("Neuropia").smart_ptr_constructor("Neuropia", &std::make_shared<NeuropiaEnv, const std::string&>);
-    emscripten::register_vector<double>("ValueVector");
+    register_vector<double>("ValueVector");
     enum_<TrainType>("TrainType")
             .value("BASIC", TrainType::Basic)
             .value("EVOLUTIONAL", TrainType::Evolutional)
@@ -152,5 +149,5 @@ EMSCRIPTEN_BINDINGS(Neuropia) {
     function("load", &NeuropiaSimple::load);
     function("verify", &NeuropiaSimple::verify);
 }
-//#endif
+#endif
 
