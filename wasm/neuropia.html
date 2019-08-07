@@ -7,17 +7,19 @@
             var neuropia = null;
             var Module = {
         onRuntimeInitialized: function() {
-        neuropia = Module.create()
-        console.log('params result: ' + Module.params(neuropia));
-      }
+            for(var tt in Module)
+                console.log('roo ' + tt);
+            neuropia = Module.create()
+            console.log('params result: ' + Module.params(neuropia));
+        }
     };
             function foo() {
             console.log('params daa' + Module.params(neuropia).size());
         }
 		</script>
-        <script src="Neuropia.js"></script>
+        <script src="neuropia_t.js"></script>
 	</head>
 	<body>
-        <button onclick="foo()">click</button>
+        <button onclick="foo()">fooed</button>
 	</body>
 </html>
