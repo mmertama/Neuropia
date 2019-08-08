@@ -30,7 +30,7 @@ namespace Neuropia {
         {"BatchVerifySize", "100", Neuropia::Params::Int},
         {"Topology", "64,32", topologyRe},
         {"MaxTrainTime", std::to_string(MaxTrainTime), Neuropia::Params::Int},
-        {"File", "mnistdata.bin", Neuropia::Params::String},
+        {"File", "mnistdata.bin", Neuropia::Params::File},
         {"Extra", "", Neuropia::Params::String},
         {"Hard", "false", Neuropia::Params::Bool},
         {"ActivationFunction", "sigmoid", activationFunctionRe},
@@ -45,7 +45,8 @@ namespace Neuropia {
 class Params {
 public:
     static constexpr char Execute[] = "executable";
-    static constexpr char String[] = R"(.+)";
+    static constexpr char File[] = R"(.+)";
+    static constexpr char String[] = R"(.*)";
     static constexpr char Int[] = R"(\d+$)";
     static constexpr char Real[] = R"(\d+(\.(\d)*)?$)";
     static constexpr char Bool[] = R"((true|false)$)";
