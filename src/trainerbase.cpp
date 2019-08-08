@@ -77,8 +77,7 @@ TrainerBase::TrainerBase(const std::string & root, const Neuropia::Params& param
                                                std::cout << (label.size() > 0 ? label + " " : "") << "iterations:" << m_passedIterations << std::endl;
                                                })){
 
-    neuropia_assert_always(m_images.ok(), m_imageFile);
-    neuropia_assert_always(m_labels.ok(), m_labelFile);
+
     const auto topology = toIntVec(params["Topology"]);
     const auto afs = toFunction(params["ActivationFunction"]);
     const auto initStrategy = toInitStrategy(params["InitStrategy"], toFunction(params["ActivationFunction"])[0]);
@@ -95,6 +94,10 @@ TrainerBase::TrainerBase(const std::string & root, const Neuropia::Params& param
 
     m_network.initialize(initStrategy);
     setDropout();
+}
+
+bool TrainerBase::isReady() const {
+    return m_images.ok() && m_labels.ok();
 }
 
 void TrainerBase::setDropout() {

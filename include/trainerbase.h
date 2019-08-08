@@ -19,6 +19,7 @@ public:
     virtual bool train() = 0;
     virtual ~TrainerBase() = default;
     Neuropia::Layer&& network() {return std::move(m_network);}
+    bool isReady() const;
 protected:
     const std::string m_imageFile;
     const std::string m_labelFile;

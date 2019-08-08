@@ -109,6 +109,8 @@ bool NeuropiaSimple::train(NeuropiaPtr env, TrainType type) {
         trainer = std::make_unique<TrainerParallel>(env->m_root, env->m_params, true);
         break;
     }
+    if(!trainer->isReady())
+        return false;
     trainer->train();
     env->m_network = std::move(trainer->network());
     return env->m_network.isValid();
