@@ -86,7 +86,7 @@ public:
                   const std::string& root);
     std::string toType(const std::string& re) const;
     void addHelp(const std::string& re, const std::string& text);
-
+    bool isValid(const std::string& k, const std::string& v) const;
     bool set(const std::string& k, const std::string& v);
 private:
     std::string formatPrint(const std::string& line) const;

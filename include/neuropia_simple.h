@@ -19,6 +19,7 @@ void free(NeuropiaPtr env);
 std::vector<double> feed(NeuropiaPtr env, const std::vector<double>& input);
 
 bool setParam(NeuropiaPtr env, const std::string& name, const std::string& value);
+bool isValid(NeuropiaPtr env, const std::string& name, const std::string& value);
 ParamType params(NeuropiaPtr env);
 
 enum class TrainType {

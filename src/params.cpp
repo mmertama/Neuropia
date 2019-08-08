@@ -48,6 +48,16 @@ std::string Params::operator[](const std::string& k) const {
     return "";
 }
 
+bool Params::isValid(const std::string& k, const std::string& v) const {
+    for(auto& p : (*this)) {
+        if(std::get<0>(p) == k) {
+            const std::regex re(std::get<2>(p));
+                return std::regex_match(v, re);
+        }
+    }
+    return false;
+}
+
 bool Params::set(const std::string& k, const std::string& v) {
     for(auto& p : (*this)) {
         if(std::get<0>(p) == k) {

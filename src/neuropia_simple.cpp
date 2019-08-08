@@ -44,7 +44,7 @@ public:
     {"BatchSize", "800", Neuropia::Params::Int},
     {"BatchVerifySize", "100", Neuropia::Params::Int},
     {"Topology", "64,32", topologyRe},
-    {"MaxTrainTime", std::to_string(MaxTrainTime), Neuropia::Params::Int},
+    {"MaxTrainTime", std::to_string(static_cast<int>(MaxTrainTime)), Neuropia::Params::Int},
     {"File", "mnistdata.bin", Neuropia::Params::File},
     {"Extra", "", Neuropia::Params::String},
     {"Hard", "false", Neuropia::Params::Bool},
@@ -70,6 +70,11 @@ void NeuropiaSimple::free(NeuropiaPtr env) {
 std::vector<double> NeuropiaSimple::feed(NeuropiaPtr env, const std::vector<double>& input) {
     ASSERT(env && env->m_network.isValid());
     return env->m_network.feed(input);
+}
+
+bool NeuropiaSimple::isValid(NeuropiaPtr env, const std::string& name, const std::string& value) {
+   ASSERT(env);
+   return env->m_params.isValid(name, value);
 }
 
 bool NeuropiaSimple::setParam(NeuropiaPtr env, const std::string& name, const std::string& value) {
