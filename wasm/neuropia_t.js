@@ -1249,11 +1249,11 @@ function updateGlobalBufferViews() {
 
 
 var STATIC_BASE = 1024,
-    STACK_BASE = 52656,
+    STACK_BASE = 53152,
     STACKTOP = STACK_BASE,
-    STACK_MAX = 5295536,
-    DYNAMIC_BASE = 5295536,
-    DYNAMICTOP_PTR = 52624;
+    STACK_MAX = 5296032,
+    DYNAMIC_BASE = 5296032,
+    DYNAMICTOP_PTR = 53120;
 
 assert(STACK_BASE % 16 === 0, 'stack must start aligned');
 assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
@@ -1748,7 +1748,7 @@ var ASM_CONSTS = [];
 
 
 
-// STATICTOP = STATIC_BASE + 51632;
+// STATICTOP = STATIC_BASE + 52128;
 /* global initializers */  __ATINIT__.push({ func: function() { globalCtors() } });
 
 
@@ -1759,7 +1759,7 @@ var ASM_CONSTS = [];
 
 
 /* no memory initializer */
-var tempDoublePtr = 52640
+var tempDoublePtr = 53136
 assert(tempDoublePtr % 8 == 0);
 
 function copyTempFloat(ptr) { // functions, because inlining this code increases code size too much
@@ -7407,7 +7407,7 @@ function copyTempDouble(ptr) {
       return _strftime(s, maxsize, format, tm); // no locale support yet
     }
 
-  var ___dso_handle=52464;
+  var ___dso_handle=52960;
 FS.staticInit();;
 if (ENVIRONMENT_HAS_NODE) { var fs = require("fs"); var NODEJS_PATH = require("path"); NODEFS.staticInit(); };
 embind_init_charCodes();

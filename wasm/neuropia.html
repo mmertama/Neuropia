@@ -19,8 +19,7 @@
                
                 const input = document.createElement("INPUT");
                 input.setAttribute("name", k)
-                input.setAttribute("class", "param")
-                input.setAttribute("mandatory", "true");
+                input.setAttribute("class", "param");
                 switch (type) {
                     case 'interger number':
                         input.setAttribute("type", "number");
@@ -51,6 +50,7 @@
                 
                 const tr = document.createElement("tr");
                 const th3 = document.createElement("th");
+                th3.setAttribute("name", "name_" + k);
                 th3.textContent = type;
                 tr.appendChild(th1);
                 tr.appendChild(th2);
@@ -60,14 +60,37 @@
             }
         }
     };
-            function train() {
-                const params = document.getElementsByClassName("param");
-                for(let tag in params) {
-                    const name = tag.name;
-                    const value = tag.getValue();
-                    Module.setParam(name, value);
-                    console.log(name + "->" + value)
+        function train() {
+            const params = document.getElementsByClassName("param");
+            let ok = true;
+            for (let i = 0, length = params.length; i < length; i++) {
+                const name = params[i].name;
+                const value = params[i].value;
+                const isOk = Module.setParam(neuropia, name, value);
+                ok = ok && isOk;
+                let status = document.getElementsByName("name_" + name); 
+                if(!isOk) {
+                    status[0].setAttribute("style", "color:#ff0000");
                 }
+                console.log(name + "->" + value + " ? " + isOk)
+            }
+            if(ok) {
+                var radios = document.getElementsByName('type');
+                for (var i = 0, length = radios.length; i < length; i++) {
+                    if (radios[i].checked) {
+                        console.log("start  train");
+                        const success = Module.train(neuropia, radios[i].value);
+                        consolole.log("training was " + success)
+                        if(success) {
+                            document.getElementById("verifyBtn").setAttribute("disabled", "false");
+                        } else {
+                            alert("Cannot with given data!");
+                        }
+                    }
+                    break;
+                }
+            }
+            return false;
         }
 		</script>
         <script src="neuropia_t.js"></script>
@@ -75,7 +98,11 @@
 	<body>
         <form name="params" onsubmit="return train()">
             <table id="paramList" align="left"></table>
+            <input type="radio" name="type" value="Basic" checked> Basic<br>
+            <input type="radio" name="type" value="Evo"> Evolutional <br>
+            <input type="radio" name="type" value="Parallel"> Parallel <br>  
             <input type="submit" name="Train" value="Train"/>
         </form>
+        <button type="button" onclick="verify()" disabled="true" id="verifyBtn">Verify</button>
 	</body>
 </html>
