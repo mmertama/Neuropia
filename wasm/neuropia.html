@@ -18,6 +18,9 @@
                 const value = p.get(1);
                
                 const input = document.createElement("INPUT");
+                input.setAttribute("name", k)
+                input.setAttribute("class", "param")
+                input.setAttribute("mandatory", "true");
                 switch (type) {
                     case 'interger number':
                         input.setAttribute("type", "number");
@@ -27,6 +30,8 @@
                         input.setAttribute("step", "any");
                         break;
                     case 'string':
+                        input.setAttribute("type", "text");
+                        input.setAttribute("mandatory", "false");
                         break;
                     case 'file':
                         input.setAttribute("type", "file");
@@ -35,6 +40,7 @@
                         input.setAttribute("type", "checkbox");
                         break;
                     default:
+                        input.setAttribute("type", "text");
                         input.setAttribute("pattern", type);
                 }
                 input.setAttribute("value", value);
@@ -54,15 +60,22 @@
             }
         }
     };
-            function foo() {
-            console.log('params daa' + Module.params(neuropia).size());
+            function train() {
+                const params = document.getElementsByClassName("param");
+                for(let tag in params) {
+                    const name = tag.name;
+                    const value = tag.getValue();
+                    Module.setParam(name, value);
+                    console.log(name + "->" + value)
+                }
         }
 		</script>
         <script src="neuropia_t.js"></script>
 	</head>
 	<body>
-        <table id="paramList" align="left">
-        </table>
-        <button onclick="foo()">fooed</button>
+        <form name="params" onsubmit="return train()">
+            <table id="paramList" align="left"></table>
+            <input type="submit" name="Train" value="Train"/>
+        </form>
 	</body>
 </html>
