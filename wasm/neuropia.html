@@ -8,9 +8,49 @@
             var Module = {
         onRuntimeInitialized: function() {
             neuropia = Module.create(".")
-            let params = Module.params(neuropia);
-            for (var p in params.keys()) {
-                console.log('params result: ' + p +  '->' + params[p]);
+            const params = Module.params(neuropia); 
+            const keys = params.keys();
+            const paramList = document.getElementById("paramList");
+            for (let i = 0; i < keys.size(); i++) {
+                const k = keys.get(i);
+                const p = params.get(k);
+                const type = p.get(0);
+                const value = p.get(1);
+               
+                const input = document.createElement("INPUT");
+                switch (type) {
+                    case 'interger number':
+                        input.setAttribute("type", "number");
+                        break;
+                     case 'real number':
+                        input.setAttribute("type", "number");
+                        input.setAttribute("step", "any");
+                        break;
+                    case 'string':
+                        break;
+                    case 'file':
+                        input.setAttribute("type", "file");
+                        break;
+                    case 'true|false':
+                        input.setAttribute("type", "checkbox");
+                        break;
+                    default:
+                        input.setAttribute("pattern", type);
+                }
+                input.setAttribute("value", value);
+                const th1 = document.createElement("th");
+                th1.textContent = k;
+                const th2 = document.createElement("th");
+                th2.appendChild(input);
+                
+                const tr = document.createElement("tr");
+                const th3 = document.createElement("th");
+                th3.textContent = type;
+                tr.appendChild(th1);
+                tr.appendChild(th2);
+                tr.appendChild(th3);
+                paramList.appendChild(tr)
+                console.log('params result: ' + i + " " + k +  '->' + type + " " + value);
             }
         }
     };
@@ -21,6 +61,8 @@
         <script src="neuropia_t.js"></script>
 	</head>
 	<body>
+        <table id="paramList" align="left">
+        </table>
         <button onclick="foo()">fooed</button>
 	</body>
 </html>
