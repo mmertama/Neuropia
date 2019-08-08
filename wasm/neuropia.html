@@ -7,7 +7,11 @@
             var neuropia = null;
             var Module = {
         onRuntimeInitialized: function() {
-            neuropia = Module.create(".")
+            neuropia = Module.create(".");
+            Module.setParam(neuropia, "Images", "mnist/train-images-idx3-ubyte");
+            Module.setParam(neuropia, "ImagesVerify", "mnist/t10k-images-idx3-ubyte");
+            Module.setParam(neuropia, "Labels", "mnist/train-labels-idx1-ubyte");
+            Module.setParam(neuropia, "LabelsVerify", "mnist/t10k-labels-idx1-ubyte");
             const params = Module.params(neuropia); 
             const keys = params.keys();
             const paramList = document.getElementById("paramList");
@@ -33,8 +37,9 @@
                         input.setAttribute("mandatory", "false");
                         break;
                     case 'file':
-                        input.setAttribute("type", "file");
-                        break;
+                      //  input.setAttribute("type", "file");
+                      //  break;
+                        continue;
                     case 'true|false':
                         input.setAttribute("type", "checkbox");
                         break;
