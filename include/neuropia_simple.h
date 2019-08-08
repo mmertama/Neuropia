@@ -12,14 +12,14 @@ namespace NeuropiaSimple {
 
 class NeuropiaEnv;
 using NeuropiaPtr = std::shared_ptr<NeuropiaEnv>;
-
+using ParamType = std::map<std::string, std::vector<std::string>>;
 NeuropiaPtr create(const std::string& root);
 void free(NeuropiaPtr env);
 
 std::vector<double> feed(NeuropiaPtr env, const std::vector<double>& input);
 
 bool setParam(NeuropiaPtr env, const std::string& name, const std::string& value);
-std::map<std::string, std::string> params(NeuropiaPtr env);
+ParamType params(NeuropiaPtr env);
 
 enum class TrainType {
     Basic,

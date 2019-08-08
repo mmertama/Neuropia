@@ -27,10 +27,10 @@ constexpr char dropoutRateRe[] = R"(\d+\.?\d*(,\d+\.?\d*)*$)";
 int main(int argc, char* argv[]) {
 
     Neuropia::Params params = {
-        {"ImagesVerify", "", Neuropia::Params::String},
-        {"LabelsVerify", "", Neuropia::Params::String},
-        {"Images", "", Neuropia::Params::String},
-        {"Labels", "", Neuropia::Params::String},
+        {"ImagesVerify", "", Neuropia::Params::File},
+        {"LabelsVerify", "", Neuropia::Params::File},
+        {"Images", "", Neuropia::Params::File},
+        {"Labels", "", Neuropia::Params::File},
         {"Iterations", "1", Neuropia::Params::Int},
         {"Jobs", "1", Neuropia::Params::Int},
         {"LearningRate", "0", Neuropia::Params::Real},
@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
         {"BatchVerifySize", "100", Neuropia::Params::Int},
         {"Topology", "64,32", topologyRe},
         {"MaxTrainTime", std::to_string(MaxTrainTime), Neuropia::Params::Int},
-        {"File", "mnistdata.bin", Neuropia::Params::String},
+        {"File", "mnistdata.bin", Neuropia::Params::File},
         {"Extra", "", Neuropia::Params::String},
         {"Hard", "false", Neuropia::Params::Bool},
         {"ActivationFunction", "sigmoid", activationFunctionRe},

@@ -167,6 +167,7 @@ std::string Params::toType(const std::string &re) const {
     if(m_helps.find(re) != m_helps.end()) {
         return m_helps.at(re);
     }
+    if(re == File) return "file";
     if(re == String) return "string";
     if(re == Int) return "interger number";
     if(re == Real) return "real number";

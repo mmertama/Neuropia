@@ -32,10 +32,10 @@ public:
     NeuropiaEnv(const std::string& root) :  m_root(root) {}
     Layer m_network;
     Params m_params = {
-    {"ImagesVerify", "", Neuropia::Params::String},
-    {"LabelsVerify", "", Neuropia::Params::String},
-    {"Images", "", Neuropia::Params::String},
-    {"Labels", "", Neuropia::Params::String},
+    {"ImagesVerify", "", Neuropia::Params::File},
+    {"LabelsVerify", "", Neuropia::Params::File},
+    {"Images", "", Neuropia::Params::File},
+    {"Labels", "", Neuropia::Params::File},
     {"Iterations", "1", Neuropia::Params::Int},
     {"Jobs", "1", Neuropia::Params::Int},
     {"LearningRate", "0", Neuropia::Params::Real},
@@ -45,7 +45,7 @@ public:
     {"BatchVerifySize", "100", Neuropia::Params::Int},
     {"Topology", "64,32", topologyRe},
     {"MaxTrainTime", std::to_string(MaxTrainTime), Neuropia::Params::Int},
-    {"File", "mnistdata.bin", Neuropia::Params::String},
+    {"File", "mnistdata.bin", Neuropia::Params::File},
     {"Extra", "", Neuropia::Params::String},
     {"Hard", "false", Neuropia::Params::Bool},
     {"ActivationFunction", "sigmoid", activationFunctionRe},
@@ -57,7 +57,6 @@ public:
 };
     const std::string m_root;
 };
-
 
 NeuropiaPtr NeuropiaSimple::create(const std::string& root) {
     return std::make_shared<NeuropiaEnv>(root);
@@ -78,11 +77,15 @@ bool NeuropiaSimple::setParam(NeuropiaPtr env, const std::string& name, const st
    return env->m_params.set(name, value);
 }
 
-std::map<std::string, std::string> NeuropiaSimple::params(NeuropiaPtr env) {
+ParamType NeuropiaSimple::params(NeuropiaPtr env) {
     ASSERT(env);
-    std::map<std::string, std::string> out;
+    ParamType out;
     for(const auto& item : env->m_params) {
-        out.emplace(std::get<0>(item), std::get<1>(item));
+        const auto key = std::get<0>(item);
+        if(key.length() > 0 && !(std::islower(key[0]))) {
+            const std::vector<std::string>  data = {env->m_params.toType(std::get<2>(item)), std::get<1>(item)};
+            out.emplace(std::get<0>(item), data);
+        }
     }
     return out;
 }
@@ -133,12 +136,13 @@ int NeuropiaSimple::verify(NeuropiaPtr env) {
 EMSCRIPTEN_BINDINGS(Neuropia) {
     class_<NeuropiaEnv>("Neuropia").smart_ptr_constructor("Neuropia", &std::make_shared<NeuropiaEnv, const std::string&>);
     register_vector<double>("ValueVector");
+    register_vector<std::string>("StringVector");
     enum_<TrainType>("TrainType")
             .value("BASIC", TrainType::Basic)
             .value("EVOLUTIONAL", TrainType::Evolutional)
             .value("PARALLEL", TrainType::Parallel)
             ;
-    register_map<std::string, std::string>("map<string, string>");
+    register_map<ParamType::key_type, ParamType::mapped_type>("ParamMap");
     function("create", &NeuropiaSimple::create);
     function("free", &NeuropiaSimple::free);
     function("feed", &NeuropiaSimple::feed);
