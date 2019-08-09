@@ -11,6 +11,7 @@
 using namespace Neuropia;
 
 constexpr char Neuropia::Params::Execute[];
+constexpr char Neuropia::Params::File[];
 constexpr char Neuropia::Params::String[];
 constexpr char Neuropia::Params::Int[];
 constexpr char Neuropia::Params::Real[];

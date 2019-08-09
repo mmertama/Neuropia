@@ -7,11 +7,14 @@
             var neuropia = null;
             var Module = {
         onRuntimeInitialized: function() {
-            neuropia = Module.create("");
-            Module.setParam(neuropia, "Images", "mnist/train-images-idx3-ubyte");
-            Module.setParam(neuropia, "ImagesVerify", "mnist/t10k-images-idx3-ubyte");
-            Module.setParam(neuropia, "Labels", "mnist/train-labels-idx1-ubyte");
-            Module.setParam(neuropia, "LabelsVerify", "mnist/t10k-labels-idx1-ubyte");
+            neuropia = Module.create("mnist");
+            Module.setLogger(neuropia, function(str) {
+                console.log(str);
+            });
+            Module.setParam(neuropia, "Images", "train-images-idx3-ubyte");
+            Module.setParam(neuropia, "ImagesVerify", "t10k-images-idx3-ubyte");
+            Module.setParam(neuropia, "Labels", "train-labels-idx1-ubyte");
+            Module.setParam(neuropia, "LabelsVerify", "t10k-labels-idx1-ubyte");
             const params = Module.params(neuropia); 
             const keys = params.keys();
             const paramList = document.getElementById("paramList");
@@ -65,6 +68,11 @@
             }
         }
     };
+        Module['locateFile'] = function(path, prefix) {
+            console.log(path, prefix);
+  return prefix + path;
+}
+        
         function train() {
             const params = document.getElementsByClassName("param");
             let ok = true;
@@ -101,6 +109,8 @@
         }
 		</script>
         <script src="neuropia_t.js"></script>
+        
+        <script src="mnist_data.js"></script>
 	</head>
 	<body>
         <form name="params" onsubmit="return train()">

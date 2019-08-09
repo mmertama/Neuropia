@@ -10,9 +10,17 @@ std::tuple<int, unsigned> Neuropia::verify(const Neuropia::Layer& network,
                  size_t from,
                  size_t count) {
     Neuropia::IdxReader<unsigned char> testImages(imageFile);
-    neuropia_assert_always(testImages.ok(), imageFile);
     Neuropia::IdxReader<unsigned char> testLabels(labelFile);
-    neuropia_assert_always(testLabels.ok(), labelFile);
+
+    if(!testImages.ok()) {
+        std::cerr << "Cannot open images from " << imageFile << std::endl;
+        return std::make_tuple(0, 0);
+    }
+
+    if(!testLabels.ok()) {
+         std::cerr << "Cannot open labels from " << labelFile << std::endl;
+         return std::make_tuple(0, 0);
+    }
 
     int found = 0;
     Neuropia::timed([&]() {

@@ -2,6 +2,35 @@
 #include "utils.h"
 #include "params.h"
 
+#include <dirent.h>
+#include <stdio.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include<string.h>
+
+void tree(const std::string& root) {
+    std::cerr << root;
+    auto d = opendir(root.c_str());
+    if(d) {
+        struct dirent *dir;
+        while((dir = readdir(d)) != nullptr) {
+            const auto l = strlen(dir->d_name);
+            if(dir->d_type == DT_REG){
+                std::cerr <<  dir->d_name << std::endl;
+            }
+            else if (dir->d_type == DT_DIR && dir->d_name[0] != '.') {
+                try {
+                    tree(root + dir->d_name + "/");
+                } catch (...) {
+                    std::cerr << "cannot access" << dir->d_name << std::endl;
+                }
+            }
+        }
+        closedir(d);
+    }
+    return;
+}
+
 using namespace Neuropia;
 
 auto toIntVec(const std::string& s) {
@@ -81,6 +110,14 @@ TrainerBase::TrainerBase(const std::string & root, const Neuropia::Params& param
     const auto topology = toIntVec(params["Topology"]);
     const auto afs = toFunction(params["ActivationFunction"]);
     const auto initStrategy = toInitStrategy(params["InitStrategy"], toFunction(params["ActivationFunction"])[0]);
+
+    if(!m_images.ok())
+        std::cerr << "Cannot open images from " << m_imageFile << std::endl;
+    if(!m_labels.ok())
+         std::cerr << "Cannot open labels from " << m_labelFile << std::endl;
+
+    tree("/");
+
 
     m_network
     .join(topology.begin(), topology.end())

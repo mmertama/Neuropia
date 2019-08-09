@@ -24,6 +24,11 @@ constexpr unsigned DefaultIobufSz = 200;
 class IdxReaderBase {
 public:
     enum class Type{Invalid, Byte, Char, Short, Int, Float, Double};
+    /**
+     * @brief IdxReaderBase
+     * @param name
+     * @param iobufszKB
+     */
     IdxReaderBase(const std::string& name, unsigned iobufszKB);
     /**
      * @brief type

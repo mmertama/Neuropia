@@ -1,10 +1,11 @@
+
+#include <cstring>
 #include "neuropia_simple.h"
 #include "params.h"
 #include "evotrain.h"
 #include "trainer.h"
 #include "paralleltrain.h"
 #include "verify.h"
-
 
 using namespace Neuropia;
 
@@ -27,9 +28,68 @@ constexpr char topologyRe[] = R"(\d+(,\d+)*$)";
 constexpr char activationFunctionRe[] =R"((sigmoid|relu|elu)(,(sigmoid|relu|elu))*$)";
 constexpr char dropoutRateRe[] = R"(\d+\.?\d*(,\d+\.?\d*)*$)";
 
+template <size_t SZ>
+class LogStream : public std::streambuf {
+public:
+    LogStream(std::function<void (const std::string&)> logger) : m_logger(logger), m_os(this) {
+        setp(m_buffer, m_buffer + SZ - 1);
+    }
+    ~LogStream() override {
+    }
+    std::ostream& stream() {
+        return m_os;
+    }
+private:
+    int_type overflow(int_type ch) override {
+        if(ch != traits_type::eof()){
+            *pptr() = static_cast<char>(ch);
+            pbump(1);
+            write();
+        }
+        return ch;
+    }
+    int sync() override {
+        write();
+        return 1;
+    }
+    void write() {
+        std::ptrdiff_t n = pptr() - pbase();
+
+        char ntBuf[SZ];
+        std::memcpy(ntBuf, m_buffer, static_cast<size_t>(n));
+        ntBuf[n] = '\0';
+        m_logger(ntBuf);
+        pbump(static_cast<int>(-n));
+    }
+private:
+    std::function<void (const std::string&)> m_logger;
+    char m_buffer[SZ];
+    std::ostream m_os;
+};
+
 class NeuropiaSimple::NeuropiaEnv {
 public:
-    NeuropiaEnv(const std::string& root) :  m_root(root) {}
+    NeuropiaEnv(const std::string& root) :  m_root(root) {
+    }
+    virtual ~NeuropiaEnv() {
+        if(m_prevStreamBufCerr) {
+            std::cerr.rdbuf(m_prevStreamBufCerr);
+        }
+        if(m_prevStreamBufCout) {
+            std::cout.rdbuf(m_prevStreamBufCout);
+        }
+    }
+    void setLogger(std::function<void (const std::string&)> logger) {
+        if(m_prevStreamBufCerr) {
+            std::cerr.rdbuf(m_prevStreamBufCerr);
+        }
+        if(m_prevStreamBufCout) {
+            std::cout.rdbuf(m_prevStreamBufCout);
+        }
+        m_logstream.reset(new LogStream<1024>(logger));
+        m_prevStreamBufCout = std::cout.rdbuf(m_logstream.get());
+        m_prevStreamBufCerr = std::cerr.rdbuf(m_logstream.get());
+    }
     Layer m_network;
     Params m_params = {
     {"ImagesVerify", "", Neuropia::Params::File},
@@ -56,6 +116,9 @@ public:
     {"Classes", "10", Neuropia::Params::Int}
 };
     const std::string m_root;
+    std::unique_ptr<LogStream<1024>> m_logstream;
+    std::streambuf* m_prevStreamBufCout = nullptr;
+    std::streambuf* m_prevStreamBufCerr = nullptr;
 };
 
 NeuropiaPtr NeuropiaSimple::create(const std::string& root) {
@@ -99,18 +162,20 @@ bool NeuropiaSimple::train(NeuropiaPtr env, TrainType type) {
     ASSERT(env);
     std::unique_ptr<TrainerBase> trainer;
     switch (type) {
-        case TrainType::Basic:
-            trainer = std::make_unique<Trainer>(env->m_root, env->m_params, true);
+    case TrainType::Basic:
+        trainer = std::make_unique<Trainer>(env->m_root, env->m_params, false);
         break;
     case TrainType::Evolutional:
-        trainer = std::make_unique<TrainerEvo>(env->m_root, env->m_params, true);
+        trainer = std::make_unique<TrainerEvo>(env->m_root, env->m_params, false);
         break;
     case TrainType::Parallel:
-        trainer = std::make_unique<TrainerParallel>(env->m_root, env->m_params, true);
+        trainer = std::make_unique<TrainerParallel>(env->m_root, env->m_params, false);
         break;
     }
-    if(!trainer->isReady())
+    if(!trainer->isReady()) {
+        std::cerr << "Training data is not ready" << std::endl;
         return false;
+    }
     trainer->train();
     env->m_network = std::move(trainer->network());
     return env->m_network.isValid();
@@ -138,6 +203,15 @@ int NeuropiaSimple::verify(NeuropiaPtr env) {
     return std::get<0>(t);
 }
 
+#ifdef __EMSCRIPTEN__
+void setLogger(NeuropiaPtr env, emscripten::val cb) {
+    ASSERT(env);
+    env->setLogger([cb](const std::string& str){
+        cb(str);
+    });
+    std::cout << "logging started" << std::endl;
+}
+#endif
 
 #ifdef __EMSCRIPTEN__
 EMSCRIPTEN_BINDINGS(Neuropia) {
@@ -159,6 +233,7 @@ EMSCRIPTEN_BINDINGS(Neuropia) {
     function("save", &NeuropiaSimple::save);
     function("load", &NeuropiaSimple::load);
     function("verify", &NeuropiaSimple::verify);
+    function("setLogger", &setLogger);
 }
 #endif
 

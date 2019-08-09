@@ -16,6 +16,7 @@ using ParamType = std::map<std::string, std::vector<std::string>>;
 NeuropiaPtr create(const std::string& root);
 void free(NeuropiaPtr env);
 
+
 std::vector<double> feed(NeuropiaPtr env, const std::vector<double>& input);
 
 bool setParam(NeuropiaPtr env, const std::string& name, const std::string& value);
