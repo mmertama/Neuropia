@@ -8,9 +8,18 @@
             var Module = {
         onRuntimeInitialized: function() {
             neuropia = Module.create("mnist");
+           
+            const terminal = document.getElementById("terminal")
             Module.setLogger(neuropia, function(str) {
-                console.log(str);
-            });
+                const  r = str.indexOf('\r');
+                if(r < 0) {
+                    terminal.value += str;
+                } else {
+                    const lastNewLine = terminal.value.lastIndexOf('\n');
+                    terminal.value = terminal.value.slice(0, lastNewLine) + str;
+                }
+                console.log(terminal.value);
+            }); 
             Module.setParam(neuropia, "Images", "train-images-idx3-ubyte");
             Module.setParam(neuropia, "ImagesVerify", "t10k-images-idx3-ubyte");
             Module.setParam(neuropia, "Labels", "train-labels-idx1-ubyte");
@@ -68,58 +77,61 @@
             }
         }
     };
-        Module['locateFile'] = function(path, prefix) {
-            console.log(path, prefix);
-  return prefix + path;
-}
         
-        function train() {
+        /* Functions */
+
+                          
+        function startTrain() {
             const params = document.getElementsByClassName("param");
             let ok = true;
+            const plist = {}
             for (let i = 0, length = params.length; i < length; i++) {
                 const name = params[i].name;
                 const value = params[i].value;
+                plist[name] = value;
                 const isOk = Module.setParam(neuropia, name, value);
                 ok = ok && isOk;
                 let status = document.getElementsByName("name_" + name); 
                 if(!isOk) {
                     status[0].setAttribute("style", "color:#ff0000");
                 }
-                console.log(name + "->" + value + " ? " + isOk)
             }
             if(ok) {
-                var radios = document.getElementsByName('type');
-                for (var i = 0, length = radios.length; i < length; i++) {
-                    if (radios[i].checked) {
-                        console.log("start  train");
-                        const success = Module.train(neuropia, radios[i].value);
-                        console.log("training was " + success)
-                        if(success) {
-                            const btn = document.getElementById("verifyBtn");
-                            btn.setAttribute("disabled", "false");
-                        } else {
-                            alert("Cannot with given data!");
+                const iterations = Module.params(neuropia).get('Iterations').get(1);
+                console.log("Ready for iterations", iterations);
+                if(iterations === 0)
+                    return false;
+                let iteration = 0;
+                
+                function doTrain() {
+                    if(iteration < iterations && Module.train(neuropia, iteration)) {
+                        setTimeout(doTrain, 1);
+                        iteration += 10;
+                    } else {
+                        if(Module.trainingOk(neuropia)) {
+                            console.log("Training done");
+                            document.getElementById("verifyBtn").disabled = false;
                         }
-                        
-                    break;
+                        else 
+                            alert("Training failed");
                     }
-                }
+                };
+                doTrain();
             }
+            
             return false;
         }
 		</script>
         <script src="neuropia_t.js"></script>
-        
-        <script src="mnist_data.js"></script>
 	</head>
 	<body>
-        <form name="params" onsubmit="return train()">
+        <form name="params" onsubmit="return startTrain()">
             <table id="paramList" align="left"></table>
-            <input type="radio" name="type" value="Basic" checked> Basic<br>
-            <input type="radio" name="type" value="Evo"> Evolutional <br>
-            <input type="radio" name="type" value="Parallel"> Parallel <br>  
             <input type="submit" name="Train" value="Train"/>
         </form>
         <button type="button" onclick="verify()" disabled="true" id="verifyBtn">Verify</button>
+        <textarea readonly rows="10" cols="75" id="terminal">
+            Loading...
+        </textarea>
 	</body>
 </html>

@@ -14,7 +14,7 @@ bool Trainer::train() {
     auto testVerify = m_testVerifyFrequency;
 
     bool failed = false;
-m_control([&]() {
+    m_control([&]() {
     Neuropia::iterator(m_iterations, [&](size_t it)->bool {
 #ifdef DO_DUMP_DEBUG
         Neuropia::debug(Trainer<inputSize>::network, strm, {1,4});

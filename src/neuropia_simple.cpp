@@ -1,5 +1,4 @@
 
-#include <cstring>
 #include "neuropia_simple.h"
 #include "params.h"
 #include "evotrain.h"
@@ -15,12 +14,12 @@ using namespace Neuropia;
 using namespace emscripten;
 #endif
 
-bool fatal(const char* t, const char* f, int line) {
-    std::cerr << "Assert:" << t << " in line " << line << " at " << f << "." << std::endl;
+bool fatal(const char* t, const char* f, int line, const char* file) {
+    std::cerr << "Assert:" << t << " in line " << line << " at " << f << "  in "<< file << "." << std::endl;
     return false;
 }
-#define ASSERT(X) (X || fatal("Invalid", __FUNCTION__, __LINE__))
-#define ASSERT_X(X, T) (X || fatal(T, __FUNCTION__, __LINE__))
+#define ASSERT(X) (X || fatal("Invalid", __FUNCTION__, __LINE__, __FILE__))
+#define ASSERT_X(X, T) (X || fatal(T, __FUNCTION__, __LINE__, __FILE__))
 
 using namespace NeuropiaSimple;
 
@@ -28,17 +27,58 @@ constexpr char topologyRe[] = R"(\d+(,\d+)*$)";
 constexpr char activationFunctionRe[] =R"((sigmoid|relu|elu)(,(sigmoid|relu|elu))*$)";
 constexpr char dropoutRateRe[] = R"(\d+\.?\d*(,\d+\.?\d*)*$)";
 
+std::string escaped(const std::string& data) {
+    std::string escaped;
+    for (const auto& c : data) {
+        if(c < ' ')
+            continue;
+        switch (c) {
+        case '\"': escaped  += "&quot;"; break;
+        case '&':  escaped  += "&amp;";  break;
+        case '<':  escaped  +=  "&lt;";   break;
+        case '>':  escaped  += "&gt;";   break;
+        default:   escaped  +=  c;
+        }
+    };
+    return escaped;
+}
+
+class SimpleTrainer : public TrainerBase
+{
+public:
+    SimpleTrainer(const std::string& root, const Neuropia::Params& params, bool quiet) : TrainerBase(root, params, quiet) {}
+    bool train(size_t it) {
+        bool success = true;
+        if(it < m_iterations) {
+            while(success && m_passedIterations < it) {
+                ++m_passedIterations;
+                success = train();
+                if(m_passedIterations + 1 == m_iterations && success) {
+                    m_network.inverseDropout();
+                    break;
+                }
+            }
+        } else success = false;
+        return success;
+    }
+
+    bool isOk() const {return isReady() && m_ok;}
+private:
+    bool train();
+    bool m_ok = true;
+};
+
 template <size_t SZ>
 class LogStream : public std::streambuf {
 public:
     LogStream(std::function<void (const std::string&)> logger) : m_logger(logger), m_os(this) {
         setp(m_buffer, m_buffer + SZ - 1);
     }
+
     ~LogStream() override {
     }
-    std::ostream& stream() {
-        return m_os;
-    }
+
+
 private:
     int_type overflow(int_type ch) override {
         if(ch != traits_type::eof()){
@@ -53,12 +93,9 @@ private:
         return 1;
     }
     void write() {
-        std::ptrdiff_t n = pptr() - pbase();
-
-        char ntBuf[SZ];
-        std::memcpy(ntBuf, m_buffer, static_cast<size_t>(n));
-        ntBuf[n] = '\0';
-        m_logger(ntBuf);
+        const auto n = static_cast<size_t>(pptr() - pbase());
+        const auto buf = std::string(m_buffer, n);
+        m_logger(buf);
         pbump(static_cast<int>(-n));
     }
 private:
@@ -69,16 +106,8 @@ private:
 
 class NeuropiaSimple::NeuropiaEnv {
 public:
-    NeuropiaEnv(const std::string& root) :  m_root(root) {
-    }
-    virtual ~NeuropiaEnv() {
-        if(m_prevStreamBufCerr) {
-            std::cerr.rdbuf(m_prevStreamBufCerr);
-        }
-        if(m_prevStreamBufCout) {
-            std::cout.rdbuf(m_prevStreamBufCout);
-        }
-    }
+    NeuropiaEnv(const std::string& root) :  m_root(root) {}
+    virtual ~NeuropiaEnv();
     void setLogger(std::function<void (const std::string&)> logger) {
         if(m_prevStreamBufCerr) {
             std::cerr.rdbuf(m_prevStreamBufCerr);
@@ -96,7 +125,7 @@ public:
     {"LabelsVerify", "", Neuropia::Params::File},
     {"Images", "", Neuropia::Params::File},
     {"Labels", "", Neuropia::Params::File},
-    {"Iterations", "1", Neuropia::Params::Int},
+    {"Iterations", "1000", Neuropia::Params::Int},
     {"Jobs", "1", Neuropia::Params::Int},
     {"LearningRate", "0", Neuropia::Params::Real},
     {"LearningRateMin", "0.02", Neuropia::Params::Real},
@@ -119,7 +148,20 @@ public:
     std::unique_ptr<LogStream<1024>> m_logstream;
     std::streambuf* m_prevStreamBufCout = nullptr;
     std::streambuf* m_prevStreamBufCerr = nullptr;
+    bool m_once = false;
+
+    std::unique_ptr<SimpleTrainer> m_trainer;
 };
+
+// to avoid warning
+NeuropiaEnv::~NeuropiaEnv() {
+    if(m_prevStreamBufCerr) {
+        std::cerr.rdbuf(m_prevStreamBufCerr);
+    }
+    if(m_prevStreamBufCout) {
+        std::cout.rdbuf(m_prevStreamBufCout);
+    }
+}
 
 NeuropiaPtr NeuropiaSimple::create(const std::string& root) {
     return std::make_shared<NeuropiaEnv>(root);
@@ -158,8 +200,25 @@ ParamType NeuropiaSimple::params(NeuropiaPtr env) {
     return out;
 }
 
+class Once { //std::once makes exception, I dont want to
+public:
+    Once(bool& once) : m_once(once) {
+        ASSERT(!m_once);
+        m_once = true;
+    }
+    ~Once() {m_once = false;}
+  private:
+    bool& m_once;
+};
+
+
 bool NeuropiaSimple::train(NeuropiaPtr env, TrainType type) {
     ASSERT(env);
+    if(env->m_once) {
+        std::cerr << "Training is busy";
+        return false;
+    }
+    Once once(env->m_once);
     std::unique_ptr<TrainerBase> trainer;
     switch (type) {
     case TrainType::Basic:
@@ -178,7 +237,7 @@ bool NeuropiaSimple::train(NeuropiaPtr env, TrainType type) {
     }
     trainer->train();
     env->m_network = std::move(trainer->network());
-    return env->m_network.isValid();
+   return false;
 }
 
 void NeuropiaSimple::save(NeuropiaPtr env, const std::string& filename) {
@@ -203,14 +262,101 @@ int NeuropiaSimple::verify(NeuropiaPtr env) {
     return std::get<0>(t);
 }
 
-#ifdef __EMSCRIPTEN__
-void setLogger(NeuropiaPtr env, emscripten::val cb) {
+void NeuropiaSimple::setLogger(NeuropiaPtr env, std::function<void (const std::string&)> cb) {
     ASSERT(env);
     env->setLogger([cb](const std::string& str){
         cb(str);
     });
     std::cout << "logging started" << std::endl;
 }
+
+
+bool SimpleTrainer::train() {
+    auto testVerify = m_testVerifyFrequency;
+
+    if(m_maxTrainTime >= MaxTrainTime) {
+        if(!m_quiet)
+            persentage(m_passedIterations, m_iterations);
+        m_learningRate += (1.0 / static_cast<double>(m_iterations)) * (m_learningRateMin - m_learningRateMax);
+    } else {
+        const auto stop = std::chrono::high_resolution_clock::now();
+        const auto delta = static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(stop - m_start).count());
+        if(delta > m_maxTrainTime) {
+            return false;
+        }
+        const auto change = delta - m_gap;
+        m_gap = delta;
+        if(!m_quiet)
+            persentage(delta, m_maxTrainTime, " " + std::to_string(m_learningRate));
+        this->m_learningRate += (static_cast<double>(change) / static_cast<double>(m_maxTrainTime)) * (m_learningRateMin - m_learningRateMax);
+    }
+
+    const auto imageSize = m_images.size(1) * m_images.size(2);
+    const auto at = m_images.random();
+    const auto image = m_images.next(at, imageSize);
+    const auto label = static_cast<unsigned>(m_labels.next(at));
+
+#ifdef DEBUG_SHOW
+    Neuropia::printimage(image.data()); //ASCII print images
+    std::cout << label << std::endl;
+#endif
+
+    std::vector<Neuropia::NeuronType> inputs(imageSize);
+    std::transform(image.begin(), image.end(), inputs.begin(), [](unsigned char c) {
+        return Neuropia::normalize(static_cast<Neuropia::NeuronType>(c), 0, 255);
+    });
+
+    std::vector<Neuropia::NeuronType> outputs(m_network.outLayer()->size());
+    outputs[label] = 1.0; //correct one is 1
+    if(!this->m_network.train(inputs.begin(), outputs.begin(), m_learningRate, m_lambdaL2)) {
+        m_ok = false;
+        return false;
+    }
+
+    if(--testVerify == 0) {
+        m_network.inverseDropout();
+        printVerify(Neuropia::verify(m_network, m_imageFile, m_labelFile, 0, 200), "Test");
+        setDropout();
+        testVerify = m_testVerifyFrequency;
+    }
+    return true;
+}
+
+
+
+
+#ifdef __EMSCRIPTEN__
+void setLogger(NeuropiaPtr env, emscripten::val cb) {
+    NeuropiaSimple::setLogger(env, [cb](const std::string& str){
+        cb(str);
+    });
+}
+
+
+bool train(NeuropiaPtr env, int iteration) {
+    ASSERT(env);
+
+    if(iteration == 0 || !env->m_trainer) {
+        std::cout << "Create trainer\n" << std::endl;
+        env->m_trainer.reset(new SimpleTrainer(env->m_root, env->m_params, false));
+    }
+    return env->m_trainer->train(iteration);
+}
+
+ParamType basicParams(NeuropiaPtr env) {
+    auto p = NeuropiaSimple::params(env);
+    p.erase("Jobs");
+    p.erase("BatchSize");
+    p.erase("BatchVerifySize");
+    p.erase("Hard");
+    return p;
+}
+
+bool trainingOk(NeuropiaPtr env) {
+    ASSERT(env);
+    return env->m_trainer && env->m_trainer->isOk();
+}
+
 #endif
 
 #ifdef __EMSCRIPTEN__
@@ -218,22 +364,18 @@ EMSCRIPTEN_BINDINGS(Neuropia) {
     class_<NeuropiaEnv>("Neuropia").smart_ptr_constructor("Neuropia", &std::make_shared<NeuropiaEnv, const std::string&>);
     register_vector<double>("ValueVector");
     register_vector<std::string>("StringVector");
-    enum_<TrainType>("TrainType")
-            .value("BASIC", TrainType::Basic)
-            .value("EVOLUTIONAL", TrainType::Evolutional)
-            .value("PARALLEL", TrainType::Parallel)
-            ;
     register_map<ParamType::key_type, ParamType::mapped_type>("ParamMap");
     function("create", &NeuropiaSimple::create);
     function("free", &NeuropiaSimple::free);
     function("feed", &NeuropiaSimple::feed);
     function("setParam", &NeuropiaSimple::setParam);
-    function("params", &NeuropiaSimple::params);
-    function("train", &NeuropiaSimple::train);
+    function("params", &::basicParams);
+    function("train", &::train);
     function("save", &NeuropiaSimple::save);
     function("load", &NeuropiaSimple::load);
     function("verify", &NeuropiaSimple::verify);
-    function("setLogger", &setLogger);
+    function("setLogger", &::setLogger);
+    function("trainingOk", &::trainingOk);
 }
 #endif
 

@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "params.h"
 
+/*
 #include <dirent.h>
 #include <stdio.h>
 #include <errno.h>
@@ -14,7 +15,6 @@ void tree(const std::string& root) {
     if(d) {
         struct dirent *dir;
         while((dir = readdir(d)) != nullptr) {
-            const auto l = strlen(dir->d_name);
             if(dir->d_type == DT_REG){
                 std::cerr <<  dir->d_name << std::endl;
             }
@@ -28,9 +28,8 @@ void tree(const std::string& root) {
         }
         closedir(d);
     }
-    return;
 }
-
+*/
 using namespace Neuropia;
 
 auto toIntVec(const std::string& s) {
@@ -116,7 +115,7 @@ TrainerBase::TrainerBase(const std::string & root, const Neuropia::Params& param
     if(!m_labels.ok())
          std::cerr << "Cannot open labels from " << m_labelFile << std::endl;
 
-    tree("/");
+    //  tree("/");
 
 
     m_network

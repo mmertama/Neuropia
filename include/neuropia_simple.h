@@ -7,6 +7,7 @@
 #include <memory>
 #include <map>
 
+
 namespace NeuropiaSimple {
 
 
@@ -37,6 +38,8 @@ void save(NeuropiaPtr env, const std::string& filename);
 bool load(NeuropiaPtr env, const std::string& filename);
 
 int verify(NeuropiaPtr env);
+
+void setLogger(NeuropiaPtr env, std::function<void (const std::string&) > cb);
 
 }
 

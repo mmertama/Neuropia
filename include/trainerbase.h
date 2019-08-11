@@ -14,7 +14,7 @@ namespace Neuropia {
 class TrainerBase {
 public:
     enum class Show{Nothing, Progress};
-    TrainerBase(const std::string & root, const Neuropia::Params& params, bool m_quiet);
+    TrainerBase(const std::string& root, const Neuropia::Params& params, bool quiet);
     void setDropout();
     virtual bool train() = 0;
     virtual ~TrainerBase() = default;
