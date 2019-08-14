@@ -108,9 +108,8 @@ class Painter {
                         const g = imgData.data[pos + 1];
                         const b = imgData.data[pos + 2];
                         const a = imgData.data[pos + 3];
-                        if(r != 0 || g != 0 || b != 0 || a != 0)
-                            console.log(pos);
-                        sampled += 255 - a;// ((a * ((r * 0.3 + g * 0.59 + b * 0.11)))) / 255 ;
+                        
+                        sampled += a;// ((a * ((r * 0.3 + g * 0.59 + b * 0.11)))) / 255 ;
                     }
                 }
                 data[gp] = Math.round(sampled / (hsamp * wsamp));
