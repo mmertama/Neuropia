@@ -227,11 +227,8 @@ void NeuropiaSimple::save(const NeuropiaPtr& env, const std::string& filename) {
 bool NeuropiaSimple::load(const NeuropiaPtr& env, const std::string& filename) {
     ASSERT(env);
     const auto nets = Neuropia::load(Neuropia::absPath(env->m_root, filename));
-    if(!nets.empty()) {
-        env->m_network = std::move(nets.at(0));
-        return env->m_network.isValid();
-    }
-    return false;
+    env->m_network = std::move(nets);
+    return env->m_network.isValid();
 }
 
 int NeuropiaSimple::verify(const NeuropiaPtr& env) {
@@ -434,13 +431,12 @@ ParamType basicParams(const NeuropiaPtr& env) {
     return p;
 }
 
-bool trainingOk(const NeuropiaPtr& env) {
+bool isNetworkValid(const NeuropiaPtr& env) {
     ASSERT(env);
     if(env->m_trainer) {
         env->m_logStream->freeze(false);
-        return env->m_trainer->isOk() && env->m_network.isValid();
     }
-    return false;
+    return env->m_network.isValid();
 }
 
 double verifyResult(const NeuropiaPtr& env) {
@@ -479,7 +475,7 @@ EMSCRIPTEN_BINDINGS(Neuropia) {
     function("load", &NeuropiaSimple::load);
     function("verify", &::verify);
     function("setLogger", &::setLogger);
-    function("trainingOk", &::trainingOk);
+    function("isNetworkValid", &::isNetworkValid);
     function("verifyResult", &::verifyResult);
     function("showImage", &::showImage);
 }

@@ -21,18 +21,15 @@ add_executable(${NAME}
     ../src/idxreader.cpp
     ../src/neuropia.cpp
     ../src/utils.cpp
-    ../src/testports.cpp
     ../src/params.cpp
     ../src/trainerbase.cpp
     ../src/trainer.cpp 
     ../src/verify.cpp
-    ../src/paralleltrain.cpp 
-    ../src/evotrain.cpp
     ../src/neuropia_simple.cpp  
 )
 
-
-set(EMCC_LINKER_FLAGS "-v --bind -s VERBOSE=1 -s SAFE_HEAP=0 -s WASM=1 -O0 --pre-js pre-module.js --post-js post-module.js -s ASSERTIONS=1 -s INVOKE_RUN=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -std=c++14")
+set(EMCC_LINKER_FLAGS "-o neuropia.js \
+      --bind --no-heap-copy -s ASSERTIONS=1 -s SAFE_HEAP=0 -s SAFE_HEAP_LOG=0 -s ALIASING_FUNCTION_POINTERS=0 -s WARN_UNALIGNED=0 -s WASM=1 -O3 -s INVOKE_RUN=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s FORCE_FILESYSTEM=1 -s ALLOW_MEMORY_GROWTH=0 -s TOTAL_MEMORY=1024MB --preload-file mnist -s EXIT_RUNTIME=1 -std=c++14")
 
 set(CMAKE_REQUIRED_FLAGS "${EMCC_LINKER_FLAGS}")
 

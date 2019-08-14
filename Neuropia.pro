@@ -67,5 +67,6 @@ DISTFILES +=    \
     tests/tests17.txt \
     tests/tests18.txt \
     tests/tests20.txt \
-    tests/tests21.txt
+    tests/tests21.txt \
+    tests/tests22.txt
 

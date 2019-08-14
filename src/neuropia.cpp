@@ -66,18 +66,19 @@ NeuronType Neuron::feed(const ValueVector& inputs) const {
 }
 
 void Neuron::save(std::ofstream& stream) const {
-    const auto sz = m_weights.size();
-    stream.write(reinterpret_cast<const char*>(&sz), sizeof(size_t));
+    const auto sz = static_cast<std::uint64_t>(m_weights.size());
+    stream.write(reinterpret_cast<const char*>(&sz), sizeof(sz));
     for(const auto& w : m_weights) {
         stream.write(reinterpret_cast<const char*>(&w), sizeof(NeuronType));
     }
     stream.write(reinterpret_cast<const char*>(&m_bias), sizeof(NeuronType));
 }
 
+
 void Neuron::load(std::ifstream& stream) {
     m_weights.clear();
-    size_t sz;
-    stream.read(reinterpret_cast<char*>(&sz), sizeof(size_t));
+    std::uint64_t  sz = 0;
+    stream.read(reinterpret_cast<char*>(&sz), sizeof(sz));
     m_weights.resize(sz);
     for(size_t s = 0; s < sz; s++) {
         NeuronType w;
@@ -315,13 +316,13 @@ constexpr char H[] = {'N', 'E', 'U', '0', '0', '0', '0', '1'};
 void Layer::save(std::ofstream& strm) const {
     if(isInput()) {
         strm.write(H, sizeof(H));
-        const auto nl = static_cast<int>(m_activationFunction.name().length());
+        const auto  nl = static_cast<std::uint32_t >(m_activationFunction.name().length());
         strm.write(reinterpret_cast<const char*>(&nl), sizeof(nl));
         strm.write(m_activationFunction.name().data(), nl);
-        const auto sz = m_neurons.size();
+        const auto sz = static_cast<std::uint32_t >(m_neurons.size());
         strm.write(reinterpret_cast<const char*>(&sz), sizeof(sz));
     } else {
-        const auto sz = m_neurons.size();
+        const auto sz = static_cast<std::uint32_t >(m_neurons.size());
         strm.write(reinterpret_cast<const char*>(&sz), sizeof(sz));
         for(const auto& n : m_neurons) {
             n.save(strm);
@@ -346,11 +347,10 @@ Layer::Layer(std::ifstream& strm, const ActivationFunction& activationFunction, 
         strm.read(hdr, sizeof(H));
         neuropia_assert_always(Hcomp(hdr), "Corrupted import stream or wrong version");
 
-        size_t namel = 0;
-        strm.read(reinterpret_cast<char*>(&namel), sizeof(int));
+        std::uint32_t namel = 0;
+        strm.read(reinterpret_cast<char*>(&namel), sizeof(namel));
         std::string name(namel, '0');
-        strm.read(&name[0], static_cast<int>(namel));
-
+        strm.read(&name[0], namel);
 
         if(signumFunction.name() == name)
             m_activationFunction = signumFunction;
@@ -363,11 +363,11 @@ Layer::Layer(std::ifstream& strm, const ActivationFunction& activationFunction, 
         else if(eluFunction.name() == name)
             m_activationFunction = eluFunction;
 
-       size_t count = 0;
+       std::uint64_t  count = 0;
        strm.read(reinterpret_cast<char*>(&count), sizeof(count));
        fill(count, proto);
     } else {
-        size_t count = 0;
+        std::uint64_t  count = 0;
         strm.read(reinterpret_cast<char*>(&count), sizeof(count));
         fill(count, proto);
         for(auto& n : m_neurons) {

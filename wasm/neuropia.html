@@ -15,7 +15,7 @@
             histogram.setColors([], "Green");
             histogram.setLabels([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
             painter = new Painter('canvas', function (p) {
-                if(Module.trainingOk(neuropia)) {
+                if(Module.isNetworkValid(neuropia)) {
                     const d = p.getData(28, 28);
                     const result = Module.feed(neuropia, d);
                     let max = 0;
@@ -40,13 +40,16 @@
             Module.setLogger(neuropia, setLog); 
             
             const fopen = Module.load(neuropia, "mnistdata.bin");
-            console.log("Load is", fopen);
+            document.getElementById("verifyBtn").disabled = !fopen;
+            if(fopen)
+                setLog("Demo network loaded");
            
            
             Module.setParam(neuropia, "Images", "train-images-idx3-ubyte");
             Module.setParam(neuropia, "ImagesVerify", "t10k-images-idx3-ubyte");
             Module.setParam(neuropia, "Labels", "train-labels-idx1-ubyte");
             Module.setParam(neuropia, "LabelsVerify", "t10k-labels-idx1-ubyte");
+            
             const params = Module.params(neuropia); 
             const keys = params.keys();
             const paramList = document.getElementById("paramList");
@@ -118,6 +121,7 @@
             }    
                           
         function startTrain() {
+            document.getElementById("verifyBtn").disabled = true;
             const params = document.getElementsByClassName("param");
             let ok = true;
             const plist = {}
@@ -144,7 +148,7 @@
                         setTimeout(doTrain, 0);
                         iteration += 100;
                     } else {
-                        if(Module.trainingOk(neuropia)) {
+                        if(Module.isNetworkValid(neuropia)) {
                             console.log("Training done");
                             document.getElementById("verifyBtn").disabled = false;
                         }
@@ -181,7 +185,7 @@
         
             
 		</script>
-        <script src="neuropia_t.js"></script>
+        <script src="neuropia.js"></script>
 	</head>
 	<body>
         <form name="params" onsubmit="return startTrain()">

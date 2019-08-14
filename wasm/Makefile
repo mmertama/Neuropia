@@ -123,33 +123,6 @@ neuropia/fast:
 	$(MAKE) -f CMakeFiles/neuropia.dir/build.make CMakeFiles/neuropia.dir/build
 .PHONY : neuropia/fast
 
-Users/markusmertama/Development/Neuropia/src/evotrain.o: Users/markusmertama/Development/Neuropia/src/evotrain.cpp.o
-
-.PHONY : Users/markusmertama/Development/Neuropia/src/evotrain.o
-
-# target to build an object file
-Users/markusmertama/Development/Neuropia/src/evotrain.cpp.o:
-	$(MAKE) -f CMakeFiles/neuropia.dir/build.make CMakeFiles/neuropia.dir/Users/markusmertama/Development/Neuropia/src/evotrain.cpp.o
-.PHONY : Users/markusmertama/Development/Neuropia/src/evotrain.cpp.o
-
-Users/markusmertama/Development/Neuropia/src/evotrain.i: Users/markusmertama/Development/Neuropia/src/evotrain.cpp.i
-
-.PHONY : Users/markusmertama/Development/Neuropia/src/evotrain.i
-
-# target to preprocess a source file
-Users/markusmertama/Development/Neuropia/src/evotrain.cpp.i:
-	$(MAKE) -f CMakeFiles/neuropia.dir/build.make CMakeFiles/neuropia.dir/Users/markusmertama/Development/Neuropia/src/evotrain.cpp.i
-.PHONY : Users/markusmertama/Development/Neuropia/src/evotrain.cpp.i
-
-Users/markusmertama/Development/Neuropia/src/evotrain.s: Users/markusmertama/Development/Neuropia/src/evotrain.cpp.s
-
-.PHONY : Users/markusmertama/Development/Neuropia/src/evotrain.s
-
-# target to generate assembly for a file
-Users/markusmertama/Development/Neuropia/src/evotrain.cpp.s:
-	$(MAKE) -f CMakeFiles/neuropia.dir/build.make CMakeFiles/neuropia.dir/Users/markusmertama/Development/Neuropia/src/evotrain.cpp.s
-.PHONY : Users/markusmertama/Development/Neuropia/src/evotrain.cpp.s
-
 Users/markusmertama/Development/Neuropia/src/idxreader.o: Users/markusmertama/Development/Neuropia/src/idxreader.cpp.o
 
 .PHONY : Users/markusmertama/Development/Neuropia/src/idxreader.o
@@ -231,33 +204,6 @@ Users/markusmertama/Development/Neuropia/src/neuropia_simple.cpp.s:
 	$(MAKE) -f CMakeFiles/neuropia.dir/build.make CMakeFiles/neuropia.dir/Users/markusmertama/Development/Neuropia/src/neuropia_simple.cpp.s
 .PHONY : Users/markusmertama/Development/Neuropia/src/neuropia_simple.cpp.s
 
-Users/markusmertama/Development/Neuropia/src/paralleltrain.o: Users/markusmertama/Development/Neuropia/src/paralleltrain.cpp.o
-
-.PHONY : Users/markusmertama/Development/Neuropia/src/paralleltrain.o
-
-# target to build an object file
-Users/markusmertama/Development/Neuropia/src/paralleltrain.cpp.o:
-	$(MAKE) -f CMakeFiles/neuropia.dir/build.make CMakeFiles/neuropia.dir/Users/markusmertama/Development/Neuropia/src/paralleltrain.cpp.o
-.PHONY : Users/markusmertama/Development/Neuropia/src/paralleltrain.cpp.o
-
-Users/markusmertama/Development/Neuropia/src/paralleltrain.i: Users/markusmertama/Development/Neuropia/src/paralleltrain.cpp.i
-
-.PHONY : Users/markusmertama/Development/Neuropia/src/paralleltrain.i
-
-# target to preprocess a source file
-Users/markusmertama/Development/Neuropia/src/paralleltrain.cpp.i:
-	$(MAKE) -f CMakeFiles/neuropia.dir/build.make CMakeFiles/neuropia.dir/Users/markusmertama/Development/Neuropia/src/paralleltrain.cpp.i
-.PHONY : Users/markusmertama/Development/Neuropia/src/paralleltrain.cpp.i
-
-Users/markusmertama/Development/Neuropia/src/paralleltrain.s: Users/markusmertama/Development/Neuropia/src/paralleltrain.cpp.s
-
-.PHONY : Users/markusmertama/Development/Neuropia/src/paralleltrain.s
-
-# target to generate assembly for a file
-Users/markusmertama/Development/Neuropia/src/paralleltrain.cpp.s:
-	$(MAKE) -f CMakeFiles/neuropia.dir/build.make CMakeFiles/neuropia.dir/Users/markusmertama/Development/Neuropia/src/paralleltrain.cpp.s
-.PHONY : Users/markusmertama/Development/Neuropia/src/paralleltrain.cpp.s
-
 Users/markusmertama/Development/Neuropia/src/params.o: Users/markusmertama/Development/Neuropia/src/params.cpp.o
 
 .PHONY : Users/markusmertama/Development/Neuropia/src/params.o
@@ -284,33 +230,6 @@ Users/markusmertama/Development/Neuropia/src/params.s: Users/markusmertama/Devel
 Users/markusmertama/Development/Neuropia/src/params.cpp.s:
 	$(MAKE) -f CMakeFiles/neuropia.dir/build.make CMakeFiles/neuropia.dir/Users/markusmertama/Development/Neuropia/src/params.cpp.s
 .PHONY : Users/markusmertama/Development/Neuropia/src/params.cpp.s
-
-Users/markusmertama/Development/Neuropia/src/testports.o: Users/markusmertama/Development/Neuropia/src/testports.cpp.o
-
-.PHONY : Users/markusmertama/Development/Neuropia/src/testports.o
-
-# target to build an object file
-Users/markusmertama/Development/Neuropia/src/testports.cpp.o:
-	$(MAKE) -f CMakeFiles/neuropia.dir/build.make CMakeFiles/neuropia.dir/Users/markusmertama/Development/Neuropia/src/testports.cpp.o
-.PHONY : Users/markusmertama/Development/Neuropia/src/testports.cpp.o
-
-Users/markusmertama/Development/Neuropia/src/testports.i: Users/markusmertama/Development/Neuropia/src/testports.cpp.i
-
-.PHONY : Users/markusmertama/Development/Neuropia/src/testports.i
-
-# target to preprocess a source file
-Users/markusmertama/Development/Neuropia/src/testports.cpp.i:
-	$(MAKE) -f CMakeFiles/neuropia.dir/build.make CMakeFiles/neuropia.dir/Users/markusmertama/Development/Neuropia/src/testports.cpp.i
-.PHONY : Users/markusmertama/Development/Neuropia/src/testports.cpp.i
-
-Users/markusmertama/Development/Neuropia/src/testports.s: Users/markusmertama/Development/Neuropia/src/testports.cpp.s
-
-.PHONY : Users/markusmertama/Development/Neuropia/src/testports.s
-
-# target to generate assembly for a file
-Users/markusmertama/Development/Neuropia/src/testports.cpp.s:
-	$(MAKE) -f CMakeFiles/neuropia.dir/build.make CMakeFiles/neuropia.dir/Users/markusmertama/Development/Neuropia/src/testports.cpp.s
-.PHONY : Users/markusmertama/Development/Neuropia/src/testports.cpp.s
 
 Users/markusmertama/Development/Neuropia/src/trainer.o: Users/markusmertama/Development/Neuropia/src/trainer.cpp.o
 
@@ -429,9 +348,6 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... neuropia"
-	@echo "... Users/markusmertama/Development/Neuropia/src/evotrain.o"
-	@echo "... Users/markusmertama/Development/Neuropia/src/evotrain.i"
-	@echo "... Users/markusmertama/Development/Neuropia/src/evotrain.s"
 	@echo "... Users/markusmertama/Development/Neuropia/src/idxreader.o"
 	@echo "... Users/markusmertama/Development/Neuropia/src/idxreader.i"
 	@echo "... Users/markusmertama/Development/Neuropia/src/idxreader.s"
@@ -441,15 +357,9 @@ help:
 	@echo "... Users/markusmertama/Development/Neuropia/src/neuropia_simple.o"
 	@echo "... Users/markusmertama/Development/Neuropia/src/neuropia_simple.i"
 	@echo "... Users/markusmertama/Development/Neuropia/src/neuropia_simple.s"
-	@echo "... Users/markusmertama/Development/Neuropia/src/paralleltrain.o"
-	@echo "... Users/markusmertama/Development/Neuropia/src/paralleltrain.i"
-	@echo "... Users/markusmertama/Development/Neuropia/src/paralleltrain.s"
 	@echo "... Users/markusmertama/Development/Neuropia/src/params.o"
 	@echo "... Users/markusmertama/Development/Neuropia/src/params.i"
 	@echo "... Users/markusmertama/Development/Neuropia/src/params.s"
-	@echo "... Users/markusmertama/Development/Neuropia/src/testports.o"
-	@echo "... Users/markusmertama/Development/Neuropia/src/testports.i"
-	@echo "... Users/markusmertama/Development/Neuropia/src/testports.s"
 	@echo "... Users/markusmertama/Development/Neuropia/src/trainer.o"
 	@echo "... Users/markusmertama/Development/Neuropia/src/trainer.i"
 	@echo "... Users/markusmertama/Development/Neuropia/src/trainer.s"
