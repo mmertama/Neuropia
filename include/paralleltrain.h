@@ -8,7 +8,7 @@ namespace Neuropia {
 class TrainerParallel : public TrainerBase {
 public:
     TrainerParallel(const std::string & root, const Neuropia::Params& params, bool m_quiet);
-    bool train();
+    bool train() override;
 protected:
     unsigned m_jobs;
     size_t m_batchSize;

@@ -140,7 +140,7 @@ bool Params::readTask(const std::string& filename,
         std::string value;
         is >> key;
         ++lineNo;
-        if(key == "" || key[0] == '#') {
+        if(key.empty() || key[0] == '#') {
             std::string line;
             std::getline(is, line); //eat and forget line
             continue;
@@ -180,7 +180,7 @@ std::string Params::toType(const std::string &re) const {
     }
     if(re == File) return "file";
     if(re == String) return "string";
-    if(re == Int) return "interger number";
+    if(re == Int) return "integer number";
     if(re == Real) return "real number";
     if(re == Bool) return "true|false";
     const std::regex reg(R"(\((.*)\)\$)");

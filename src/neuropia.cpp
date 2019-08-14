@@ -9,7 +9,7 @@ using namespace Neuropia;
 
 std::ostream& operator << (std::ostream& strm, const std::vector<Neuropia::NeuronType>& values) {
     strm << '[';
-    if(values.size() > 0) {
+    if(!values.empty()) {
         for(size_t i = 0; i < values.size() - 1; i++) {
             strm << values[i] << ", ";
         }
@@ -58,6 +58,7 @@ Layer::InitStrategy Neuropia::initStrategyMap(ActivationFunction af) {
 NeuronType Neuron::feed(const ValueVector& inputs) const {
     neuropia_assert(m_af);
     NeuronType sum = m_bias;
+    neuropia_assert(m_weights.size() >= inputs.size());
     for(size_t i = 0; i < inputs.size(); i++) {
         sum += (m_weights[i] * inputs[i]);
     }
@@ -92,10 +93,10 @@ void Neuron::load(std::ifstream& stream) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////7
 
 
-Layer::Layer(const std::initializer_list<Neuron>& list, ActivationFunction activationFunction) noexcept : m_neurons(list), m_activationFunction(activationFunction), m_outBuffer(list.size()) {
+Layer::Layer(const std::initializer_list<Neuron>& list, const ActivationFunction& activationFunction) noexcept : m_neurons(list), m_activationFunction(activationFunction), m_outBuffer(list.size()) {
 }
 
-Layer::Layer(size_t count, ActivationFunction activationFunction, const Neuron& proto) noexcept : m_activationFunction(activationFunction){
+Layer::Layer(size_t count, const ActivationFunction& activationFunction, const Neuron& proto) noexcept : m_activationFunction(activationFunction){
     m_neurons.resize(static_cast<unsigned>(count));
     std::fill(m_neurons.begin(), m_neurons.end(), proto);
     m_outBuffer.resize(m_neurons.size());
@@ -206,7 +207,7 @@ const Layer* Layer::previousLayer(const Layer* current) const {
  //see://www.youtube.com/watch?v=QJoa0JYaX1I - there are several episode
  //video how that works, therefore only the most basic comments are injected here that may
  //help you the implementation vs. explanation on video
-bool Layer::backpropagation(const ValueVector& outValues, const ValueVector& expectedValues, double learningRate, double lambdaL2, DerivativeFunction df) {
+bool Layer::backpropagation(const ValueVector& outValues, const ValueVector& expectedValues, double learningRate, double lambdaL2, const DerivativeFunction& df) {
 
 //expected values as Matrix
     const auto expected = Matrix<NeuronType>::fromArray(expectedValues, Matrix<NeuronType>::VecDir::row);
@@ -339,7 +340,7 @@ bool Hcomp(const char* h) {
     return true;
 }
 
-Layer::Layer(std::ifstream& strm, ActivationFunction activationFunction, const Neuron& proto, bool isIn) noexcept : m_activationFunction(activationFunction) {
+Layer::Layer(std::ifstream& strm, const ActivationFunction& activationFunction, const Neuron& proto, bool isIn) noexcept : m_activationFunction(activationFunction) {
     if(isIn) {
         char hdr[sizeof(H)];
         strm.read(hdr, sizeof(H));
@@ -401,7 +402,7 @@ Layer& Layer::operator=(const Layer& other) noexcept {
     m_outBuffer.resize(m_neurons.size());
     m_activationFunction = other.m_activationFunction;
     if(other.m_next) {
-        m_next.reset(new Layer(*other.m_next));
+        m_next = std::make_unique<Layer>(*other.m_next);
     }
     if(m_next) {
         m_next->m_prev = this;
@@ -508,7 +509,7 @@ void Layer::initialize(InitStrategy strategy) {
 void Layer::dropout(std::default_random_engine& gen) {
     if(m_dropOut > 0.0) {
         if(!isOutput()) { // outputs are not dropped
-            const unsigned sz = static_cast<unsigned>(m_neurons.size());
+            const auto sz = static_cast<unsigned>(m_neurons.size());
             const auto dropCount = static_cast<unsigned>(static_cast<double>(sz * m_dropOut));
             std::vector<bool> set(sz);
             std::fill(set.begin(), set.end(), false);
@@ -567,7 +568,8 @@ void Layer::dropout(double dropoutRate, bool inherit) {
 Layer* Layer::get(int offset) {
     if(offset == 0)
         return this;
-    else if(offset > 0) {
+
+    if(offset > 0) {
         if(m_next)
             return m_next->get(offset - 1);
     }
@@ -584,6 +586,9 @@ const Layer* Layer::get(int offset) const {
 
 
 bool Layer::isValid(bool testNext) const {
+    if(m_outBuffer.empty()) {
+        return false;
+    }
     if(isInput())
         return !testNext || !m_next || m_next->isValid(true);
     const auto prevLayer = previousLayer(this);
@@ -593,5 +598,8 @@ bool Layer::isValid(bool testNext) const {
     [](const Neuron & n, Matrix<NeuronType>::index_type index) {
         return n.weight(index);
     });
-    return weights.reduce<bool>(false, [](bool a, auto r){return a || std::isnan(r) || std::isinf(r);}) && (!testNext || !m_next || m_next->isValid(true));
+    const auto hasInvalidValue = weights.reduce<bool>(false, [](bool a, auto r){
+           return a || std::isnan(r) || std::isinf(r);
+       });
+    return !hasInvalidValue && (!testNext || !m_next || m_next->isValid(true));
 }

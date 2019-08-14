@@ -7,7 +7,7 @@
 #include <initializer_list>
 #include <vector>
 #include <memory>
-#include <math.h>
+#include <cmath>
 #include <iostream>
 #include <string>
 #include <random>
@@ -89,7 +89,6 @@ protected:
 private:
    std::function<R(U...)> m_f = nullptr;
    std::string m_name;
-   char _COMPILER_PADDING[8]; //clang
 };
 
 /**
@@ -267,7 +266,7 @@ public:
      * @brief hasWeights
      * @return
      */
-    bool hasWeights() const {return m_weights.size() > 0;}
+    bool hasWeights() const {return !m_weights.empty();}
 
     /**
      * @brief feed
@@ -341,14 +340,14 @@ public:
      * @brief Layer
      * @param activationFunction
      */
-    Layer(ActivationFunction activationFunction = DEFAULT_AF) : m_activationFunction(activationFunction) {}
+    Layer(const ActivationFunction& activationFunction = DEFAULT_AF) : m_activationFunction(activationFunction) {}
 
     /**
      * @brief Layer
      * @param list
      * @param activationFunction
      */
-    Layer(const std::initializer_list<Neuron>& list, ActivationFunction activationFunction = DEFAULT_AF) noexcept;
+    Layer(const std::initializer_list<Neuron>& list, const ActivationFunction& activationFunction = DEFAULT_AF) noexcept;
 
     /**
      * @brief Layer
@@ -356,14 +355,14 @@ public:
      * @param activationFunction
      * @param proto
      */
-    Layer(size_t count, ActivationFunction activationFunction, const Neuron& proto) noexcept;
+    Layer(size_t count, const ActivationFunction& activationFunction, const Neuron& proto) noexcept;
 
     /**
      * @brief Layer
      * @param count
      * @param activationFunction
      */
-    Layer(size_t count, ActivationFunction activationFunction = DEFAULT_AF) noexcept : Layer(count, activationFunction, Neuron(activationFunction)) {}
+    Layer(size_t count, const ActivationFunction& activationFunction = DEFAULT_AF) noexcept : Layer(count, activationFunction, Neuron(activationFunction)) {}
 
     /**
      * @brief Layer
@@ -378,7 +377,7 @@ public:
      * @param proto
      * @param isIn
      */
-    Layer(std::ifstream& stream, ActivationFunction activationFunction, const Neuron& proto, bool isIn = true) noexcept;
+    Layer(std::ifstream& stream, const ActivationFunction& activationFunction, const Neuron& proto, bool isIn = true) noexcept;
 
     /**
      * @brief Layer
@@ -386,7 +385,7 @@ public:
      * @param activationFunction
      * @param isIn
      */
-    Layer(std::ifstream& stream, ActivationFunction activationFunction = DEFAULT_AF, bool isIn = true) noexcept :
+    Layer(std::ifstream& stream, const ActivationFunction& activationFunction = DEFAULT_AF, bool isIn = true) noexcept :
         Layer(stream, activationFunction, Neuron(activationFunction), isIn) {}
 
 
@@ -507,19 +506,20 @@ public:
         neuropia_assert(m_activationFunction);
         if(!isInput()) {
             const ValueVector values(begin, end);
+            neuropia_assert(m_outBuffer.size() >= m_neurons.size());
             for(size_t i = 0; i < m_neurons.size(); i++) {
                 const auto& n = m_neurons[i];
                 neuropia_assert(n.isActive());
                 m_outBuffer[i] = n.feed(values);
             }
         } else {
+            neuropia_assert(static_cast<size_t>(std::distance(begin, end)) <= m_outBuffer.size());
             std::copy(begin, end, m_outBuffer.begin());
         }
         if(m_next != nullptr) {
             return m_next->feed(m_outBuffer.begin(), m_outBuffer.end());
-        } else {
-            return  m_outBuffer;
         }
+        return  m_outBuffer;
     }
 
     /**
@@ -548,7 +548,7 @@ public:
      * @param df
      * @return
      */
-    bool train(IteratorItInput inputs, IteratorItOutput expectedOutputs, double learningRate, double lambdaL2, DerivativeFunction df = nullptr) {
+    bool train(IteratorItInput inputs, IteratorItOutput expectedOutputs, double learningRate, double lambdaL2, const DerivativeFunction& dfp = nullptr) {
         const auto seed =
 #ifndef RANDOM_SEED
                 static_cast<unsigned>(std::chrono::system_clock::now().time_since_epoch().count())
@@ -562,7 +562,7 @@ public:
         const auto out = feedTrain(inputs, inputs + m_neurons.size()); //go forward first
         ValueVector expectedValues(out.size());
         std::copy(expectedOutputs, expectedOutputs + out.size(), expectedValues.begin());
-        df = df == nullptr ? Neuropia::derivativeMap(m_activationFunction) : df;
+        const auto df = dfp == nullptr ? Neuropia::derivativeMap(m_activationFunction) : dfp;
         return backpropagation(out, expectedValues, learningRate, lambdaL2, df);
     }
 
@@ -686,7 +686,7 @@ public:
      * @param testNext
      * @return
      */
-    bool isValid(bool testNext = false) const;
+    bool isValid(bool testNext = true) const;
 
     /**
      * @brief outLayer
@@ -697,7 +697,7 @@ public:
  protected:
     Layer* previousLayer(Layer* current);
     const Layer* previousLayer(const Layer* current) const;
-    bool backpropagation(const ValueVector& out, const ValueVector& expected, double learningRate, double lambdaL2, DerivativeFunction df);
+    bool backpropagation(const ValueVector& out, const ValueVector& expected, double learningRate, double lambdaL2, const DerivativeFunction& df);
     void dropout(std::default_random_engine& gen);
 
     template<typename IteratorIt>
@@ -727,9 +727,9 @@ public:
         }
         if(m_next != nullptr) {
             return m_next->feedTrain(m_outBuffer.begin(), m_outBuffer.end());
-        } else {
-            return  m_outBuffer;
         }
+        return  m_outBuffer;
+
     }
 
 private:

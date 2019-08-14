@@ -16,7 +16,7 @@ namespace Neuropia {
 class TrainerEvo : public TrainerBase {
 public:
     TrainerEvo(const std::string & root, const Neuropia::Params& params, bool m_quiet);
-    bool train();
+    bool train() override;
 protected:
     unsigned m_jobs;
     size_t m_batchSize;

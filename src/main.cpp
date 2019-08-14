@@ -23,7 +23,6 @@ constexpr char topologyRe[] = R"(\d+(,\d+)*$)";
 constexpr char activationFunctionRe[] =R"((sigmoid|relu|elu)(,(sigmoid|relu|elu))*$)";
 constexpr char dropoutRateRe[] = R"(\d+\.?\d*(,\d+\.?\d*)*$)";
 
-
 int main(int argc, char* argv[]) {
 
     Neuropia::Params params = {
@@ -65,6 +64,8 @@ int main(int argc, char* argv[]) {
                 Neuropia::Trainer trainer(root, params, quiet);
                 const bool ok = trainer.train();
                 const auto network = trainer.network();
+
+                assert(network.isValid());
 
                 if(!params["File"].empty())
                     Neuropia::save(params["File"], network);

@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include <functional>
 
 
 namespace NeuropiaSimple {
@@ -20,9 +21,9 @@ void free(NeuropiaPtr env);
 
 std::vector<double> feed(NeuropiaPtr env, const std::vector<double>& input);
 
-bool setParam(NeuropiaPtr env, const std::string& name, const std::string& value);
-bool isValid(NeuropiaPtr env, const std::string& name, const std::string& value);
-ParamType params(NeuropiaPtr env);
+bool setParam(const NeuropiaPtr& env, const std::string& name, const std::string& value);
+bool isValid(const NeuropiaPtr& env, const std::string& name, const std::string& value);
+ParamType params(const NeuropiaPtr& env);
 
 enum class TrainType {
     Basic,
@@ -31,15 +32,15 @@ enum class TrainType {
 };
 
 
-bool train(NeuropiaPtr env, TrainType type);
+bool train(const NeuropiaPtr& env, TrainType type);
 
-void save(NeuropiaPtr env, const std::string& filename);
+void save(const NeuropiaPtr& env, const std::string& filename);
 
-bool load(NeuropiaPtr env, const std::string& filename);
+bool load(const NeuropiaPtr& env, const std::string& filename);
 
-int verify(NeuropiaPtr env);
+int verify(const NeuropiaPtr& env);
 
-void setLogger(NeuropiaPtr env, std::function<void (const std::string&) > cb);
+void setLogger(const NeuropiaPtr& env, std::function<void (const std::string&) > cb);
 
 }
 

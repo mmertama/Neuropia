@@ -60,10 +60,17 @@ std::tuple<int, unsigned> Neuropia::verifyEnseble(const std::vector<Neuropia::La
                                                   size_t from,
                                                   size_t count) {
     Neuropia::IdxReader<unsigned char> testImages(imageFiles);
-    neuropia_assert_always(testImages.ok(), imageFiles);
     Neuropia::IdxReader<unsigned char> testLabels(labelFiles);
-    neuropia_assert_always(testLabels.ok(), labelFiles);
 
+    if(!testImages.ok()) {
+        std::cerr << "Cannot open images from " << imageFiles << std::endl;
+        return std::make_tuple(0, 0);
+    }
+
+    if(!testLabels.ok()) {
+         std::cerr << "Cannot open labels from " << labelFiles << std::endl;
+         return std::make_tuple(0, 0);
+    }
 
     const auto imageSize = testImages.size(1) * testImages.size(2);
     int found = 0;

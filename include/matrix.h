@@ -47,6 +47,9 @@ public:
     using propagate_on_container_move_assignment = std::true_type;
 private:
     struct Pool {
+        Pool() = default;
+        Pool(const Pool&) = delete;
+        Pool(Pool&&) = delete;
         struct Node {
             Node* next;
             T* block;
@@ -65,8 +68,6 @@ private:
             }
         }
     };
-
-    thread_local static Pool  m_pool;
 public:
     MatrixAllocator() {}
     template <class U> MatrixAllocator(MatrixAllocator<U> const&) noexcept {}
@@ -76,12 +77,13 @@ public:
             std::allocator<char> byteAlloc;
             auto bytes = byteAlloc.allocate(sizeof(T) * size + sizeof(void*));
             return reinterpret_cast<T*>(bytes + sizeof(void*));
-        } else  {
-            auto node = it->second;
-            auto next = node->next;
-            it->second = next;
-            return node->block;
         }
+
+        auto node = it->second;
+        auto next = node->next;
+        it->second = next;
+        return node->block;
+
     }
     void deallocate(T* ptr, size_t size) {
         auto node = reinterpret_cast<typename MatrixAllocator<T>::Pool::Node*>(reinterpret_cast<char*>(ptr) - sizeof(void*));
@@ -95,6 +97,8 @@ public:
             it->second = node;
         }
     }
+private:
+    thread_local static Pool  m_pool;
 };
 
 template <class T>
@@ -133,6 +137,8 @@ public:
     Matrix(const Matrix& other) = delete;
     Matrix() = default;
     Matrix& operator=(const Matrix& other) = default;
+    ~Matrix() = default;
+    Matrix& operator=(Matrix&& other) noexcept = default;
 
     bool isValid() const {
         return !(m_colSize <= 0 || rows() <= 0 || cols() <= 0 || std::isinf(operator()(0, 0)) || std::isnan(operator()(0, 0)));

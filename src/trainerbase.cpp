@@ -64,7 +64,7 @@ auto toFunction(const std::string& names) {
     return functions;
 }
 
-auto toInitStrategy(const std::string& strategy, Neuropia::ActivationFunction af) {
+auto toInitStrategy(const std::string& strategy, const Neuropia::ActivationFunction& af) {
     if(strategy == "logistic")
         return Neuropia::Layer::InitStrategy::Logistic;
     if(strategy == "norm")
@@ -102,7 +102,7 @@ TrainerBase::TrainerBase(const std::string & root, const Neuropia::Params& param
                                            static_cast<decltype (m_control)>(Neuropia::timed) :
                                            static_cast<decltype (m_control)>([this](const std::function<void ()>& f, const std::string & label) {
                                                f();
-                                               std::cout << (label.size() > 0 ? label + " " : "") << "iterations:" << m_passedIterations << std::endl;
+                                               std::cout << (!label.empty() ? label + " " : "") << "iterations:" << m_passedIterations << std::endl;
                                                })){
 
 
@@ -137,7 +137,7 @@ bool TrainerBase::isReady() const {
 }
 
 void TrainerBase::setDropout() {
-    if(m_dropoutRate.size() > 0) {
+    if(!m_dropoutRate.empty()) {
         m_network.dropout(m_dropoutRate[0], true);
         for(auto i = 1U; i < m_dropoutRate.size(); i++) {
             auto npt = m_network.get(static_cast<int>(i));
