@@ -104,11 +104,13 @@ class Painter {
                     const p = (y * stride) + off;
                     for(let x = 0; x < wsamp * 4; x += 4) {
                         const pos = x + p;  
-                        const r = 0;//imgData.data[pos + 0];
-                        const g = 0;//imgData.data[pos + 1];
-                        const b = 0;//imgData.data[pos + 2];
+                        const r = imgData.data[pos + 0];
+                        const g = imgData.data[pos + 1];
+                        const b = imgData.data[pos + 2];
                         const a = imgData.data[pos + 3];
-                        sampled += a;// ((a * ((r * 0.3 + g * 0.59 + b * 0.11)))) / 255 ;
+                        if(r != 0 || g != 0 || b != 0 || a != 0)
+                            console.log(pos);
+                        sampled += 255 - a;// ((a * ((r * 0.3 + g * 0.59 + b * 0.11)))) / 255 ;
                     }
                 }
                 data[gp] = Math.round(sampled / (hsamp * wsamp));

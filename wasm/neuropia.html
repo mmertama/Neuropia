@@ -3,20 +3,24 @@
 	<head>
 		<meta charset="utf-8">
         <title>Neuropia</title>
+        <script src="minimap.js"></script>
         <script src="painter.js"></script>
         <script src="histogram.js"></script>
         <script>
             var painter = null;
             var histogram = null;
             var neuropia = null;
+            var minimap = null;
             var Module = {
         onRuntimeInitialized: function() {
             histogram = new Histogram('histogram', 3);
             histogram.setColors([], "Green");
             histogram.setLabels([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+            minimap = new Minimap('minimap'); 
             painter = new Painter('canvas', function (p) {
+                const d = p.getData(28, 28);
+                minimap.setData(d);
                 if(Module.isNetworkValid(neuropia)) {
-                    const d = p.getData(28, 28);
                     const result = Module.feed(neuropia, d);
                     let max = 0;
                     let maxi =0;
@@ -202,7 +206,9 @@
         <h3 id="verificationResult">Verification: N/A</h3>
         <canvas id="canvas" width="280" height="280" style="border:1px solid #000000;">
         </canvas>
-        <button type="button" onclick="painter.erase()"  id="eraseBtn">Erase</button>
+        <canvas id="minimap" width="112" height="112" style="border:1px solid #00FF00;">
+        </canvas>
+        <button type="button" onclick="painter.erase();minimap.erase()"  id="eraseBtn">Erase</button>
         <h3 id="guess">?</h3>
         <canvas id="histogram" width="480" height="200" style="border:1px solid #00FF00;">
         </canvas>
