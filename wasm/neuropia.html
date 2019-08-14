@@ -34,12 +34,15 @@
                     document.getElementById('guess').innerHTML = maxi + '(' + max + ')';                    
                 }
             }); 
+            
             neuropia = Module.create("mnist");
-            //const fopen = Module.load(neuropia, "mnistdata.bin");
-            //console.log("Load was", fopen);
-           
             const terminal = document.getElementById("terminal")
-            Module.setLogger(neuropia,setLog); 
+            Module.setLogger(neuropia, setLog); 
+            
+            const fopen = Module.load(neuropia, "mnistdata.bin");
+            console.log("Load is", fopen);
+           
+           
             Module.setParam(neuropia, "Images", "train-images-idx3-ubyte");
             Module.setParam(neuropia, "ImagesVerify", "t10k-images-idx3-ubyte");
             Module.setParam(neuropia, "Labels", "train-labels-idx1-ubyte");
