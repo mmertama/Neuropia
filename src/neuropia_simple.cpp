@@ -5,6 +5,7 @@
 #include "trainer.h"
 #include "paralleltrain.h"
 #include "verify.h"
+#include "default.h"
 
 using namespace Neuropia;
 
@@ -22,10 +23,6 @@ bool fatal(const char* t, const char* f, int line, const char* file) {
 #define ASSERT_X(X, T) ((X) || fatal((T), __FUNCTION__, __LINE__, __FILE__))
 
 using namespace NeuropiaSimple;
-
-constexpr char topologyRe[] = R"(\d+(,\d+)*$)";
-constexpr char activationFunctionRe[] =R"((sigmoid|relu|elu)(,(sigmoid|relu|elu))*$)";
-constexpr char dropoutRateRe[] = R"(\d+\.?\d*(,\d+\.?\d*)*$)";
 
 template <size_t SZ>
 class LogStream : public std::streambuf {
@@ -127,28 +124,7 @@ public:
     }
     Layer m_network;
     Params m_params = {
-    {"ImagesVerify", "", Neuropia::Params::File},
-    {"LabelsVerify", "", Neuropia::Params::File},
-    {"Images", "", Neuropia::Params::File},
-    {"Labels", "", Neuropia::Params::File},
-    {"Iterations", "1000", Neuropia::Params::Int},
-    {"Jobs", "1", Neuropia::Params::Int},
-    {"LearningRate", "0", Neuropia::Params::Real},
-    {"LearningRateMin", "0.02", Neuropia::Params::Real},
-    {"LearningRateMax", "0.02", Neuropia::Params::Real},
-    {"BatchSize", "800", Neuropia::Params::Int},
-    {"BatchVerifySize", "100", Neuropia::Params::Int},
-    {"Topology", "64,32", topologyRe},
-    {"MaxTrainTime", std::to_string(static_cast<int>(MaxTrainTime)), Neuropia::Params::Int},
-    {"File", "mnistdata.bin", Neuropia::Params::File},
-    {"Extra", "", Neuropia::Params::String},
-    {"Hard", "false", Neuropia::Params::Bool},
-    {"ActivationFunction", "sigmoid", activationFunctionRe},
-    {"InitStrategy", "auto", R"((auto|logistic|norm|relu)$)"},
-    {"DropoutRate", "0.0", dropoutRateRe},
-    {"TestFrequency", "9999999", Neuropia::Params::Int},
-    {"L2", "0.0", Neuropia::Params::Real},
-    {"Classes", "10", Neuropia::Params::Int}
+        DEFAULT_PARAMS
 };
     const std::string m_root;
     std::unique_ptr<SimpleLogStream> m_logStream;
@@ -250,9 +226,9 @@ void NeuropiaSimple::save(const NeuropiaPtr& env, const std::string& filename) {
 
 bool NeuropiaSimple::load(const NeuropiaPtr& env, const std::string& filename) {
     ASSERT(env);
-    const auto nets = Neuropia::load(filename);
+    const auto nets = Neuropia::load(Neuropia::absPath(env->m_root, filename));
     if(!nets.empty()) {
-        env->m_network = nets[0];
+        env->m_network = std::move(nets.at(0));
         return env->m_network.isValid();
     }
     return false;

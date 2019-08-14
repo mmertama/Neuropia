@@ -33,6 +33,7 @@ SOURCES += src/main.cpp \
     src/trainerbase.cpp
 
 HEADERS += \
+    include/default.h \
     include/neuropia.h \
     include/idxreader.h \
     include/matrix.h \
@@ -48,6 +49,7 @@ HEADERS += \
 
 DISTFILES +=    \
     tests/tests.txt   \
+    tests/tests1.txt \
     tests/tests2.txt  \
     tests/tests3.txt  \
     tests/tests5.txt  \

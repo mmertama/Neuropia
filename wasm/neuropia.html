@@ -35,6 +35,8 @@
                 }
             }); 
             neuropia = Module.create("mnist");
+            //const fopen = Module.load(neuropia, "mnistdata.bin");
+            //console.log("Load was", fopen);
            
             const terminal = document.getElementById("terminal")
             Module.setLogger(neuropia,setLog); 
