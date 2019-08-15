@@ -43,7 +43,7 @@
             const terminal = document.getElementById("terminal")
             Module.setLogger(neuropia, setLog); 
             
-            const fopen = Module.load(neuropia, "mnistdata.bin");
+            const fopen = Module.load(neuropia, "default_out.bin");
             document.getElementById("verifyBtn").disabled = !fopen;
             if(fopen)
                 setLog("Demo network loaded");
@@ -198,7 +198,7 @@
         </form>
         <button type="button" onclick="verify()" disabled="true" id="verifyBtn">Verify</button>
         <div>
-            <textarea readonly rows="80" cols="75" id="terminal">
+            <textarea readonly rows="60" cols="75" id="terminal">
                 Loading...
             </textarea>
             <button type="button" onclick="document.getElementById('terminal').value = ''">Clear log</button>
