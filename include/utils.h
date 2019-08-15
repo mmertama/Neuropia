@@ -7,6 +7,7 @@
 #include <set>
 #include <iomanip>
 #include <vector>
+#include <unordered_map>
 
 namespace Neuropia {
 class Layer;
@@ -17,13 +18,13 @@ size_t iterator(size_t iterations, const std::function<bool (size_t it)>& f);
 
 size_t iterator(size_t iterations, const std::function<bool ()>& f);
 
-void save(const std::string& filename, const Layer& network);
+void save(const std::string& filename, const Layer& network, const std::unordered_map<std::string, std::string>& = {});
 
 void save(const std::string& filename, const std::vector<Layer>& ensembles);
 
 std::vector<Layer> loadEnsemble(const std::string& filename);
 
-Layer load(const std::string& filename);
+Layer load(const std::string& filename, const std::function<void (const std::unordered_map<std::string, std::string>&) >& metareader = nullptr);
 
 void debug(const Layer& network, std::ostream& strm = std::cout, const std::set<int>& excluded = {});
 

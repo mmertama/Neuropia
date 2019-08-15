@@ -221,14 +221,24 @@ bool NeuropiaSimple::train(const NeuropiaPtr& env, TrainType type) {
 
 void NeuropiaSimple::save(const NeuropiaPtr& env, const std::string& filename) {
     ASSERT(env && env->m_network.isValid());
-    Neuropia::save(filename, env->m_network);
+    const auto params = env->m_params.toMap();
+    Neuropia::save(filename, env->m_network, params);
 }
 
 bool NeuropiaSimple::load(const NeuropiaPtr& env, const std::string& filename) {
     ASSERT(env);
-    const auto nets = Neuropia::load(Neuropia::absPath(env->m_root, filename));
+    std::unordered_map<std::string, std::string> params;
+    const auto nets = Neuropia::load(Neuropia::absPath(env->m_root, filename), [&params](const std::unordered_map<std::string, std::string>& map){
+        params = map;
+    });
     env->m_network = std::move(nets);
-    return env->m_network.isValid();
+    if(env->m_network.isValid()) {
+        for(const auto& p : params) {
+            env->m_params.set(p.first, p.second);
+        }
+        return true;
+    }
+    return false;
 }
 
 int NeuropiaSimple::verify(const NeuropiaPtr& env) {

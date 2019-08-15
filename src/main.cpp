@@ -44,8 +44,10 @@ int main(int argc, char* argv[]) {
 
                 assert(network.isValid());
 
-                if(!params["File"].empty())
-                    Neuropia::save(params["File"], network);
+                if(!params["File"].empty()) {
+                    const auto p = params.toMap();
+                    Neuropia::save(params["File"], network, p);
+                }
                 if(ok) {
                     Neuropia::printVerify(verify(network,
                                            Neuropia::absPath(root, params["Images"]),
@@ -73,8 +75,11 @@ int main(int argc, char* argv[]) {
                 const auto ok = trainer.train();
                 const auto network = trainer.network();
 
-                if(ok && !params["File"].empty())
+                if(ok && !params["File"].empty()) {
+                    const auto p = params.toMap();
                     Neuropia::save(params["File"], network);
+                }
+
                 Neuropia::printVerify(verify(network,
                                        Neuropia::absPath(root, params["ImagesVerify"]),
                                        Neuropia::absPath(root, params["LabelsVerify"])), "Verify");
@@ -88,12 +93,15 @@ int main(int argc, char* argv[]) {
                const auto ok = trainer.train();
                const auto network = trainer.network();
 
-                if(ok && !params["File"].empty())
-                    Neuropia::save(params["File"], network);
-                Neuropia::printVerify(verify(network,
+               if(ok && !params["File"].empty()) {
+                   const auto p = params.toMap();
+                   Neuropia::save(params["File"], network);
+               }
+
+               Neuropia::printVerify(verify(network,
                                        Neuropia::absPath(root, params["ImagesVerify"]),
                                        Neuropia::absPath(root, params["LabelsVerify"])), "Verify");
-                std::cout << std::endl;
+               std::cout << std::endl;
         }
         },
         {
@@ -102,7 +110,11 @@ int main(int argc, char* argv[]) {
                 std::ifstream str;
                 str.open(params["File"], std::ios::out | std::ios::binary);
                 if(str.is_open()) {
-                    network = Neuropia::Layer(str);
+                    network = Neuropia::Layer(str, [](const std::unordered_map<std::string, std::string>& plist){
+                            for(const auto& p : plist)
+                                std::cout << p.first << "=" << p.second << std::endl;
+                            std::cout << std::endl;
+                });
                 } else {
                     std::cerr << params["File"] << " parse error" << std::endl;
                     return;

@@ -55,11 +55,11 @@ void Neuropia::timed(const std::function<void ()>& f, const std::string& label) 
               - std::chrono::duration_cast<std::chrono::seconds>(stop - start).count() * 1000000 << std::endl;
 }
 
-void Neuropia::save(const std::string& filename, const Neuropia::Layer& network) {
+void Neuropia::save(const std::string& filename, const Neuropia::Layer& network, const std::unordered_map<std::string, std::string>& map) {
     std::ofstream str;
     str.open(filename, std::ios::out | std::ios::binary);
     if(str.is_open()) {
-        network.save(str);
+        network.save(str, map);
     }
     str.close();
 }
@@ -87,12 +87,12 @@ std::vector<Layer> Neuropia::loadEnsemble(const std::string& filename) {
     return ensembles;
 }
 
-Layer Neuropia::load(const std::string& filename) {
+Layer Neuropia::load(const std::string& filename, const std::function<void (const std::unordered_map<std::string, std::string>&) >& metareader ) {
     Neuropia::Layer network;
     std::ifstream str;
     str.open(filename, std::ios::out | std::ios::binary);
     if(str.is_open()) {
-        network = Neuropia::Layer(str);
+        network = Neuropia::Layer(str, metareader);
     } else std::cerr << "filename " << filename << " cannot be opened" << std::endl;
     str.close();
     return network;
@@ -122,7 +122,3 @@ void Neuropia::debug(const Neuropia::Layer& layer, std::ostream& out, const std:
 std::string Neuropia::absPath(const std::string& root, const std::string& relativePath) {
     return root + "/" + relativePath;
 }
-
-
-
-

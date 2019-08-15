@@ -371,14 +371,6 @@ public:
      */
     Layer(Layer&& other) noexcept;
 
-    /**
-     * @brief Layer
-     * @param stream
-     * @param activationFunction
-     * @param proto
-     * @param isIn
-     */
-    Layer(std::ifstream& stream, const ActivationFunction& activationFunction, const Neuron& proto, bool isIn = true) noexcept;
 
     /**
      * @brief Layer
@@ -386,8 +378,7 @@ public:
      * @param activationFunction
      * @param isIn
      */
-    Layer(std::ifstream& stream, const ActivationFunction& activationFunction = DEFAULT_AF, bool isIn = true) noexcept :
-        Layer(stream, activationFunction, Neuron(activationFunction), isIn) {}
+    Layer(std::ifstream& stream, const std::function<void (const std::unordered_map<std::string, std::string>&) >& metareader = nullptr);
 
 
     /**
@@ -602,7 +593,7 @@ public:
      * @brief save
      * @param stream
      */
-    void save(std::ofstream& stream) const;
+    void save(std::ofstream& stream, const std::unordered_map<std::string, std::string>& meta = {}) const;
 
     /**
      * @brief merge
@@ -696,6 +687,8 @@ public:
     Layer* outLayer();
 
  protected:
+    void load(std::ifstream& stream);
+
     Layer* previousLayer(Layer* current);
     const Layer* previousLayer(const Layer* current) const;
     bool backpropagation(const ValueVector& out, const ValueVector& expected, double learningRate, double lambdaL2, const DerivativeFunction& df);

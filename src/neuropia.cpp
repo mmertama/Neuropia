@@ -6,6 +6,39 @@
 
 using namespace Neuropia;
 
+static std::unordered_map<std::string, std::string> readMeta(std::ifstream& strm) {
+    std::unordered_map<std::string, std::string> map;
+    std::uint8_t sz = 0;
+    strm.read(reinterpret_cast<char*>(&sz), sizeof(sz));
+    for(auto i = 0; i < sz; i++) {
+        std::uint8_t keyl = 0;
+        strm.read(reinterpret_cast<char*>(&keyl), sizeof(keyl));
+        std::string key(keyl, '\0');
+        strm.read(&key[0], keyl);
+
+        std::uint8_t vall = 0;
+        strm.read(reinterpret_cast<char*>(&vall), sizeof(vall));
+        std::string val(vall, '\0');
+        strm.read(&val[0], vall);
+
+        map[key] = val;
+    }
+    return map;
+}
+
+static void writeMeta(std::ofstream& strm, const std::unordered_map<std::string, std::string>& map ) {
+    const auto sz = static_cast<std::uint8_t >(map.size());
+    strm.write(reinterpret_cast<const char*>(&sz), sizeof(sz));
+    for(const auto& p : map) {
+        const auto  kl = static_cast<std::uint8_t >(p.first.length());
+        strm.write(reinterpret_cast<const char*>(&kl), sizeof(kl));
+        strm.write(p.first.c_str(), kl);
+
+        const auto  vl = static_cast<std::uint8_t >(p.second.length());
+        strm.write(reinterpret_cast<const char*>(&vl), sizeof(vl));
+        strm.write(p.second.c_str(), vl);
+    }
+}
 
 std::ostream& operator << (std::ostream& strm, const std::vector<Neuropia::NeuronType>& values) {
     strm << '[';
@@ -66,7 +99,7 @@ NeuronType Neuron::feed(const ValueVector& inputs) const {
 }
 
 void Neuron::save(std::ofstream& stream) const {
-    const auto sz = static_cast<std::uint64_t>(m_weights.size());
+    const auto sz = static_cast<std::uint32_t>(m_weights.size());
     stream.write(reinterpret_cast<const char*>(&sz), sizeof(sz));
     for(const auto& w : m_weights) {
         stream.write(reinterpret_cast<const char*>(&w), sizeof(NeuronType));
@@ -77,7 +110,7 @@ void Neuron::save(std::ofstream& stream) const {
 
 void Neuron::load(std::ifstream& stream) {
     m_weights.clear();
-    std::uint64_t  sz = 0;
+    std::uint32_t  sz = 0;
     stream.read(reinterpret_cast<char*>(&sz), sizeof(sz));
     m_weights.resize(sz);
     for(size_t s = 0; s < sz; s++) {
@@ -311,29 +344,8 @@ bool Layer::backpropagation(const ValueVector& outValues, const ValueVector& exp
     return true;
 }
 
-
-constexpr char H[] = {'N', 'E', 'U', '0', '0', '0', '0', '1'};
-void Layer::save(std::ofstream& strm) const {
-    if(isInput()) {
-        strm.write(H, sizeof(H));
-        const auto  nl = static_cast<std::uint32_t >(m_activationFunction.name().length());
-        strm.write(reinterpret_cast<const char*>(&nl), sizeof(nl));
-        strm.write(m_activationFunction.name().data(), nl);
-        const auto sz = static_cast<std::uint32_t >(m_neurons.size());
-        strm.write(reinterpret_cast<const char*>(&sz), sizeof(sz));
-    } else {
-        const auto sz = static_cast<std::uint32_t >(m_neurons.size());
-        strm.write(reinterpret_cast<const char*>(&sz), sizeof(sz));
-        for(const auto& n : m_neurons) {
-            n.save(strm);
-        }
-    }
-    if(m_next) {
-        m_next->save(strm);
-    }
-}
-
-bool Hcomp(const char* h) {
+constexpr char H[] = {'N', 'E', 'U', '0', '0', '0', '0', '2'};
+static bool Hcomp(const char* h) {
     for(auto i = 0U; i < sizeof(H); i++)
         if(h[i] != H[i]) {
             return false;
@@ -341,42 +353,80 @@ bool Hcomp(const char* h) {
     return true;
 }
 
-Layer::Layer(std::ifstream& strm, const ActivationFunction& activationFunction, const Neuron& proto, bool isIn) noexcept : m_activationFunction(activationFunction) {
-    if(isIn) {
-        char hdr[sizeof(H)];
-        strm.read(hdr, sizeof(H));
-        neuropia_assert_always(Hcomp(hdr), "Corrupted import stream or wrong version");
-
-        std::uint32_t namel = 0;
-        strm.read(reinterpret_cast<char*>(&namel), sizeof(namel));
-        std::string name(namel, '0');
-        strm.read(&name[0], namel);
-
-        if(signumFunction.name() == name)
-            m_activationFunction = signumFunction;
-        else if(binaryFunction.name() == name)
-            m_activationFunction = binaryFunction;
-        else if(sigmoidFunction.name() == name)
-            m_activationFunction = sigmoidFunction;
-        else if(reLuFunction.name() == name)
-            m_activationFunction = reLuFunction;
-        else if(eluFunction.name() == name)
-            m_activationFunction = eluFunction;
-
-       std::uint64_t  count = 0;
-       strm.read(reinterpret_cast<char*>(&count), sizeof(count));
-       fill(count, proto);
-    } else {
-        std::uint64_t  count = 0;
-        strm.read(reinterpret_cast<char*>(&count), sizeof(count));
-        fill(count, proto);
-        for(auto& n : m_neurons) {
-            n.load(strm);
-            n.setActivationFunction(m_activationFunction);
-        }
+void Layer::save(std::ofstream& strm, const std::unordered_map<std::string, std::string>& meta) const {
+    if(isInput()) {
+        strm.write(H, sizeof(H));
+        writeMeta(strm, meta);
     }
+
+    const auto  nl = static_cast<std::uint8_t >(m_activationFunction.name().length());
+    strm.write(reinterpret_cast<const char*>(&nl), sizeof(nl));
+    strm.write(m_activationFunction.name().data(), nl);
+
+    const auto  dropout =  static_cast<std::uint32_t>(m_dropOut * 100000.);
+    strm.write(reinterpret_cast<const char*>(&dropout), sizeof(dropout));
+
+    const auto sz = static_cast<std::uint32_t >(m_neurons.size());
+    strm.write(reinterpret_cast<const char*>(&sz), sizeof(sz));
+
+    for(const auto& n : m_neurons) {
+        n.save(strm);
+        }
+
+    if(m_next) {
+        m_next->save(strm);
+    }
+}
+
+Layer::Layer(std::ifstream& strm, const std::function<void (const std::unordered_map<std::string, std::string>&) >& metareader)  :
+    m_activationFunction(DEFAULT_AF) {
+
+    char hdr[sizeof(H)];
+    strm.read(hdr, sizeof(H));
+    neuropia_assert_always(Hcomp(hdr), "Corrupted import stream or wrong version");
+
+    const auto meta = readMeta(strm);
+    if(metareader)
+        metareader(meta);
+
+    load(strm);
+    }
+
+
+void Layer::load(std::ifstream &strm) {
+    std::uint8_t namel = 0;
+    strm.read(reinterpret_cast<char*>(&namel), sizeof(namel));
+
+    std::string name(namel, '\0');
+    strm.read(&name[0], namel);
+
+    if(signumFunction.name() == name)
+        m_activationFunction = signumFunction;
+    else if(binaryFunction.name() == name)
+        m_activationFunction = binaryFunction;
+    else if(sigmoidFunction.name() == name)
+        m_activationFunction = sigmoidFunction;
+    else if(reLuFunction.name() == name)
+        m_activationFunction = reLuFunction;
+    else if(eluFunction.name() == name)
+        m_activationFunction = eluFunction;
+
+    std::uint32_t  dropout = 0;
+    strm.read(reinterpret_cast<char*>(&dropout), sizeof(dropout));
+    m_dropOut = static_cast<double>(dropout) / 100000.;
+
+
+   std::uint32_t  count = 0;
+   strm.read(reinterpret_cast<char*>(&count), sizeof(count));
+   fill(count, Neuron(m_activationFunction));
+
+    for(auto& n : m_neurons) {
+        n.load(strm);
+       }
+
     if(!strm.eof()) {
-        auto layer = new Layer(strm, m_activationFunction, proto, false);
+        auto layer = new Layer();
+        layer->load(strm);
         if(layer->size() > 0) {
             m_next.reset(layer);
             m_next->m_prev = this;
@@ -385,6 +435,8 @@ Layer::Layer(std::ifstream& strm, const ActivationFunction& activationFunction, 
         }
     }
 }
+
+
 
 Layer& Layer::operator=(Layer&& other) noexcept {
     m_neurons = std::move(other.m_neurons);

@@ -72,7 +72,7 @@ public:
         std::transform(l.begin(), l.end(), std::back_inserter(top), f);
         return top;
     }
-
+    std::unordered_map<std::string, std::string> toMap() const;
     bool contains(const std::string& k) const;
     std::string operator[](const std::string& k) const;
     static bool isZero(double v);

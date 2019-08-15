@@ -191,3 +191,10 @@ std::string Params::toType(const std::string &re) const {
     return re;
 }
 
+std::unordered_map<std::string, std::string> Params::toMap() const {
+    std::unordered_map<std::string, std::string> params;
+    for(const auto& p : *this) {
+        params[std::get<0>(p)] = std::get<1>(p);
+    }
+    return params;
+}
