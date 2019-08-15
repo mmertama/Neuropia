@@ -370,31 +370,6 @@ bool SimpleVerifier::verify() {
     return true;
 }
 
-
-#ifdef __EMSCRIPTEN__
-void setLogger(const NeuropiaPtr& env, emscripten::val cb) {
-    NeuropiaSimple::setLogger(env, [cb](const std::string& str){
-        cb(str);
-    });
-}
-
-
-template <typename T>
-std::vector<T> fromJSArray(const emscripten::val& v) {
-    const auto l = v["length"].as<unsigned>();
-    std::vector<T> vec(l);
-    emscripten::val memoryView(emscripten::typed_memory_view(l, vec.data()));
-    memoryView.call<void>("set", v);
-    return vec;
-}
-
-std::vector<double> feed(NeuropiaPtr env, emscripten::val a) {
-    return NeuropiaSimple::feed(env, fromJSArray<double>(a));
-}
-
-
-#endif
-
 bool train(const NeuropiaPtr& env, unsigned iteration) {
     ASSERT(env);
 
@@ -457,6 +432,52 @@ bool showImage(const NeuropiaPtr& env, const std::string& name, unsigned index) 
     Neuropia::printimage(data.data());
     return true;
 }
+
+
+#ifdef __EMSCRIPTEN__
+void setLogger(const NeuropiaPtr& env, emscripten::val cb) {
+    NeuropiaSimple::setLogger(env, [cb](const std::string& str){
+        cb(str);
+    });
+}
+
+
+template <typename T>
+std::vector<T> fromJSArray(const emscripten::val& v) {
+    const auto l = v["length"].as<unsigned>();
+    std::vector<T> vec(l);
+    emscripten::val memoryView(emscripten::typed_memory_view(l, vec.data()));
+    memoryView.call<void>("set", v);
+    return vec;
+}
+
+std::vector<double> feed(NeuropiaPtr env, emscripten::val a) {
+    const auto image = fromJSArray<double>(a);
+
+    std::vector<unsigned char> test(image.size());
+    std::transform(image.begin(), image.end(), test.begin(), [](double c) {
+        ASSERT(c >=  0 && c <= 255);
+        return static_cast<unsigned char>(c);
+    });
+    Neuropia::printimage(test.data());
+    std::cout << std::endl;
+
+    std::cout << "reference" << std::endl;
+    showImage(env, "train-images-idx3-ubyte", 34);
+    std::cout << std::endl;
+
+
+    std::vector<Neuropia::NeuronType> inputs(image.size());
+    std::transform(image.begin(), image.end(), inputs.begin(), [](double c) {
+        return Neuropia::normalize(static_cast<Neuropia::NeuronType>(c), 0., 255.);
+    });
+    return NeuropiaSimple::feed(env, inputs);
+}
+
+
+#endif
+
+
 
 
 #ifdef __EMSCRIPTEN__

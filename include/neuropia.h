@@ -168,7 +168,8 @@ DERIVATIVE_FUNCTION(eluFunctionDerivative, [](Neuropia::NeuronType value) -> Neu
  * @return
  */
 
-inline NeuronType normalize(NeuronType value, NeuronType min, NeuronType max) {
+inline
+NeuronType normalize(NeuronType value, NeuronType min, NeuronType max) {
     neuropia_assert(min < max);
     return (value - min) / (max - min);
 }

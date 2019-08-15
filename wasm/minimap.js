@@ -20,7 +20,7 @@ class Minimap {
             for(let j = 0; j < dim; j++) {
                 let posx = 0;
                 for(let i = 0; i < dim; i++) {
-                    const v = this.data[p];
+                    const v = 255 - this.data[p];
                     const hex = Number(v).toString(16);
                     
                     const color = "#" + _pad(hex) + _pad(hex) + _pad(hex);

@@ -71,7 +71,7 @@ class Painter {
         this.ctx.strokeStyle = "Black";
         this.ctx.lineCap = "round";
         this.ctx.lineJoin = "round"
-        this.ctx.lineWidth = 16;
+        this.ctx.lineWidth = 20;
         this.ctx.stroke();
         this.ctx.closePath();
 
