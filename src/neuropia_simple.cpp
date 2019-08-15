@@ -423,14 +423,19 @@ double verifyResult(const NeuropiaPtr& env) {
     return -2.0; //arbitrary negative number, but not -1
 }
 
-bool showImage(const NeuropiaPtr& env, const std::string& name, unsigned index) {
+int showImage(const NeuropiaPtr& env, const std::string& imageName, const std::string& labelName, unsigned index) {
     ASSERT(env);
-    Neuropia::IdxRandomReader<std::array<unsigned char, 28 * 28>> idx(Neuropia::absPath(env->m_root, name));
-    if(!idx.ok() || idx.dimensions() != 3)
-        return false;
-    const auto data = idx.next(index);
+    Neuropia::IdxRandomReader<std::array<unsigned char, 28 * 28>> idxi(Neuropia::absPath(env->m_root, imageName));
+    if(!idxi.ok() || idxi.dimensions() != 3)
+        return -1;
+
+    Neuropia::IdxRandomReader<unsigned char> idxl(Neuropia::absPath(env->m_root, labelName));
+    if(!idxl.ok() || idxl.dimensions() != 1)
+        return -2;
+
+    const auto data = idxi.next(index);
     Neuropia::printimage(data.data());
-    return true;
+    return idxl.next(index);
 }
 
 
@@ -463,8 +468,7 @@ std::vector<double> feed(NeuropiaPtr env, emscripten::val a) {
     std::cout << std::endl;
 
     std::cout << "reference" << std::endl;
-    showImage(env, "train-images-idx3-ubyte", 34);
-    std::cout << std::endl;
+    std::cout << showImage(env, "train-images-idx3-ubyte", "train-labels-idx1-ubyte", 3) << std::endl;
 
 
     std::vector<Neuropia::NeuronType> inputs(image.size());

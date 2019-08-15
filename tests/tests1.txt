@@ -3,5 +3,7 @@ LabelsVerify t10k-labels-idx1-ubyte
 Images train-images-idx3-ubyte
 Labels train-labels-idx1-ubyte
 
+File default_out.bin
+Iterations 30000
 print default values
 trainMnist

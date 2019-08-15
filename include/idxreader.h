@@ -39,7 +39,7 @@ public:
 
     /**
      * @brief dimensions
-     * @return number of data dimensions, 1 arry, 2 matrix etc....
+     * @return number of data dimensions, 1 for array of single values, 2 array of arrays, 3, array of matrices etc....
      */
     size_t dimensions() const {return m_dimensions.size();}
 
