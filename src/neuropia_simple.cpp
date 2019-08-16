@@ -1,5 +1,6 @@
 
 #include "neuropia_simple.h"
+#include <unordered_map>
 #include "params.h"
 #include "evotrain.h"
 #include "trainer.h"

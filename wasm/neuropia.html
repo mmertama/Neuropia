@@ -6,211 +6,50 @@
         <script src="minimap.js"></script>
         <script src="painter.js"></script>
         <script src="histogram.js"></script>
-        <script>
-            var painter = null;
-            var histogram = null;
-            var neuropia = null;
-            var minimap = null;
-            var Module = {
-        onRuntimeInitialized: function() {
-            histogram = new Histogram('histogram', 3);
-            histogram.setColors([], "Green");
-            histogram.setLabels([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-            minimap = new Minimap('minimap'); 
-            painter = new Painter('canvas', function (p) {
-                const d = p.getData(28, 28);
-                minimap.setData(d);
-                if(Module.isNetworkValid(neuropia)) {
-                    const result = Module.feed(neuropia, d);
-                    let max = 0;
-                    let maxi =0;
-                    let data = [];
-                    for(let k = 0; k < result.size(); k++) {
-                        const r = result.get(k);
-                        if(r > max) {
-                            maxi = k;
-                            max = r;
-                        }
-                        data.push(r)
-                        console.log(k + ": " + r);
-                    }
-                    histogram.setData(data);
-                    document.getElementById('guess').innerHTML = maxi + '(' + max + ')';                    
-                }
-            }); 
-            
-            neuropia = Module.create("mnist");
-            const terminal = document.getElementById("terminal")
-            Module.setLogger(neuropia, setLog); 
-            
-            const fopen = Module.load(neuropia, "default_out.bin");
-            document.getElementById("verifyBtn").disabled = !fopen;
-            if(fopen)
-                setLog("Demo network loaded");
-           
-           
-            Module.setParam(neuropia, "Images", "train-images-idx3-ubyte");
-            Module.setParam(neuropia, "ImagesVerify", "t10k-images-idx3-ubyte");
-            Module.setParam(neuropia, "Labels", "train-labels-idx1-ubyte");
-            Module.setParam(neuropia, "LabelsVerify", "t10k-labels-idx1-ubyte");
-            
-            const params = Module.params(neuropia); 
-            const keys = params.keys();
-            const paramList = document.getElementById("paramList");
-            for (let i = 0; i < keys.size(); i++) {
-                const k = keys.get(i);
-                const p = params.get(k);
-                const type = p.get(0);
-                const value = p.get(1);
-                const pattern = p.get(2);
-               
-                const input = document.createElement("INPUT");
-                input.setAttribute("name", k)
-                input.setAttribute("class", "param");
-                switch (type) {
-                    case 'interger number':
-                        input.setAttribute("type", "number");
-                        break;
-                     case 'real number':
-                        input.setAttribute("type", "number");
-                        input.setAttribute("step", "any");
-                        break;
-                    case 'string':
-                        input.setAttribute("type", "text");
-                        input.setAttribute("mandatory", "false");
-                        break;
-                    case 'file':
-                      //  input.setAttribute("type", "file");
-                      //  break;
-                        continue;
-                    case 'true|false':
-                        input.setAttribute("type", "checkbox");
-                        break;
-                    default:
-                        input.setAttribute("type", "text");
-                        input.setAttribute("pattern", pattern);
-                }
-                input.setAttribute("value", value);
-                const th1 = document.createElement("th");
-                th1.textContent = k;
-                const th2 = document.createElement("th");
-                th2.appendChild(input);
-                
-                const tr = document.createElement("tr");
-                const th3 = document.createElement("th");
-                th3.setAttribute("name", "name_" + k);
-                th3.textContent = type;
-                tr.appendChild(th1);
-                tr.appendChild(th2);
-                tr.appendChild(th3);
-                paramList.appendChild(tr)
-       //         console.log('params result: ' + i + " " + k +  '->' + type + " " + value);
-            }
-            
-         //   if(!Module.showImage(neuropia, "train-images-idx3-ubyte", 0))
-        //        console.log("OHO")
-        }
-    };
-        
-        /* Functions */
-
-         function setLog(str) {
-                const  r = str.indexOf('\r');
-                if(r < 0) {
-                    terminal.value += str;
-                } else {
-                    const lastNewLine = terminal.value.lastIndexOf('\n');
-                    terminal.value = terminal.value.slice(0, lastNewLine) + str;
-                }
-            }    
-                          
-        function startTrain() {
-            document.getElementById("verifyBtn").disabled = true;
-            const params = document.getElementsByClassName("param");
-            let ok = true;
-            const plist = {}
-            for (let i = 0, length = params.length; i < length; i++) {
-                const name = params[i].name;
-                const value = params[i].value;
-                plist[name] = value;
-                const isOk = Module.setParam(neuropia, name, value);
-                ok = ok && isOk;
-                let status = document.getElementsByName("name_" + name); 
-                if(!isOk) {
-                    status[0].setAttribute("style", "color:#ff0000");
-                }
-            }
-            if(ok) {
-                const iterations = Module.params(neuropia).get('Iterations').get(1);
-                console.log("Ready for Training", iterations);
-                if(iterations === 0)
-                    return false;
-                let iteration = 0;
-                
-                function doTrain() {
-                    if(iteration <= iterations && Module.train(neuropia, iteration)) {
-                        setTimeout(doTrain, 0);
-                        iteration += 100;
-                    } else {
-                        if(Module.isNetworkValid(neuropia)) {
-                            console.log("Training done");
-                            document.getElementById("verifyBtn").disabled = false;
-                        }
-                        else 
-                            alert("Training failed");
-                    }
-                }
-                doTrain();
-            }
-            
-            return false;
-        }
-            
-        function verify() {
-            let iteration = 0;
-            console.log("Start verify");
-            function doVerify() {
-                if(Module.verify(neuropia, iteration)) {
-                    setTimeout(doVerify, 0);
-                    ++iteration;
-                } else {
-                    const verifyResult = Module.verifyResult(neuropia);
-                    if(verifyResult >= 0) {
-                        console.log("Verify done");
-                        document.getElementById("verificationResult").innerHTML = "Verification: " + verifyResult * 100 + "%";
-                    } else {
-                        alert("Training failed");
-                    }
-                }
-            }
-            doVerify();
-            return false;
-        }
-        
-            
-		</script>
+        <script src="neuropia_html.js"></script>
         <script src="neuropia.js"></script>
 	</head>
 	<body>
-        <form name="params" onsubmit="return startTrain()">
-            <table id="paramList" align="left"></table>
-            <input type="submit" name="Train" value="Train"/>
-        </form>
-        <button type="button" onclick="verify()" disabled="true" id="verifyBtn">Verify</button>
-        <div>
-            <textarea readonly rows="60" cols="75" id="terminal">
+        <h2>Neuropia</h2>
+        <p>
+        Neuropia is a C++ feed forward neural network framework. It is open source and available at <a href="https://github.com/mmertama/Neuropia">GitHub</a>. There is a blog text about behind the scenes on <a href="https://www.intopalo.com/blog/2019-06-19-road-to-neuropia/">Intopalo Digital</a> blogsphere. 
+        </p>
+        <p>
+            This page composes an interactive demo of Neuropia running on <a href="https://webassembly.org">WebAssembly</a> aka WASM. The C++ is compiled and build as a WASM module and therefore can be run directly on any browser supporting it. <a href="https://emscripten.org/index.html">Emscripten</a> is used as compiler and framework for Javascript bindings. That let me write this user interface using web stuff where engine is written on C++.  
+        </p>
+        <p>
+            On load this demo provides a pre-calculated neural network that you can try immediately. You are supposed to draw numbers on <a href="#drawarea">drawing area</a> and then network try to figure out the number by feeding its pixels into neural network. The <a href="#histogram">histogram</a> and <a href="#guess">certainty</a> gives you idea how sure the network is about its conclusion. You can <a href="#training">train</a> your own network by changing the parameters (see the <a href="https://www.intopalo.com/blog/2019-06-19-road-to-neuropia/">blog</a> text about information of the values). But be warned: the training may take some time - especially WASM is not the fastest platform on earth (to be measure, but C++ on bare metal is about 100x performance). The <a href="#verify">verify</a> button calculates test material over the network to give an objective number of network match accuracy.  
+        </p>
+        
+        <div id="drawarea">
+            <canvas id="canvas" width="280" height="280">
+            </canvas>
+            <h5>Draw a single digit number</h5>
+            <canvas id="minimap" width="112" height="112">
+            </canvas>
+            <h5>Down sampled as network get it</h5> 
+            <button type="button" onclick="painter.erase();minimap.erase()"  id="eraseBtn">Erase</button>
+        </div>
+        <div id="result">
+            <h5>Result</h5>
+            Network assumes it is <span id="guess"></span>.
+            <canvas id="histogram" width="480" height="200">
+            </canvas>
+        </div>
+        <div id="training">
+            <h5>Network parameters</h5>
+            <form name="params" onsubmit="return startTrain()">
+                <table id="paramList"></table>
+                <input type="submit" name="Train" value="Train"/>
+            </form>
+            <button type="button" onclick="verify()" disabled="true" id="verifyBtn">Verify</button>
+            <h5 id="verificationResult">Verification: N/A</h5>
+        </div>
+        <div id="textdiv">
+            <textarea id="terminal" readonly rows="60" cols="75" id="terminal">
                 Loading...
             </textarea>
             <button type="button" onclick="document.getElementById('terminal').value = ''">Clear log</button>
         </div>
-        <h3 id="verificationResult">Verification: N/A</h3>
-        <canvas id="canvas" width="280" height="280" style="border:1px solid #000000;">
-        </canvas>
-        <canvas id="minimap" width="112" height="112" style="border:1px solid #00FF00;">
-        </canvas>
-        <button type="button" onclick="painter.erase();minimap.erase()"  id="eraseBtn">Erase</button>
-        <h3 id="guess">?</h3>
-        <canvas id="histogram" width="480" height="200" style="border:1px solid #00FF00;">
-        </canvas>
 	</body>
 </html>
