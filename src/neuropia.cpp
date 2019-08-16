@@ -378,22 +378,23 @@ void Layer::save(std::ofstream& strm, const std::unordered_map<std::string, std:
     }
 }
 
-Layer::Layer(std::ifstream& strm, const std::function<void (const std::unordered_map<std::string, std::string>&) >& metareader)  :
-    m_activationFunction(DEFAULT_AF) {
+std::tuple<bool, std::unordered_map<std::string, std::string>> Layer::load(std::ifstream& strm)  {
 
     char hdr[sizeof(H)];
     strm.read(hdr, sizeof(H));
-    neuropia_assert_always(Hcomp(hdr), "Corrupted import stream or wrong version");
+    if(!Hcomp(hdr)) {
+        std::cerr << "Corrupted import stream or wrong version" << std::endl;
+        return {false, {}};
+    }
 
     const auto meta = readMeta(strm);
-    if(metareader)
-        metareader(meta);
 
-    load(strm);
+    loadLayer(strm);
+    return {true, meta};
     }
 
 
-void Layer::load(std::ifstream &strm) {
+void Layer::loadLayer(std::ifstream &strm) {
     std::uint8_t namel = 0;
     strm.read(reinterpret_cast<char*>(&namel), sizeof(namel));
 
@@ -426,7 +427,7 @@ void Layer::load(std::ifstream &strm) {
 
     if(!strm.eof()) {
         auto layer = new Layer();
-        layer->load(strm);
+        layer->loadLayer(strm);
         if(layer->size() > 0) {
             m_next.reset(layer);
             m_next->m_prev = this;

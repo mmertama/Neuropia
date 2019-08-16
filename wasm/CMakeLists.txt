@@ -7,8 +7,8 @@ project (${NAME})
 
 #option(JS_ONLY "Compiles to native JS (No WASM)" OFF)
 
-set(CMAKE_CXX_STANDARD 14)
-add_definitions(-std=c++14 -O3)
+set(CMAKE_CXX_STANDARD 17)
+add_definitions(-std=c++17 -O3)
 
 include_directories(../include)
 

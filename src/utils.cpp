@@ -81,21 +81,25 @@ std::vector<Layer> Neuropia::loadEnsemble(const std::string& filename) {
     std::ifstream str;
     str.open(filename, std::ios::in | std::ios::binary);
     while(str.is_open() && !str.eof()) {
-        ensembles.emplace_back(Layer(str));
+        Layer layer;
+        if(std::get<bool>(layer.load(str)))
+            ensembles.emplace_back(layer);
     }
     str.close();
     return ensembles;
 }
 
-Layer Neuropia::load(const std::string& filename, const std::function<void (const std::unordered_map<std::string, std::string>&) >& metareader ) {
+std::tuple<Neuropia::Layer, bool, std::unordered_map<std::string, std::string>> Neuropia::load(const std::string& filename) {
     Neuropia::Layer network;
+    bool ok = false;
+    std::unordered_map<std::string, std::string> map;
     std::ifstream str;
     str.open(filename, std::ios::out | std::ios::binary);
     if(str.is_open()) {
-        network = Neuropia::Layer(str, metareader);
+        std::tie(ok, map) = network.load(str);
     } else std::cerr << "filename " << filename << " cannot be opened" << std::endl;
     str.close();
-    return network;
+    return std::make_tuple(network, ok, map);
 }
 
 

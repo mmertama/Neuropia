@@ -16,7 +16,7 @@ INCLUDEPATH += include
 
 TEMPLATE = app
 
-CONFIG += c++14
+CONFIG += c++17
 
 SOURCES += src/main.cpp \
     src/neuropia.cpp \

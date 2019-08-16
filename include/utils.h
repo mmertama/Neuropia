@@ -24,7 +24,7 @@ void save(const std::string& filename, const std::vector<Layer>& ensembles);
 
 std::vector<Layer> loadEnsemble(const std::string& filename);
 
-Layer load(const std::string& filename, const std::function<void (const std::unordered_map<std::string, std::string>&) >& metareader = nullptr);
+std::tuple<Neuropia::Layer, bool, std::unordered_map<std::string, std::string>> load(const std::string& filename);
 
 void debug(const Layer& network, std::ostream& strm = std::cout, const std::set<int>& excluded = {});
 

@@ -106,20 +106,17 @@ int main(int argc, char* argv[]) {
         },
         {
             "verifyMnist", [&](const std::string & root) {
-                Neuropia::Layer network;
-                std::ifstream str;
-                str.open(params["File"], std::ios::out | std::ios::binary);
-                if(str.is_open()) {
-                    network = Neuropia::Layer(str, [](const std::unordered_map<std::string, std::string>& plist){
-                            for(const auto& p : plist)
-                                std::cout << p.first << "=" << p.second << std::endl;
-                            std::cout << std::endl;
-                });
-                } else {
+
+                auto [network, ok, map] = Neuropia::load(params["File"]);
+                    for(const auto& p : map)
+                        std::cout << p.first << "=" << p.second << std::endl;
+                    std::cout << std::endl;
+
+                if(!ok) {
                     std::cerr << params["File"] << " parse error" << std::endl;
                     return;
                 }
-                str.close();
+
                 Neuropia::printVerify(verify(network, Neuropia::absPath(root, params["ImagesVerify"]),
                          Neuropia::absPath(root, params["LabelsVerify"])), "Verify data");
                 std::cout << std::endl;
@@ -130,15 +127,13 @@ int main(int argc, char* argv[]) {
                 const auto files = Neuropia::Params::split(params["Extra"]);
                 std::vector<Neuropia::Layer> ensebles;
                 for(const auto& file : files) {
-                    std::ifstream str;
-                    str.open(file, std::ios::out | std::ios::binary);
-                    if(str.is_open()) {
-                        ensebles.emplace_back(Neuropia::Layer(str));
+                    const auto [net, ok, map] = Neuropia::load(file);
+                    if(ok) {
+                        ensebles.emplace_back(net);
                     } else {
                         std::cerr << file << " cannot be opened" << std::endl;
                         return;
                     }
-                    str.close();
                 }
                 Neuropia::printVerify(Neuropia::verifyEnseble(ensebles, params.boolean("Hard"),
                         Neuropia::absPath(root, params["ImagesVerify"]),

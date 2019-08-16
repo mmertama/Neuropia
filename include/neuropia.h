@@ -371,16 +371,6 @@ public:
      */
     Layer(Layer&& other) noexcept;
 
-
-    /**
-     * @brief Layer
-     * @param stream
-     * @param activationFunction
-     * @param isIn
-     */
-    Layer(std::ifstream& stream, const std::function<void (const std::unordered_map<std::string, std::string>&) >& metareader = nullptr);
-
-
     /**
      * @brief Layer
      * @param other
@@ -595,6 +585,14 @@ public:
      */
     void save(std::ofstream& stream, const std::unordered_map<std::string, std::string>& meta = {}) const;
 
+
+    /**
+     * @brief load
+     * @param stream
+     * @return
+     */
+    std::tuple<bool, std::unordered_map<std::string, std::string>> load(std::ifstream& stream);
+
     /**
      * @brief merge
      * @param other
@@ -687,7 +685,7 @@ public:
     Layer* outLayer();
 
  protected:
-    void load(std::ifstream& stream);
+    void loadLayer(std::ifstream& stream);
 
     Layer* previousLayer(Layer* current);
     const Layer* previousLayer(const Layer* current) const;

@@ -5,5 +5,7 @@ Labels train-labels-idx1-ubyte
 
 File default_out.bin
 Iterations 30000
-print default values
-trainMnist
+executable trainMnist
+print default values on $executable
+run
+

@@ -227,10 +227,9 @@ void NeuropiaSimple::save(const NeuropiaPtr& env, const std::string& filename) {
 
 bool NeuropiaSimple::load(const NeuropiaPtr& env, const std::string& filename) {
     ASSERT(env);
-    std::unordered_map<std::string, std::string> params;
-    const auto nets = Neuropia::load(Neuropia::absPath(env->m_root, filename), [&params](const std::unordered_map<std::string, std::string>& map){
-        params = map;
-    });
+    auto [nets, ok, params] = Neuropia::load(Neuropia::absPath(env->m_root, filename));
+    if(!ok)
+            return false;
     env->m_network = std::move(nets);
     if(env->m_network.isValid()) {
         for(const auto& p : params) {
@@ -474,12 +473,13 @@ std::vector<double> feed(NeuropiaPtr env, emscripten::val a) {
         ASSERT(c >=  0 && c <= 255);
         return static_cast<unsigned char>(c);
     });
+/* debug the map
     Neuropia::printimage(test.data());
     std::cout << std::endl;
 
     std::cout << "reference" << std::endl;
     std::cout << showImage(env, "train-images-idx3-ubyte", "train-labels-idx1-ubyte", 3) << std::endl;
-
+*/
 
     std::vector<Neuropia::NeuronType> inputs(image.size());
     std::transform(image.begin(), image.end(), inputs.begin(), [](double c) {
