@@ -13,8 +13,8 @@ constexpr char dropoutRateRe[] = R"(\d+\.?\d*(,\d+\.?\d*)*$)";
 {"Iterations", "1000", Neuropia::Params::Int}, \
 {"Jobs", "1", Neuropia::Params::Int}, \
 {"LearningRate", "0", Neuropia::Params::Real}, \
-{"LearningRateMin", "0.02", Neuropia::Params::Real}, \
-{"LearningRateMax", "0.02", Neuropia::Params::Real}, \
+{"LearningRateMin", "0.05", Neuropia::Params::Real}, \
+{"LearningRateMax", "0.05", Neuropia::Params::Real}, \
 {"BatchSize", "800", Neuropia::Params::Int}, \
 {"BatchVerifySize", "100", Neuropia::Params::Int}, \
 {"Topology", "64,32", topologyRe}, \

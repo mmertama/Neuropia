@@ -51,6 +51,7 @@ DISTFILES +=    \
     tests/tests.txt   \
     tests/tests1.txt \
     tests/tests2.txt  \
+    tests/tests23.txt \
     tests/tests3.txt  \
     tests/tests5.txt  \
     tests/tests4.txt  \

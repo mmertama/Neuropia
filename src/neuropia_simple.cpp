@@ -407,11 +407,14 @@ bool verify(const NeuropiaPtr& env, int iteration) {
 
 ParamType basicParams(const NeuropiaPtr& env) {
     auto p = NeuropiaSimple::params(env);
-    p.erase("Jobs");
-    p.erase("BatchSize");
-    p.erase("BatchVerifySize");
-    p.erase("Hard");
-    p.erase("Extra");
+    p.erase("Jobs");    //mt
+    p.erase("BatchSize"); //mt
+    p.erase("BatchVerifySize"); //mt
+    p.erase("Hard"); //for ensenble
+    p.erase("Extra"); //this is for ensemble
+    p.erase("LearningRate"); //use only min and max
+    p.erase("Classes"); //irrelevant
+    return p;
     return p;
 }
 

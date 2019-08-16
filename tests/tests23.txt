@@ -1,0 +1,10 @@
+ImagesVerify t10k-images-idx3-ubyte
+LabelsVerify t10k-labels-idx1-ubyte
+Images train-images-idx3-ubyte
+Labels train-labels-idx1-ubyte
+
+File default_out.bin
+Iterations 1000000
+executable trainMnist
+print default values on $executable
+run
