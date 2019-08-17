@@ -34,7 +34,8 @@ class Minimap {
         }
     }
     erase() {
-        this.ctx.clearRect(0, 0, this.element.width, this.element.height);
+        this.ctx.fillStyle = this.element.style.backgroundColor;
+        this.ctx.fillRect(0, 0, this.element.width, this.element.height);
     }
     setData(data) {
         this.ctx.clearRect(0, 0, this.element.width, this.element.height);

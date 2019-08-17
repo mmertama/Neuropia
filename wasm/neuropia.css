@@ -1,0 +1,171 @@
+body {
+  background-color: black;
+  color: black;
+  font-family: "Arial";
+}
+
+a:link {
+    color: black
+}
+
+a:visited {
+    color: black
+}
+
+a:hover {
+    color: black
+}
+
+a:active {
+    color: black
+}
+
+h1 {
+  color: white;
+  margin-left: 20px;
+}
+
+input[type=submit] {
+    border-radius: 8px;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    font-size: 16px;
+}
+
+button {
+    border-radius: 8px;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    font-size: 16px;
+}
+
+#live_text {
+    color: red;
+    position: inline;
+    top: -80px;
+    left: 100px;
+    display: inline-block
+    -webkit-transform: rotate(-20deg) translateY(-200px) translateX(180px);
+    -moz-transform: rotate(-20deg) translateY(-200px) translateX(180px);
+    -o-transform: rotate(-20deg) translateY(-200px) translateX(180px);
+    transform: rotate(-20deg) translateY(-200px) translateX(180px);    
+}
+
+#content {
+    width: 480px;
+    background-color:darkgray;
+    text-indent: 20px;
+    padding: 10px;
+    justify-self: stretch
+        
+}
+
+th {
+    font-size: 12px;
+    text-align: left;
+}
+
+canvas {
+    background-color: #ccc;
+}
+
+#minimap {
+    display: none
+}
+
+#drawarea {
+    position: relative;
+    top: 10px;
+    width: 480px;
+    height: 280px;
+    background-color:darkgray;
+    padding: 10px;
+}
+
+#canvas {
+    position: relative;
+    left: 100px;
+    top: -60px
+}
+
+#draw_title {
+    position: relative;
+    top: -10px;
+    left: 120px;
+    z-index:1
+}
+
+#result_area {
+    position: relative;
+    background-color:darkgray;
+    height: 280px;
+    width: 480px;
+    top: 20px;
+    padding: 10px;
+}
+
+
+#result_title {
+    display: none;
+}
+
+#terminal_area {
+    position: fixed;
+    left: 515px;
+    top: 130px;
+}
+
+#terminal {
+    color: greenyellow;
+    background-color: black;
+    font-family: "Courier";
+    text-align: left;
+    border-color: white;
+}
+
+#me {
+    position: relative;
+    top: -13px;
+    left: 120px;
+    color: white;
+    background-color: black;
+    border-style: solid;
+    border-width: thin;
+    width: 170px;
+    font-family: "Courier";
+    font-size: 9px;
+    padding-left: 5px;
+}
+
+#eraseBtn {
+    position: relative;
+    left: -280px;
+    top: -70px;
+}
+
+#clearBtn {
+    position: relative;
+    left: -100px;
+    top: -20px;
+}
+
+#training_area {
+    position: relative;
+    background-color:darkgray;
+    height: 280px;
+    width: 480px;
+    top: 30px;
+    padding: 10px;
+}
+
+#verify_area {
+    position: relative;
+    background-color:darkgray;
+    height: 60px;
+    width: 480px;
+    top: 40px;
+    padding: 10px;
+}
+
+#verifyBtn {
+    position: relative;
+    top: -10px;
+}

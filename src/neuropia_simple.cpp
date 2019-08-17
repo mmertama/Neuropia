@@ -228,9 +228,17 @@ void NeuropiaSimple::save(const NeuropiaPtr& env, const std::string& filename) {
 
 bool NeuropiaSimple::load(const NeuropiaPtr& env, const std::string& filename) {
     ASSERT(env);
-    auto [nets, ok, params] = Neuropia::load(Neuropia::absPath(env->m_root, filename));
-    if(!ok)
-            return false;
+#if __cplusplus > 201402L
+    auto [nets, ok, params]
+#else
+    Neuropia::Layer nets; bool ok; std::unordered_map<std::string, std::string> params;
+    std::tie(nets, ok, params)
+#endif
+    = Neuropia::load(Neuropia::absPath(env->m_root, filename));
+    if(!ok) {
+        return false;
+    }
+
     env->m_network = std::move(nets);
     if(env->m_network.isValid()) {
         for(const auto& p : params) {

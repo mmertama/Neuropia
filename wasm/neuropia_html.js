@@ -26,7 +26,7 @@
                         console.log(k + ": " + r);
                     }
                     histogram.setData(data);
-                    document.getElementById('guess').innerHTML = maxi + '(' + max + ')';                    
+                    document.getElementById('guess').innerHTML = maxi + ' with certainty ' + max.toFixed(3);                    
                 }
             }); 
             

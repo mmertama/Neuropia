@@ -3,6 +3,7 @@
 	<head>
 		<meta charset="utf-8">
         <title>Neuropia</title>
+        <link rel="stylesheet" type="text/css" href="neuropia.css">
         <script src="minimap.js"></script>
         <script src="painter.js"></script>
         <script src="histogram.js"></script>
@@ -10,46 +11,49 @@
         <script src="neuropia.js"></script>
 	</head>
 	<body>
-        <h2>Neuropia</h2>
+        <h1>Neuropia</h1>
+        <h2 id="live_text">Live</h2>
+        <div id="content">
         <p>
         Neuropia is a C++ feed forward neural network framework. It is open source and available at <a href="https://github.com/mmertama/Neuropia">GitHub</a>. There is a blog text about behind the scenes on <a href="https://www.intopalo.com/blog/2019-06-19-road-to-neuropia/">Intopalo Digital</a> blogsphere. 
         </p>
         <p>
-            This page composes an interactive demo of Neuropia running on <a href="https://webassembly.org">WebAssembly</a> aka WASM. The C++ is compiled and build as a WASM module and therefore can be run directly on any browser supporting it. <a href="https://emscripten.org/index.html">Emscripten</a> is used as compiler and framework for Javascript bindings. That let me write this user interface using web stuff where engine is written on C++.  
+            This page composes an interactive demo of Neuropia running on <a href="https://webassembly.org">WebAssembly</a> aka WASM. The C++ is compiled and build as a WASM module and therefore it can be run directly on any browser supporting it. <a href="https://emscripten.org/index.html">Emscripten</a> is used as compiler and framework for Javascript bindings. That let me write this user interface using web stuff where engine is written on C++.  
         </p>
         <p>
             On load this demo provides a pre-calculated neural network that you can try immediately. You are supposed to draw numbers on <a href="#drawarea">drawing area</a> and then network try to figure out the number by feeding its pixels into neural network. The <a href="#histogram">histogram</a> and <a href="#guess">certainty</a> gives you idea how sure the network is about its conclusion. You can <a href="#training">train</a> your own network by changing the parameters (see the <a href="https://www.intopalo.com/blog/2019-06-19-road-to-neuropia/">blog</a> text about information of the values). But be warned: the training may take some time - especially WASM is not the fastest platform on earth (to be measure, but C++ on bare metal is about 100x performance). The <a href="#verify">verify</a> button calculates test material over the network to give an objective number of network match accuracy.  
         </p>
-        
+        </div>
         <div id="drawarea">
+            <h5 id="draw_title">Draw a single digit number</h5>
             <canvas id="canvas" width="280" height="280">
             </canvas>
-            <h5>Draw a single digit number</h5>
+            <button type="button" onclick="painter.erase();minimap.erase()"  id="eraseBtn">Erase</button>
             <canvas id="minimap" width="112" height="112">
             </canvas>
-            <h5>Down sampled as network get it</h5> 
-            <button type="button" onclick="painter.erase();minimap.erase()"  id="eraseBtn">Erase</button>
         </div>
-        <div id="result">
-            <h5>Result</h5>
-            Network assumes it is <span id="guess"></span>.
+        <div id="result_area">
+            <h5 id="result_title">Result</h5>
+            <p></p>Network assumes it is <span id="guess"> (Please draw something...) </span>.</p>
             <canvas id="histogram" width="480" height="200">
             </canvas>
         </div>
-        <div id="training">
-            <h5>Network parameters</h5>
+        <div id="training_area">
             <form name="params" onsubmit="return startTrain()">
-                <table id="paramList"></table>
+                <table id="paramList">
+                    <tr><th>Name</th><th>Value</th><th>Info</th></tr></tr>
+                </table>
                 <input type="submit" name="Train" value="Train"/>
             </form>
-            <button type="button" onclick="verify()" disabled="true" id="verifyBtn">Verify</button>
-            <h5 id="verificationResult">Verification: N/A</h5>
         </div>
-        <div id="textdiv">
-            <textarea id="terminal" readonly rows="60" cols="75" id="terminal">
-                Loading...
-            </textarea>
-            <button type="button" onclick="document.getElementById('terminal').value = ''">Clear log</button>
+        <div id="verify_area">
+            <p id="verificationResult">Verification: N/A</p>
+            <button type="button" onclick="verify()" disabled="true" id="verifyBtn">Verify</button>
+        </div>
+        <div id="terminal_area">
+            <textarea id="terminal" readonly rows="24" cols="60" id="terminal">Loading...</textarea>
+            <button type="button" id="clearBtn" onclick="document.getElementById('terminal').value = ''">Clear log</button>
+            <div id="me">Neuropia &copy; 2019 Markus Mertama</div>
         </div>
 	</body>
 </html>
