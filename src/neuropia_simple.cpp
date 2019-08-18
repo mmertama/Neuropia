@@ -261,7 +261,7 @@ void NeuropiaSimple::setLogger(const NeuropiaPtr& env, std::function<void (const
     env->setLogger([cb](const std::string& str){
         cb(str);
     });
-    std::cout << "logging started" << std::endl;
+    std::cout << "Neuropia loaded" << std::endl;
 }
 
 bool SimpleTrainer::train(unsigned its, SimpleLogStream& stream) {
@@ -393,7 +393,7 @@ bool train(const NeuropiaPtr& env, unsigned iteration) {
 
     if(iteration == 0 || !env->m_trainer) {
         env->m_logStream->freeze(false);
-        std::cout << "Create trainer."  << std::endl;;
+        std::cout << "Create trainer"  << std::endl;;
         env->m_trainer = std::make_unique<SimpleTrainer>(env->m_root, env->m_params, false, [env](Layer&& layer, bool){
             env->m_network = layer;
         });
@@ -406,7 +406,7 @@ bool verify(const NeuropiaPtr& env, int iteration) {
     if(iteration == 0 || !env->m_verifier) {
         ASSERT(env->m_network.isValid());
         env->m_logStream->freeze(false);
-        std::cout << "Create verifier."  << std::endl;;
+        std::cout << "Create verifier"  << std::endl;;
         env->m_verifier.reset(new SimpleVerifier(env->m_network, Neuropia::absPath(env->m_root, env->m_params["ImagesVerify"]), Neuropia::absPath(env->m_root,env->m_params["LabelsVerify"])));
         Neuropia::persentage(0, 1);
     }

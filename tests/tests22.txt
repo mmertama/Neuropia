@@ -2,5 +2,10 @@ ImagesVerify t10k-images-idx3-ubyte
 LabelsVerify t10k-labels-idx1-ubyte
 Images train-images-idx3-ubyte
 Labels train-labels-idx1-ubyte
+Iterations 10000
+File mnistdata.bin
+trainMnist
+verifyMnist
 File default_out.bin
 verifyMnist
+
