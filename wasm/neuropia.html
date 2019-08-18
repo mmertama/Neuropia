@@ -15,13 +15,19 @@
         <h2 id="live_text">Live</h2>
         <div id="content">
         <p>
-        Neuropia is a C++ feed forward neural network framework. It is open source and available at <a href="https://github.com/mmertama/Neuropia">GitHub</a>. There is a blog text about behind the scenes on <a href="https://www.intopalo.com/blog/2019-06-19-road-to-neuropia/">Intopalo Digital</a> blogsphere. 
+            Neuropia is a C++ feed forward neural network framework. It is open source and available on <a href="https://github.com/mmertama/Neuropia">GitHub</a>. There is a blog text about the Neuropia behind the scenes on <a href="https://www.intopalo.com/blog/2019-06-19-road-to-neuropia/">Intopalo Digital</a> blogsphere. 
         </p>
         <p>
-            This page composes an interactive demo of Neuropia running on <a href="https://webassembly.org">WebAssembly</a> aka WASM. The C++ is compiled and build as a WASM module and therefore it can be run directly on any browser supporting it. <a href="https://emscripten.org/index.html">Emscripten</a> is used as compiler and framework for Javascript bindings. That let me write this user interface using web stuff where engine is written on C++.  
+            This page composes an interactive demo of Neuropia running on <a href="https://webassembly.org">WebAssembly</a> aka WASM. The Neuropia C++ source code is compiled and build as a WASM module and therefore it can be run directly on any browser supporting it. I used <a href="https://emscripten.org/index.html">Emscripten</a> as a compiler and framework for the Javascript bindings. That let me write this user interface using common web stuff where engine is written on C++.  
         </p>
         <p>
-            On load this demo provides a pre-calculated neural network that you can try immediately. You are supposed to draw numbers on <a href="#drawarea">drawing area</a> and then network try to figure out the number by feeding its pixels into neural network. The <a href="#histogram">histogram</a> and <a href="#guess">certainty</a> gives you idea how sure the network is about its conclusion. You can <a href="#training">train</a> your own network by changing the parameters (see the <a href="https://www.intopalo.com/blog/2019-06-19-road-to-neuropia/">blog</a> text about information of the values). But be warned: the training may take some time - especially WASM is not the fastest platform on earth (to be measure, but C++ on bare metal is about 100x performance). The <a href="#verify">verify</a> button calculates test material over the network to give an objective number of network match accuracy.  
+            On load a pre-calculated neural network is provided and you can try that immediately. You are supposed to draw numbers on <a href="#drawarea">drawing area</a> and then network tries to figure out the number. The number is given neural network as pixels and neural network outputs the likehoods how well the figure match with each digit. The <a href="#histogram">histogram</a> and the best <a href="#guess">likehood</a> gives you idea how sure the network is about its conclusion.
+        </p>
+        <p>
+            You may <a href="#training">train</a> your own network by changing the parameters (see the <a href="https://www.intopalo.com/blog/2019-06-19-road-to-neuropia/">blog</a> text about information of the values).
+        </p>
+        <p>
+            The <a href="#verify">verify</a> button calculates independent test material over the network to give an objective and comparative value of network match accuracy.  
         </p>
         </div>
         <div id="drawarea">

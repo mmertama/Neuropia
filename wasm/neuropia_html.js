@@ -26,7 +26,7 @@
                         console.log(k + ": " + r);
                     }
                     histogram.setData(data);
-                    document.getElementById('guess').innerHTML = maxi + ' with certainty ' + max.toFixed(3);                    
+                    document.getElementById('guess').innerHTML = maxi + ' with likehood ' + max.toFixed(3);                    
                 }
             }); 
             
@@ -37,7 +37,7 @@
             const fopen = Module.load(neuropia, "default_out.bin");
             document.getElementById("verifyBtn").disabled = !fopen;
             if(fopen)
-                setLog("Demo network loaded");
+                setLog("Demo network loaded" + String.fromCharCode(10));
            
            
             Module.setParam(neuropia, "Images", "train-images-idx3-ubyte");
