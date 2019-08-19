@@ -16,3 +16,6 @@ dump.text
 
 *.data
 *.wast
+wasm/Makefile
+wasm/neuropia.js
+wasm/neuropia.wasm

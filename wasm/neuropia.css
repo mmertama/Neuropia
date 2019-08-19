@@ -37,17 +37,23 @@ button {
     font-size: 16px;
 }
 
+input[type=number] {
+    width: 150px;
+}
+
+input[type=text] {
+    width: 150px;
+}
+
 #live_text {
     color: red;
-    position: inline;
-    top: -80px;
-    left: 100px;
-    display: inline-block
-    -webkit-transform: rotate(-20deg) translateY(-200px) translateX(180px);
-    -moz-transform: rotate(-20deg) translateY(-200px) translateX(180px);
-    -o-transform: rotate(-20deg) translateY(-200px) translateX(180px);
-    transform: rotate(-20deg) translateY(-200px) translateX(180px);    
-}
+    position: relative;
+    -webkit-transform: rotate(-20deg);
+    -moz-transform: rotate(-20deg) ;
+    -o-transform: rotate(-20deg) ;
+    transform: rotate(-20deg);    
+    transform-origin: -40px -320px;
+    }
 
 #content {
     width: 480px;
@@ -150,7 +156,6 @@ canvas {
 #training_area {
     position: relative;
     background-color:darkgray;
-    height: 280px;
     width: 480px;
     top: 30px;
     padding: 10px;
