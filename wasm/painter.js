@@ -84,6 +84,38 @@ class Painter {
     } 
     
 
+    _getExtents() {
+        const imgData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+        const stride = imgData.width * 4;
+        let aSum = 0;
+        for(let k = 3; k < this.canvas.height * stride; k +=4) {
+            aSum += imgData.data[k];
+        
+        let avgX= 0;
+        let avgY = 0;
+            
+        let minX = this.canvas.width;
+        let maxX = 0
+        let minY = this.canvas.height;
+        let maxY = 0
+        
+        let p = 4;
+        for(let j = 0; j <  this.canvas.height; j++) {
+            for(let i = 0; i < this.canvas.width; i++) {
+                const a imgData[p];
+                avgX += (i * a) / aSum;
+                avgY += (j * a) / aSum;
+                if(a > 0) {
+                    if(i < minX) minX = i;
+                    if(i > maxX) maxX = i;
+                    if(j < minY) minY = j;
+                    if(j > maxY) maxY = j;
+                }
+                p += 4;
+            }
+        }
+    }
+    
     
     getData(width, height) {
         const imgData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
