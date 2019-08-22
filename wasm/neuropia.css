@@ -74,9 +74,10 @@ canvas {
 }
 
 #minimap {
-    position: fixed;
+    position: absolute;
     display: inline;
     z: 100;
+    y: 500;
 }
 
 #drawarea {
