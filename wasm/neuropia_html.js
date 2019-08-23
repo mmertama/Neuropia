@@ -10,8 +10,10 @@
             minimap = new Minimap('minimap'); 
             painter = new Painter('canvas', function (p) {
                 const d = p.getData(28, 28);
+                if(d == undefined)
+                    return;
                 minimap.setData(d);
-                if(Module.isNetworkValid(neuropia)) {
+                if(Module.isNetworkValid(neuropia)) { 
                     const result = Module.feed(neuropia, d);
                     let max = 0;
                     let maxi =0;
@@ -23,8 +25,8 @@
                             max = r;
                         }
                         data.push(r)
-                        console.log(k + ": " + r);
-                    }
+                      //  console.log(k + ": " + r);
+                    } 
                     histogram.setData(data);
                     document.getElementById('guess').innerHTML = maxi + ' with likehood ' + max.toFixed(3);                    
                 }

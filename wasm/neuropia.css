@@ -57,7 +57,7 @@ input[type=text] {
 
 #content {
     width: 480px;
-    background-color:darkgray;
+    background-color:gray;
     text-indent: 20px;
     padding: 10px;
     justify-self: stretch
@@ -70,14 +70,15 @@ th {
 }
 
 canvas {
-    background-color: #ccc;
+    background-color: #FFF;
 }
 
 #minimap {
-    position: absolute;
-    display: inline;
-    z: 100;
-    y: 500;
+    display: none;
+    position: relative;
+    z: 1000;
+    y: 1000;
+    x: 1000;
 }
 
 #drawarea {
@@ -85,7 +86,7 @@ canvas {
     top: 10px;
     width: 480px;
     height: 280px;
-    background-color:darkgray;
+    background-color:gray;
     padding: 10px;
 }
 
@@ -97,6 +98,7 @@ canvas {
 
 #draw_title {
     position: relative;
+    display: inline-block
     top: -10px;
     left: 120px;
     z-index:1
@@ -104,7 +106,7 @@ canvas {
 
 #result_area {
     position: relative;
-    background-color:darkgray;
+    background-color:gray;
     height: 280px;
     width: 480px;
     top: 20px;
@@ -158,7 +160,7 @@ canvas {
 
 #training_area {
     position: relative;
-    background-color:darkgray;
+    background-color:gray;
     width: 480px;
     top: 30px;
     padding: 10px;
@@ -166,7 +168,7 @@ canvas {
 
 #verify_area {
     position: relative;
-    background-color:darkgray;
+    background-color:gray;
     height: 60px;
     width: 480px;
     top: 40px;

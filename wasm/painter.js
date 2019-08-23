@@ -12,11 +12,11 @@ function _mapGrey(m) {
         return greys.charAt(9 - p);
     }
 
-function _printimage(c)  {
+function _printimage(c, w, h)  {
         let p = 0;
-        for(let j = 0; j < 28; j++) {
+        for(let j = 0; j < h; j++) {
             let s = j + ":"
-            for(let i = 0; i < 28; i++) {
+            for(let i = 0; i < w; i++) {
                 s += _mapGrey(c[p]);
                 ++p;
             }
@@ -83,11 +83,8 @@ class Painter {
      //   document.getElementById(this.element).style.display = "display";
     } 
     
-
-    _getImageCentered() {
-        const imgData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+    _findExtens(imgData) {
         const stride = imgData.width * 4;
-     
         let minX = this.canvas.width;
         let maxX = 0
         let minY = this.canvas.height;
@@ -106,39 +103,82 @@ class Painter {
                 p += 4;
             }
         }
-        
-        const width = maxX  - minX;
-        const height = maxY - minY;        
-        const startX = (this.canvas.width - width) / 2;
-        const startY = (this.canvas.width - height) / 2;
+        return {'x': minX, 'y': minY, 'width': maxX - minX, 'height': maxY - minY};
+    }
+    
+    _crop(data, dataWidth, dataHeight, width, height) {
+        const buffer = new ArrayBuffer(width * height);
+        const copy = new Uint8Array(buffer);
+        const startX = Math.floor((dataWidth - width) / 2);
+        const startY = Math.floor((dataHeight - height) / 2);
+        let p = 0;
+        let pp = startY * dataWidth + startX;
+        for(let j = 0; j < height; j++) {
+            for(let i = 0; i < width; i++) {
+                copy[p] = data[pp];
+                p++;
+                pp++;
+            }
+            pp += dataWidth - width;
+        }
+        return copy;
+    }
+    
+    _getImageCentered() {
+        const imgData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+
+        const ext = this._findExtens(imgData);
+            
+        const startX = Math.floor((this.canvas.width - ext.width) / 2);
+        const startY = Math.floor((this.canvas.width - ext.height) / 2);
                         
        
         const buffer = new ArrayBuffer(this.canvas.width * this.canvas.height);
         const copy = new Uint8Array(buffer);
         
-        for(let j = minY; j < maxY; j++) {
-            let p = j * stride + minX * 4;
-            let pp = startY * stride + startX * 4;
-            for(let i = minX; i < maxX; i++) {
+        const stride = imgData.width * 4;
+        let pp = startY * this.canvas.width + startX;
+        let p = (ext.y * stride) + (ext.x * 4) + 3; 
+        for(let j = 0; j < ext.height; j++) {
+            for(let i = 0; i < ext.width; i++) {
                 copy[pp] = imgData.data[p];
                 p += 4;
                 pp++;
             }
+            pp += this.canvas.width - ext.width;
+            p += stride - ext.width * 4;
         }
         
-        return copy;
+        //rescale if needed
+        //since the image is now centered we can just crop it and then do actual scaling on 
+        //resampling
+        const scaleFactor = Math.max(ext.width / this.canvas.width, ext.height / this.canvas.height);
+        
+        if(scaleFactor < 0.1)
+            return undefined;
+       
+        if(scaleFactor > 0.7) {
+            return {'data': copy, 'width': this.canvas.width, 'height': this.canvas.height};
+        } 
+        
+        const width = Math.ceil(this.canvas.width * (scaleFactor * 1.5));
+        const height = Math.ceil(this.canvas.height * (scaleFactor * 1.5));
+        return {'data': this._crop(copy, this.canvas.width, this.canvas.height, width, height), 'width': width, 'height': height};
     }
     
     getData(width, height) {
         
         const imgData = this._getImageCentered();
+        
+        if(imgData == undefined || !width || !height)
+            return undefined;
             
-        const wsamp = this.canvas.width / width;
-        const hsamp = this.canvas.height / height;
+        const wsamp = Math.max(1, Math.floor(imgData.width / width));
+        const hsamp = Math.max(1, Math.floor(imgData.height / height));
         
-        const data = new ArrayBuffer(width * height);
+        const data = new Array(width * height);
         
-        const stride = this.canvas.width;
+        const stride = imgData.width;
        
         for(let j = 0 ; j < height; j++) {
             for(let i = 0 ; i < width; i++) {
@@ -146,56 +186,18 @@ class Painter {
                 const gp = i + j * width;
                 const off =  (i * wsamp) + (j * stride * hsamp)
                 for(let y = 0; y < hsamp; y++) {
-                    const p = (y * stride) + off;
+                    const p = Math.floor((y * stride) + off);
                     for(let x = 0; x < wsamp; x++) {
                         const pos = x + p;  
-                        const a = imgData[pos];
+                        const a = imgData.data[pos];
                         sampled += a;
                     }
                 }
                 data[gp] = Math.round(sampled / (hsamp * wsamp));
             }
         }
-     //   _printimage(data);
+        _printimage(data, width, height);
         return data;
     }
-    
- /*   
-    getData(width, height) {
-        
-        const ext = this._getExtents()
-        
-        const imgData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-        
-        const wsamp = this.canvas.width / width;
-        const hsamp = this.canvas.height / height;
-        
-        const data = new Array(width * height);
-        
-        const stride = imgData.width * 4;
-       
-        for(let j = 0 ; j < height; j++) {
-            for(let i = 0 ; i < width; i++) {
-                let sampled = 0;
-                const gp = i + j * width;
-                const off =  (4 * i * wsamp) + (j * stride * hsamp)
-                for(let y = 0; y < hsamp; y++) {
-                    const p = (y * stride) + off;
-                    for(let x = 0; x < wsamp * 4; x += 4) {
-                        const pos = x + p;  
-                        const r = imgData.data[pos + 0];
-                        const g = imgData.data[pos + 1];
-                        const b = imgData.data[pos + 2];
-                        const a = imgData.data[pos + 3];
-                        
-                        sampled += a;// ((a * ((r * 0.3 + g * 0.59 + b * 0.11)))) / 255 ;
-                    }
-                }
-                data[gp] = Math.round(sampled / (hsamp * wsamp));
-            }
-        }
-     //   _printimage(data);
-        return data;
-    }*/
 }
 
