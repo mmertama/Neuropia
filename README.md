@@ -1,4 +1,6 @@
 # Neuropia
+C++ Neural Network library. 
+See neuropia_simple.h to get started, it is a high level wrapper to construct a network.   
 Markus Mertama 2019
 ## Build
 Use neuropia.pro or CMakeLists.txt
