@@ -1,5 +1,6 @@
 # Neuropia
-C++ Neural Network library. 
+C++ Neural Network library.
+The comprehensive introduction [article series](https://www.insta.fi/en/expert-blog/road-to-neuropia)
 See neuropia_simple.h to get started, it is a high level wrapper to construct a network.   
 Markus Mertama 2019
 ## Build
