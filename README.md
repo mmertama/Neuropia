@@ -12,7 +12,7 @@ Use neuropia.pro or CMakeLists.txt
 Supports Windows MSCV, GCC and Clang, Emscripten
 
 ## Data
-For testing copy the Mnist data from http://yann.lecun.com/exdb/mnist/
+For testing copy the Mnist data from [huggingface](https://huggingface.co/datasets/mnist)
 
 Extract GZ files data/mnist folder (tests_all.sh assume that folder, but otherwise pick freely)
 
