@@ -100,10 +100,8 @@ network.load(neuropia_bin, sizeof(neuropia_bin));
 
 ```
 
-
-
 ## Build
-Use neuropia.pro or CMakeLists.txt
+Use cmake
 
 Supports Windows MSCV, GCC and Clang, Emscripten
 
