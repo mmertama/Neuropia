@@ -122,23 +122,23 @@ constexpr double EluFactor = 1.0;
 
 ACTIVATION_FUNCTION(signumFunction, [](NeuronType value) -> NeuronType{
     return value < 0.0 ? -1.0 : value > 0.0 ? 1.0 : 0.0;
-});
+})
 
 ACTIVATION_FUNCTION(binaryFunction, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
     return value >= 1.0 ? 0.0 : 1.0;
-});
+})
 
 ACTIVATION_FUNCTION(sigmoidFunction, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
     return 1.0 / (1.0 + std::exp(-value));
-});
+})
 
 ACTIVATION_FUNCTION(reLuFunction, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
     return std::max(value, LeakyReLuFactor * value);
-});
+})
 
 ACTIVATION_FUNCTION(eluFunction, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
     return value < 0.0 ? EluFactor * (std::exp(value) - 1.0) : value;
-});
+})
 
 #ifndef DEFAULT_AF
 #define DEFAULT_AF sigmoidFunction
@@ -149,15 +149,15 @@ ACTIVATION_FUNCTION(eluFunction, [](Neuropia::NeuronType value) -> Neuropia::Neu
   */
 DERIVATIVE_FUNCTION(sigmoidFunctionDerivative, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
     return value * (1.0 - value);
-});
+})
 
 DERIVATIVE_FUNCTION(reLuFunctionDerivative, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
     return value > 0.0 ? 1.0 : LeakyReLuFactor;
-});
+})
 
 DERIVATIVE_FUNCTION(eluFunctionDerivative, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
     return value > 0.0 ? 1.0 : EluFactor * std::exp(value);
-});
+})
 
 /**
  * @brief normalize
@@ -315,7 +315,14 @@ public:
      * @param stream
      * @return
      */
-    void load(std::ifstream& stream);
+    bool load(std::ifstream& stream);
+
+    /**
+     * @brief 
+     * @param bytes 
+     * @return 
+     */
+    bool load(const std::vector<uint8_t>& bytes);
 
     /**
      * @brief operator <<
@@ -325,7 +332,10 @@ public:
      */
     friend std::ostream& ::operator<<(std::ostream& output, const Neuron& neuron);
 
+    // @internal
+    template<typename S> bool loadNeuron(S& stream);
 private:
+    
     std::function<NeuronType (NeuronType)> m_af = nullptr;
     ValueVector m_weights;
     NeuronType m_bias = 1;
@@ -594,6 +604,20 @@ public:
     std::tuple<bool, std::unordered_map<std::string, std::string>> load(std::ifstream& stream);
 
     /**
+     * @brief load
+     * @param stream
+     * @return
+     */
+    std::tuple<bool, std::unordered_map<std::string, std::string>> load(const std::vector<uint8_t>& stream);
+
+    /**
+     * @brief load
+     * @param stream
+     * @return
+     */
+    std::tuple<bool, std::unordered_map<std::string, std::string>> load(const uint8_t* bytes, size_t sz);
+
+    /**
      * @brief merge
      * @param other
      * @param factor
@@ -685,7 +709,7 @@ public:
     Layer* outLayer();
 
  protected:
-    void loadLayer(std::ifstream& stream);
+    template<typename S> void loadLayer(S& stream);
 
     Layer* previousLayer(Layer* current);
     const Layer* previousLayer(const Layer* current) const;

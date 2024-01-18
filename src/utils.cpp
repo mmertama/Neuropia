@@ -124,5 +124,6 @@ void Neuropia::debug(const Neuropia::Layer& layer, std::ostream& out, const std:
 }
 
 std::string Neuropia::absPath(const std::string& root, const std::string& relativePath) {
-    return root + "/" + relativePath;
+    return root.empty() || (!relativePath.empty() && relativePath.front() == '/') ?
+        relativePath : root + "/" + relativePath;
 }

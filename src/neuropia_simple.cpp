@@ -217,7 +217,7 @@ bool NeuropiaSimple::train(const NeuropiaPtr& env, TrainType type) {
     }
     trainer->train();
     env->m_network = std::move(trainer->network());
-   return false;
+   return true;
 }
 
 void NeuropiaSimple::save(const NeuropiaPtr& env, const std::string& filename) {

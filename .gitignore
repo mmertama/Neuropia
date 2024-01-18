@@ -19,3 +19,4 @@ dump.text
 wasm/Makefile
 wasm/neuropia.js
 wasm/neuropia.wasm
+.vscode

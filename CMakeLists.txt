@@ -1,37 +1,20 @@
-cmake_minimum_required (VERSION 3.1)
+cmake_minimum_required (VERSION 3.15)
 
-project (neuropia)
+project(neuropiaML)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-if(NOT MSVC)
-	set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+if(NOT NOLIB)
+  add_subdirectory(neuropialib)
 endif()
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-set(CMAKE_CXX_STANDARD 17)
-
-include_directories(include)
-
-find_package (Threads)
-
-add_executable(neuropia
-    src/idxreader.cpp
-    src/main.cpp
-    src/neuropia.cpp
-    src/utils.cpp
-    src/testports.cpp
-    src/params.cpp
-    src/trainerbase.cpp
-    src/trainer.cpp 
-    src/verify.cpp
-    src/paralleltrain.cpp 
-    src/evotrain.cpp 
-    src/argparse.cpp
-)
-
-target_link_libraries (neuropia ${CMAKE_THREAD_LIBS_INIT})
 
 
+if(NOT NOAPP)
+  add_subdirectory(app)
+endif()
+
+if(NOT NOTEST)
+  add_subdirectory(test)
+endif()

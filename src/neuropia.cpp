@@ -2,11 +2,48 @@
 #include <random>
 #include <iostream>
 #include <fstream>
+#include <cstring>
 #include "matrix.h"
 
 using namespace Neuropia;
 
-static std::unordered_map<std::string, std::string> readMeta(std::ifstream& strm) {
+class ByteStream {
+public:
+    ByteStream(const std::vector<uint8_t>& vec) : m_vec(vec) {}
+    ByteStream& read(char* target, size_t size) {
+        auto sz = std::min(m_vec.size(), size + m_pos);
+        if(sz > 0) {
+            std::memcpy(target, &m_vec[m_pos], sz);
+            m_pos += sz;
+        }
+        return *this; 
+    }
+    bool eof() const {return m_pos >= m_vec.size();}
+private:
+    const std::vector<uint8_t>& m_vec;
+    size_t m_pos = 0;
+};
+
+class BytePtrStream {
+public:
+    BytePtrStream(const uint8_t* bytes, size_t sz) : m_bytes(bytes), m_sz(sz) {}
+    BytePtrStream& read(char* target, size_t size) {
+        auto sz = std::min(m_sz, size + m_pos);
+        if(sz > 0) {
+            std::memcpy(target, &m_bytes[m_pos], sz);
+            m_pos += sz;
+        }
+        return *this; 
+    }
+    bool eof() const {return m_pos >= m_sz;}
+private:
+    const uint8_t* m_bytes;
+    const size_t m_sz;
+    size_t m_pos = 0;
+};
+
+template<typename S>
+std::unordered_map<std::string, std::string> readMeta(S& strm) {
     std::unordered_map<std::string, std::string> map;
     std::uint8_t sz = 0;
     strm.read(reinterpret_cast<char*>(&sz), sizeof(sz));
@@ -108,20 +145,37 @@ void Neuron::save(std::ofstream& stream) const {
 }
 
 
-void Neuron::load(std::ifstream& stream) {
+bool Neuron::load(std::ifstream& stream) {
+    return loadNeuron(stream);
+}
+
+bool Neuron::load(const std::vector<uint8_t>& data) {
+    ByteStream stream{data};
+    return loadNeuron(stream);
+}
+
+template<typename S>
+bool Neuron::loadNeuron(S& stream) {
     m_weights.clear();
     std::uint32_t  sz = 0;
     stream.read(reinterpret_cast<char*>(&sz), sizeof(sz));
+    if(stream.eof())
+        return false;
     m_weights.resize(sz);
     for(size_t s = 0; s < sz; s++) {
-        NeuronType w;
+        NeuronType w{};
         stream.read(reinterpret_cast<char*>(&w), sizeof(NeuronType));
         setWeight(s, w);
     }
+    if(stream.eof())
+        return false;
     NeuronType b;
     stream.read(reinterpret_cast<char*>(&b), sizeof(NeuronType));
     setBias(b);
+    return true;
 }
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////7
@@ -393,8 +447,39 @@ std::tuple<bool, std::unordered_map<std::string, std::string>> Layer::load(std::
     return {true, meta};
     }
 
+std::tuple<bool, std::unordered_map<std::string, std::string>> Layer::load(const std::vector<uint8_t>& data) {
+    char hdr[sizeof(H)];
+    ByteStream strm(data);
+    strm.read(hdr, sizeof(H));
+    if(!Hcomp(hdr)) {
+        std::cerr << "Corrupted import stream or wrong version" << std::endl;
+        return {false, {}};
+    }
 
-void Layer::loadLayer(std::ifstream &strm) {
+    const auto meta = readMeta(strm);
+
+    loadLayer(strm);
+    return {true, meta};
+    }
+
+std::tuple<bool, std::unordered_map<std::string, std::string>> Layer::load(const uint8_t* bytes, size_t sz) {
+    char hdr[sizeof(H)];
+    BytePtrStream strm(bytes, sz);
+    strm.read(hdr, sizeof(H));
+    if(!Hcomp(hdr)) {
+        std::cerr << "Corrupted import stream or wrong version" << std::endl;
+        return {false, {}};
+    }
+
+    const auto meta = readMeta(strm);
+
+    loadLayer(strm);
+    return {true, meta};
+    }
+
+
+template<typename S>
+void Layer::loadLayer(S &strm) {
     std::uint8_t namel = 0;
     strm.read(reinterpret_cast<char*>(&namel), sizeof(namel));
 
@@ -422,7 +507,7 @@ void Layer::loadLayer(std::ifstream &strm) {
    fill(count, Neuron(m_activationFunction));
 
     for(auto& n : m_neurons) {
-        n.load(strm);
+        n.loadNeuron(strm);
        }
 
     if(!strm.eof()) {
@@ -436,7 +521,6 @@ void Layer::loadLayer(std::ifstream &strm) {
         }
     }
 }
-
 
 
 Layer& Layer::operator=(Layer&& other) noexcept {
