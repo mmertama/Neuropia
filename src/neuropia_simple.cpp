@@ -228,20 +228,14 @@ void NeuropiaSimple::save(const NeuropiaPtr& env, const std::string& filename) {
 
 bool NeuropiaSimple::load(const NeuropiaPtr& env, const std::string& filename) {
     ASSERT(env);
-#if __cplusplus > 201402L
-    auto [nets, ok, params]
-#else
-    Neuropia::Layer nets; bool ok; std::unordered_map<std::string, std::string> params;
-    std::tie(nets, ok, params)
-#endif
-    = Neuropia::load(Neuropia::absPath(env->m_root, filename));
-    if(!ok) {
+    const auto loaded = Neuropia::load(Neuropia::absPath(env->m_root, filename));
+    if(!loaded) {
         return false;
     }
 
-    env->m_network = std::move(nets);
+    env->m_network = std::move(std::get<Layer>(*loaded));
     if(env->m_network.isValid()) {
-        for(const auto& p : params) {
+        for(const auto& p : std::get<1>(*loaded)) {
             env->m_params.set(p.first, p.second);
         }
         return true;

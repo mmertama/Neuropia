@@ -107,17 +107,18 @@ int main(int argc, char* argv[]) {
         {
             "verifyMnist", [&](const std::string & root) {
 
-                auto [network, ok, map] = Neuropia::load(params["File"]);
-                    for(const auto& p : map)
-                        std::cout << p.first << "=" << p.second << std::endl;
-                    std::cout << std::endl;
-
-                if(!ok) {
+                const auto loaded = Neuropia::load(params["File"]);
+                if(!loaded) {
                     std::cerr << params["File"] << " parse error" << std::endl;
                     return;
                 }
+                for(const auto& p : std::get<1>(*loaded))
+                    std::cout << p.first << "=" << p.second << std::endl;
+                std::cout << std::endl;
 
-                Neuropia::printVerify(verify(network, Neuropia::absPath(root, params["ImagesVerify"]),
+               
+
+                Neuropia::printVerify(verify(std::get<0>(*loaded), Neuropia::absPath(root, params["ImagesVerify"]),
                          Neuropia::absPath(root, params["LabelsVerify"])), "Verify data");
                 std::cout << std::endl;
             },
@@ -127,9 +128,9 @@ int main(int argc, char* argv[]) {
                 const auto files = Neuropia::Params::split(params["Extra"]);
                 std::vector<Neuropia::Layer> ensebles;
                 for(const auto& file : files) {
-                    const auto [net, ok, map] = Neuropia::load(file);
-                    if(ok) {
-                        ensebles.emplace_back(net);
+                    const auto loaded = Neuropia::load(file);
+                    if(loaded) {
+                        ensebles.emplace_back(std::get<0>(*loaded));
                     } else {
                         std::cerr << file << " cannot be opened" << std::endl;
                         return;

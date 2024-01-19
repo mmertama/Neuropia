@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <vector>
 #include <unordered_map>
+#include <optional>
 
 namespace Neuropia {
 class Layer;
@@ -24,7 +25,7 @@ void save(const std::string& filename, const std::vector<Layer>& ensembles);
 
 std::vector<Layer> loadEnsemble(const std::string& filename);
 
-std::tuple<Neuropia::Layer, bool, std::unordered_map<std::string, std::string>> load(const std::string& filename);
+std::optional<std::tuple<Neuropia::Layer, std::unordered_map<std::string, std::string>>> load(const std::string& filename);
 
 void debug(const Layer& network, std::ostream& strm = std::cout, const std::set<int>& excluded = {});
 

@@ -13,7 +13,6 @@ include_directories(${DIR}/include)
 
 add_library(${PROJECT_NAME} 
     neuropialib.h    
-    neuropialib.cpp
     ${DIR}/src/neuropia.cpp
 )
 

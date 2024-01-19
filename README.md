@@ -34,11 +34,11 @@ The API:
 ```cpp 
 std::optional<Sizes> Neuropia::Network::load(const Bytes& bytes);
 std::optional<Sizes> Neuropia::Network::load(const uint8_t& bytes, size_t sz);
-Values Neuropia::Network::feed(const Values& input) const;
+const Values& feed(const ITType& begin, const ITType& end) const;
 ```
 
-* Load function loads the trained network as a input (i.e. the binary file `neuropia` app created).
-* Feed function takes the input layer as an input and returns output layer.
+* Load function loads the trained network data as a input (i.e. the binary file `neuropia` app created) and constructs the network. 
+* Feed function takes the input layer as an input and returns output layer. It is granted not to allocate any memory.
 
 When network code is backed in sources it can be used as
 

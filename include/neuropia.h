@@ -12,6 +12,7 @@
 #include <string>
 #include <random>
 #include <chrono>
+#include <optional>
 
 /**
  * Namespace Neuropia
@@ -276,7 +277,8 @@ public:
      * @return
      */
 
-    NeuronType feed(const ValueVector& inputs) const;
+    template<typename IT>
+    NeuronType feed(const IT& begin, const IT& end) const;
 
     /**
      * @brief size
@@ -488,31 +490,13 @@ public:
         return join(begin, end, Neuron(m_activationFunction));
     }
 
-    template<typename IteratorIt>
+    template<typename IT>
     /**
      * @brief feed
      * @param values
      * @return
      */
-    const ValueVector& feed(IteratorIt begin, IteratorIt end) const {
-        neuropia_assert(m_activationFunction);
-        if(!isInput()) {
-            const ValueVector values(begin, end);
-            neuropia_assert(m_outBuffer.size() >= m_neurons.size());
-            for(size_t i = 0; i < m_neurons.size(); i++) {
-                const auto& n = m_neurons[i];
-                neuropia_assert(n.isActive());
-                m_outBuffer[i] = n.feed(values);
-            }
-        } else {
-            neuropia_assert(static_cast<size_t>(std::distance(begin, end)) <= m_outBuffer.size());
-            std::copy(begin, end, m_outBuffer.begin());
-        }
-        if(m_next != nullptr) {
-            return m_next->feed(m_outBuffer.begin(), m_outBuffer.end());
-        }
-        return  m_outBuffer;
-    }
+    const ValueVector& feed(const IT& begin, const IT& end) const;
 
     /**
      * @brief feed
@@ -601,21 +585,21 @@ public:
      * @param stream
      * @return
      */
-    std::tuple<bool, std::unordered_map<std::string, std::string>> load(std::ifstream& stream);
+    std::optional<std::unordered_map<std::string, std::string>> load(std::ifstream& stream);
 
     /**
      * @brief load
      * @param stream
      * @return
      */
-    std::tuple<bool, std::unordered_map<std::string, std::string>> load(const std::vector<uint8_t>& stream);
+    std::optional<std::unordered_map<std::string, std::string>> load(const std::vector<uint8_t>& stream);
 
     /**
      * @brief load
      * @param stream
      * @return
      */
-    std::tuple<bool, std::unordered_map<std::string, std::string>> load(const uint8_t* bytes, size_t sz);
+    std::optional<std::unordered_map<std::string, std::string>> load(const uint8_t* bytes, size_t sz);
 
     /**
      * @brief merge
@@ -707,6 +691,7 @@ public:
      * @return
      */
     Layer* outLayer();
+    const Layer* outLayer() const;
 
  protected:
     template<typename S> void loadLayer(S& stream);
@@ -729,7 +714,7 @@ public:
                     for(auto j = 0U; j < sz; j++) {
                         values[j] = (prevBegin + j)->isActive() ? *(begin + j) : 0;
                     }
-                    const auto out = n.feed(values);
+                    const auto out = n.feed(values.begin(), values.end());
                     m_outBuffer[i] = out * p;
                 } else {
                     m_outBuffer[i] = 0;
@@ -764,6 +749,38 @@ private:
  * @return
  */
 Layer::InitStrategy initStrategyMap(ActivationFunction af);
+
+template<typename IT>
+NeuronType Neuron::feed(const IT& begin, const IT& end) const {
+    neuropia_assert(m_af);
+    NeuronType sum = m_bias;
+    const auto sz = static_cast<size_t>(std::distance(begin, end));
+    neuropia_assert(m_weights.size() >= sz);
+    for(size_t i = 0; i < sz; i++) {
+        sum += (m_weights[i] * *(begin + i));
+    }
+    return m_af(sum);
+}
+
+    template<typename IT>
+    const ValueVector& Layer::feed(const IT& begin, const IT& end) const {
+        neuropia_assert(m_activationFunction);
+        if(!isInput()) {
+            neuropia_assert(m_outBuffer.size() >= m_neurons.size());
+            for(size_t i = 0; i < m_neurons.size(); i++) {
+                const auto& n = m_neurons[i];
+                neuropia_assert(n.isActive());
+                m_outBuffer[i] = n.feed(begin, end);
+            }
+        } else {
+            neuropia_assert(static_cast<size_t>(std::distance(begin, end)) <= m_outBuffer.size());
+            std::copy(begin, end, m_outBuffer.begin());
+        }
+        if(m_next != nullptr) {
+            return m_next->feed(m_outBuffer.begin(), m_outBuffer.end());
+        }
+        return  m_outBuffer;
+    }
 
 }
 

@@ -125,16 +125,6 @@ Layer::InitStrategy Neuropia::initStrategyMap(ActivationFunction af) {
 }
 
 
-NeuronType Neuron::feed(const ValueVector& inputs) const {
-    neuropia_assert(m_af);
-    NeuronType sum = m_bias;
-    neuropia_assert(m_weights.size() >= inputs.size());
-    for(size_t i = 0; i < inputs.size(); i++) {
-        sum += (m_weights[i] * inputs[i]);
-    }
-    return m_af(sum);
-}
-
 void Neuron::save(std::ofstream& stream) const {
     const auto sz = static_cast<std::uint32_t>(m_weights.size());
     stream.write(reinterpret_cast<const char*>(&sz), sizeof(sz));
@@ -276,6 +266,13 @@ void Layer::randomize(NeuronType min, NeuronType max) {
 
 
 Layer* Layer::outLayer() {
+    if(m_next == nullptr) {
+        return this;
+    }
+    return m_next->outLayer();
+}
+
+const Layer* Layer::outLayer() const {
     if(m_next == nullptr) {
         return this;
     }
@@ -432,49 +429,49 @@ void Layer::save(std::ofstream& strm, const std::unordered_map<std::string, std:
     }
 }
 
-std::tuple<bool, std::unordered_map<std::string, std::string>> Layer::load(std::ifstream& strm)  {
+std::optional<std::unordered_map<std::string, std::string>> Layer::load(std::ifstream& strm)  {
 
     char hdr[sizeof(H)];
     strm.read(hdr, sizeof(H));
     if(!Hcomp(hdr)) {
         std::cerr << "Corrupted import stream or wrong version" << std::endl;
-        return {false, {}};
+        return std::nullopt;
     }
 
     const auto meta = readMeta(strm);
 
     loadLayer(strm);
-    return {true, meta};
+    return meta;
     }
 
-std::tuple<bool, std::unordered_map<std::string, std::string>> Layer::load(const std::vector<uint8_t>& data) {
+std::optional<std::unordered_map<std::string, std::string>> Layer::load(const std::vector<uint8_t>& data) {
     char hdr[sizeof(H)];
     ByteStream strm(data);
     strm.read(hdr, sizeof(H));
     if(!Hcomp(hdr)) {
         std::cerr << "Corrupted import stream or wrong version" << std::endl;
-        return {false, {}};
+        return std::nullopt;
     }
 
     const auto meta = readMeta(strm);
 
     loadLayer(strm);
-    return {true, meta};
+    return meta;
     }
 
-std::tuple<bool, std::unordered_map<std::string, std::string>> Layer::load(const uint8_t* bytes, size_t sz) {
+std::optional<std::unordered_map<std::string, std::string>> Layer::load(const uint8_t* bytes, size_t sz) {
     char hdr[sizeof(H)];
     BytePtrStream strm(bytes, sz);
     strm.read(hdr, sizeof(H));
     if(!Hcomp(hdr)) {
         std::cerr << "Corrupted import stream or wrong version" << std::endl;
-        return {false, {}};
+        return std::nullopt;
     }
 
     const auto meta = readMeta(strm);
 
     loadLayer(strm);
-    return {true, meta};
+    return meta;
     }
 
 

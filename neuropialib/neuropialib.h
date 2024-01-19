@@ -2,8 +2,8 @@
 
 #include <vector>
 #include <string>
-#include <memory>
 #include <optional>
+#include "neuropia.h"
 
 /**
  * @brief Interface to use network
@@ -18,25 +18,40 @@ namespace Neuropia
     struct Sizes {unsigned in_layer; unsigned out_layer;};
     class Network {
         public:
-            Network();
-            ~Network();
+            Network() {}
+            ~Network() {}
             /**
              * @brief Load a network
              * 
              * @param bytes 
              * @return std::optional<Sizes>, if ok in and output layer sizes. 
              */
-            std::optional<Sizes> load(const uint8_t* bytes, size_t sz);
-            std::optional<Sizes> load(const Bytes& bytes);
+            std::optional<Sizes> load(const uint8_t* bytes, size_t sz) {
+                const auto map = m_network.load(bytes, sz);
+                if(!map) return std::nullopt;
+                return sizes();
+            }
+            std::optional<Sizes> load(const Bytes& bytes) {
+                const auto map = m_network.load(bytes);
+                if(!map) return std::nullopt;
+                return sizes(); 
+            }
             /**
              * @brief Feed values to network, get calculated output.
              * 
              * @param input 
              * @return Values 
              */
-            Values feed(const Values& input) const;
+
+            template <typename IT>
+            const Values& feed(const IT& begin, const IT& end) const {{return m_network.feed(begin, end);}}
         private:
-            class Private;
-            std::unique_ptr<Private> m_private;
+            Sizes sizes() const {
+                return Sizes{
+                    static_cast<unsigned>(m_network.size()),
+                    static_cast<unsigned>(m_network.outLayer()->size())};
+            }
+        private:
+            Layer m_network;
    };
 } // namespace Neuropia
