@@ -20,3 +20,4 @@ wasm/Makefile
 wasm/neuropia.js
 wasm/neuropia.wasm
 .vscode
+build

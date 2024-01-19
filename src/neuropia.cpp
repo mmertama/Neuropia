@@ -11,7 +11,7 @@ class ByteStream {
 public:
     ByteStream(const std::vector<uint8_t>& vec) : m_vec(vec) {}
     ByteStream& read(char* target, size_t size) {
-        auto sz = std::min(m_vec.size(), size + m_pos);
+        auto sz = std::min(m_vec.size() - m_pos, size);
         if(sz > 0) {
             std::memcpy(target, &m_vec[m_pos], sz);
             m_pos += sz;
@@ -28,7 +28,7 @@ class BytePtrStream {
 public:
     BytePtrStream(const uint8_t* bytes, size_t sz) : m_bytes(bytes), m_sz(sz) {}
     BytePtrStream& read(char* target, size_t size) {
-        auto sz = std::min(m_sz, size + m_pos);
+        auto sz = std::min(m_sz - m_pos, size);
         if(sz > 0) {
             std::memcpy(target, &m_bytes[m_pos], sz);
             m_pos += sz;

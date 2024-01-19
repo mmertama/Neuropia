@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
             std::cerr << "Bad parameter '"<< param <<"', expects KEY=VALUE" << std::endl;
             return 1;
         }
-        const auto key = param.substr(0, eq - 1);
+        const auto key = param.substr(0, eq);
         const auto value = param.substr(eq + 1);
         if(!NeuropiaSimple::setParam(neuropia, key, value)) {
             std::cerr << "Bad optional parameter '" << key << "' as '" << value << "'" << std::endl;
