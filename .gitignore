@@ -6,14 +6,13 @@ neuropia_run*.txt
 CMakeSettings.json
 CMakeCache.txt
 CMakeFiles
-*.cmake
+
 builds
 Neuropia.pro.user*
 *.autosave
 dump.txt
 dump.text
 *.bin
-
 *.data
 *.wast
 wasm/Makefile
