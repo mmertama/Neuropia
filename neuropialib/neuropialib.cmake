@@ -22,7 +22,7 @@ function (make_neuropia TARGET_DIR)
     
     find_program(SYS_CMAKE cmake REQUIRED)
     
-    message("${TARGET_DIR} from ${NEUROPIA_DIR}, using ${SYS_CMAKE}")
+    message("make neuropia into ${TARGET_DIR} from ${NEUROPIA_DIR}, using ${SYS_CMAKE}")
     
     file(MAKE_DIRECTORY ${TARGET_DIR})
 
@@ -31,7 +31,7 @@ function (make_neuropia TARGET_DIR)
     endif()
 
     execute_process(
-        COMMAND ${NEUROPIA_DIR}/neuropialib/make_neuropia.sh ${NEUROPIA_DIR} ${TARGET_DIR}
+        COMMAND env -i HOME="$HOME" bash -l -c "${NEUROPIA_DIR}/neuropialib/make_neuropia.sh ${NEUROPIA_DIR} ${TARGET_DIR}"
         WORKING_DIRECTORY ${TARGET_DIR}
         COMMAND_ECHO STDOUT
         ECHO_OUTPUT_VARIABLE
