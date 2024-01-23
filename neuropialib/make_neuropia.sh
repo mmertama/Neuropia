@@ -9,6 +9,6 @@ if [ ! -d "$2" ]; then
 fi   
 
 pushd $2
-cmake -S $1 -B $2 -DNOTEST=1 -NOLIB=1
+cmake -S $1 -B $2 -DNOTEST=1 -DNOLIB=1
 cmake --build . --config Release 
 popd
