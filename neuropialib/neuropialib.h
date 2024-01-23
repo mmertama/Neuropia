@@ -14,7 +14,7 @@
 namespace Neuropia
 {
     using Bytes = std::vector<uint8_t>;
-    using Values = std::vector<double>;
+    using Values = std::vector<NeuronType>;
     struct Sizes {unsigned in_layer; unsigned out_layer;};
     class Network {
         public:

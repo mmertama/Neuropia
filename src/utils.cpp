@@ -27,7 +27,7 @@ void Neuropia::printimage(const unsigned char* c)  {
 
 
 void Neuropia::printVerify(const std::tuple<size_t, size_t>& result, const std::string& txt) {
-    std::cout << txt << ", rate:" << 100.0 * (static_cast<double>(std::get<0>(result)) / static_cast<double>(std::get<1>(result)))
+    std::cout << txt << ", rate:" << 100.0 * (static_cast<NeuronType>(std::get<0>(result)) / static_cast<NeuronType>(std::get<1>(result)))
           << "%, found:" << std::get<0>(result)
           << " of " << std::get<1>(result)<< std::endl;
 }
@@ -55,21 +55,21 @@ void Neuropia::timed(const std::function<void ()>& f, const std::string& label) 
               - std::chrono::duration_cast<std::chrono::seconds>(stop - start).count() * 1000000 << std::endl;
 }
 
-void Neuropia::save(const std::string& filename, const Neuropia::Layer& network, const std::unordered_map<std::string, std::string>& map) {
+void Neuropia::save(const std::string& filename, const Neuropia::Layer& network, const std::unordered_map<std::string, std::string>& map, Neuropia::SaveType savetype) {
     std::ofstream str;
     str.open(filename, std::ios::out | std::ios::binary);
     if(str.is_open()) {
-        network.save(str, map);
+        network.save(str, map, savetype);
     }
     str.close();
 }
 
-void  Neuropia::save(const std::string& filename, const std::vector<Layer>& ensembles) {
+void  Neuropia::save(const std::string& filename, const std::vector<Layer>& ensembles, Neuropia::SaveType savetype) {
     std::ofstream str;
     str.open(filename, std::ios::out | std::ios::binary);
     if(str.is_open()) {
         for (const auto& n : ensembles) {
-            n.save(str);
+            n.save(str, {}, savetype);
         }
     }
     str.close();
@@ -114,10 +114,10 @@ void Neuropia::debug(const Neuropia::Layer& layer, std::ostream& out, const std:
             int neuron = 0;
             for(const auto&n : *l) {
                 ++neuron;
-                double avg = 0;
+                NeuronType avg = 0;
                 for(auto i = 0U; i < n.size(); i++)
                     avg += n.weight_d(i);
-                avg /= static_cast<double>(n.size());
+                avg /= static_cast<NeuronType>(n.size());
                 out << "layer " << count << ", neuron:" << neuron << ", weights avg:"<< avg << ", bias:" << n.bias() << ", function:" << l->activationFunction().name() << ", active:" << n.isActive() << std::endl;
             }
         }

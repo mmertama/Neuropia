@@ -18,7 +18,7 @@ constexpr char dropoutRateRe[] = R"(\d+\.?\d*(,\d+\.?\d*)*$)";
 {"BatchSize", "800", Neuropia::Params::Int}, \
 {"BatchVerifySize", "100", Neuropia::Params::Int}, \
 {"Topology", "64,32", topologyRe}, \
-{"MaxTrainTime", std::to_string(static_cast<int>(MaxTrainTime)), Neuropia::Params::Int}, \
+{"MaxTrainTime", std::to_string(static_cast<int>(Neuropia::MaxTrainTime)), Neuropia::Params::Int}, \
 {"File", "mnistdata.bin", Neuropia::Params::File}, \
 {"Extra", "", Neuropia::Params::String}, \
 {"Hard", "false", Neuropia::Params::Bool}, \

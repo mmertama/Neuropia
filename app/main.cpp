@@ -5,18 +5,35 @@
 int main(int argc, char* argv[]) {
 
     ArgParse argparse;
+    argparse.addOpt('d', "data_type", true, "double");
 
     if(!argparse.set(argc, argv)) {
         std::cerr << "Invalid args" << std::endl;
         return -1;
     }
 
+    Neuropia::SaveType save_type = Neuropia::SaveType::NeuronType;
+
+    if(argparse.hasOption("data_type")) {
+        if(argparse.option("data_type") == "double")
+            save_type = Neuropia::SaveType::Double;
+        else if(argparse.option("data_type") == "float")
+            save_type = Neuropia::SaveType::Float;
+        else if(argparse.option("data_type") == "long")
+            save_type = Neuropia::SaveType::LongDouble;
+        else if(argparse.option("data_type") == "longDouble")
+            save_type = Neuropia::SaveType::LongDouble;
+        else {
+            std::cerr << "Bad data type --data_type <double|float|longDouble>";
+        }                        
+    }
+
     auto neuropia = NeuropiaSimple::create("");
    
-
     if(argparse.paramCount() < 4) {
-        std::cerr << "neuropia DATA LABELS OUTPUT <PARAMS>" << std::endl;
+        std::cerr << "neuropia <--data_type <double|float|longDouble>> DATA LABELS OUTPUT <PARAMS>" << std::endl;
         std::cerr << "Where params is KEY=VALUE:" << std::endl;
+        std::cerr << "data_type option defines if neurons are stored in float (32 bit), double (64 bit) or long double (128 bit) precision. Default is a build option, and it defaults to double." << std::endl;
         for(const auto& [k, v] :  NeuropiaSimple::params(neuropia)) {
             std::cerr << "'"<< k << "', as " << v.front() << std::endl;
         }
@@ -59,7 +76,7 @@ int main(int argc, char* argv[]) {
             return 2;
     } 
 
-    NeuropiaSimple::save(neuropia, argparse.param(3));
+    NeuropiaSimple::save(neuropia, argparse.param(3), save_type);
 
     return 0;
 }

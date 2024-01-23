@@ -37,7 +37,7 @@ auto toIntVec(const std::string& s) {
 }
 
 auto toRealVec(const std::string& s) {
-    return Neuropia::Params::toVector<double>(s, [](const auto& s){return std::atof(s.c_str());});
+    return Neuropia::Params::toVector<NeuronType>(s, [](const auto& s){return std::atof(s.c_str());});
 }
 
 auto toFunction(const std::string& names) {

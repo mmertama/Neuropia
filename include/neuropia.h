@@ -13,6 +13,7 @@
 #include <random>
 #include <chrono>
 #include <optional>
+#include <fstream>
 
 /**
  * Namespace Neuropia
@@ -44,10 +45,15 @@ inline bool doAssert(const std::string& s, int line, const char* file, const std
 #define neuropia_assert_always(x, extra) ((x) || doAssert(#x, __LINE__, __FILE__, extra))
 #endif
 
+#ifndef NEUROPIA_TYPE
+#define NEUROPIA_TYPE double
+#endif
+
 namespace Neuropia {
-    using NeuronType = double;
+    using NeuronType = NEUROPIA_TYPE;
     class Layer;
     class Neuron;
+    class StreamBase;
 }
 
 //Not in namespace
@@ -71,6 +77,15 @@ using ValueMap = std::unordered_map<int, NeuronType>;
  * Array type for NeuronType
  */
 using ValueVector = std::vector<NeuronType>;
+
+/**
+ * @brief Save data types. NeuronType is a Neuropia::NeuronType, others are C++ FP data types 
+ * 
+ * 
+ */
+enum class SaveType : uint8_t {
+    NeuronType, Double, Float, LongDouble
+};
 
 //C++ functions are uncomparable and typedef is not hard, thus we make a wrapper functor to help this
 template <typename R, typename ...U>
@@ -118,8 +133,8 @@ public:
 #define ACTIVATION_FUNCTION(name, f) const ActivationFunction name(f, #name);
 #define DERIVATIVE_FUNCTION(name, f) const DerivativeFunction name(f, #name);
 
-constexpr double LeakyReLuFactor = 0.05; //too small makes backpropagation not working
-constexpr double EluFactor = 1.0;
+constexpr NeuronType LeakyReLuFactor = 0.05; //too small makes backpropagation not working
+constexpr NeuronType EluFactor = 1.0;
 
 ACTIVATION_FUNCTION(signumFunction, [](NeuronType value) -> NeuronType{
     return value < 0.0 ? -1.0 : value > 0.0 ? 1.0 : 0.0;
@@ -310,21 +325,23 @@ public:
      * @brief save
      * @param stream
      */
-    void save(std::ofstream& stream) const;
+    void save(std::ofstream& stream, SaveType saveType = SaveType::NeuronType) const;
 
     /**
      * @brief load
      * @param stream
+     * @param savetype 
      * @return
      */
-    bool load(std::ifstream& stream);
+    bool load(std::ifstream& stream, SaveType saveType = SaveType::NeuronType);
 
     /**
      * @brief 
      * @param bytes 
+     * @param savetype 
      * @return 
      */
-    bool load(const std::vector<uint8_t>& bytes);
+    bool load(const std::vector<uint8_t>& bytes, SaveType saveType = SaveType::NeuronType);
 
     /**
      * @brief operator <<
@@ -335,7 +352,7 @@ public:
     friend std::ostream& ::operator<<(std::ostream& output, const Neuron& neuron);
 
     // @internal
-    template<typename S> bool loadNeuron(S& stream);
+    [[nodiscard]] bool loadNeuron(StreamBase& stream, SaveType saveType);
 private:
     
     std::function<NeuronType (NeuronType)> m_af = nullptr;
@@ -524,7 +541,7 @@ public:
      * @param df
      * @return
      */
-    bool train(IteratorItInput inputs, IteratorItOutput expectedOutputs, double learningRate, double lambdaL2, const DerivativeFunction& dfp = nullptr) {
+    bool train(IteratorItInput inputs, IteratorItOutput expectedOutputs, NeuronType learningRate, NeuronType lambdaL2, const DerivativeFunction& dfp = nullptr) {
         const auto seed =
 #ifndef RANDOM_SEED
                 static_cast<unsigned>(std::chrono::system_clock::now().time_since_epoch().count())
@@ -547,7 +564,7 @@ public:
      * @param dropoutRate
      * @param inherit
      */
-    void dropout(double dropoutRate, bool inherit = true);
+    void dropout(NeuronType dropoutRate, bool inherit = true);
 
     /**
      * @brief inverseDropout
@@ -577,7 +594,7 @@ public:
      * @brief save
      * @param stream
      */
-    void save(std::ofstream& stream, const std::unordered_map<std::string, std::string>& meta = {}) const;
+    void save(std::ofstream& stream, const std::unordered_map<std::string, std::string>& meta = {}, SaveType saveType = SaveType::NeuronType) const;
 
 
     /**
@@ -606,7 +623,7 @@ public:
      * @param other
      * @param factor
      */
-    void merge(const Layer& other, double factor);
+    void merge(const Layer& other, NeuronType factor);
 
     /**
      * @brief compare
@@ -694,11 +711,11 @@ public:
     const Layer* outLayer() const;
 
  protected:
-    template<typename S> void loadLayer(S& stream);
+    [[nodiscard]] bool loadLayer(StreamBase& stream, SaveType saveType);
 
     Layer* previousLayer(Layer* current);
     const Layer* previousLayer(const Layer* current) const;
-    bool backpropagation(const ValueVector& out, const ValueVector& expected, double learningRate, double lambdaL2, const DerivativeFunction& df);
+    bool backpropagation(const ValueVector& out, const ValueVector& expected, NeuronType learningRate, NeuronType lambdaL2, const DerivativeFunction& df);
     void dropout(std::default_random_engine& gen);
 
     template<typename IteratorIt>
@@ -738,7 +755,7 @@ private:
     std::unique_ptr<Layer> m_next;
     Layer* m_prev = nullptr;
     ActivationFunction m_activationFunction = nullptr;
-    double m_dropOut = 0.0;
+    NeuronType m_dropOut = 0.0;
     mutable ValueVector m_outBuffer;
 };
 

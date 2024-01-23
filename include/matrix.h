@@ -347,8 +347,8 @@ public:
         return out;
     }
 
-    double norm() const {
-        return std::sqrt(reduce<double>(0.0,  [](double a, const T p) {return a + static_cast<double>(p * p);}));
+    T norm() const {
+        return std::sqrt(reduce<T>(0.0,  [](const T a, const T p) {return a + static_cast<T>(p * p);}));
     }
 
     Matrix transpose() const {
@@ -385,7 +385,7 @@ public:
     }
 
     std::vector<T> toVector(VecDir row = VecDir::col, int index = 0) const {
-        const int sz = row == Matrix<double>::VecDir::row ? cols() : rows();
+        const int sz = row == Matrix<T>::VecDir::row ? cols() : rows();
         //issue when compiling, I have to explicitly define types first
         const std::function<T(int)> f1 = [this, index](int i) {
             return operator()(index, i);

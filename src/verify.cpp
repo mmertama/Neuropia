@@ -85,7 +85,7 @@ std::tuple<int, unsigned> Neuropia::verifyEnseble(const std::vector<Neuropia::La
             });
 
             std::map<unsigned, size_t> hardVotes; //hard we take one got most of outputs for each round
-            std::map<size_t, double> softVotes;   //we sum up the results and take one get more over all results in round
+            std::map<size_t, NeuronType> softVotes;   //we sum up the results and take one get more over all results in round
             for(const auto& network : ensebles) {
                 const auto& outputs = network.feed(inputs.begin(), inputs.end());
 

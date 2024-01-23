@@ -16,7 +16,9 @@ of the things by setting parameters.
 
 #### Use as command line application
 `neuropia` trains a network for classification. 1st parameter is image (or such) data in 3-dimensional [IDX](https://www.fon.hum.uva.nl/praat/manual/IDX_file_format.html),
-second 1-dimensional labels, and 3rd is output name. The training parameters (run `neuropia` without parameters to see available parameters) are added after 3rd parameter as KEY=VALUE pairs. Build and `neuropia` app create networks for you.
+second 1-dimensional labels, and 3rd is output name. The training parameters (run `neuropia` without parameters to see available parameters) are added after 3rd parameter as KEY=VALUE pairs. Build and `neuropia` app create networks for you. 
+
+For embedded system the compiled network size can be reduced with -d float parameter. Even the network is calculated using REALTYPE=double (default)   
 
 e.g.
 ```

@@ -1,22 +1,47 @@
 #include "neuropia.h"
 #include <random>
 #include <iostream>
-#include <fstream>
 #include <cstring>
+#include <optional>
 #include "matrix.h"
 
 using namespace Neuropia;
 
-class ByteStream {
+class Neuropia::StreamBase  {
+public:
+    template<typename T>
+    std::optional<T> read() {
+        T v;
+        constexpr auto sz{sizeof(T)};
+        return sz == read(reinterpret_cast<char*>(&v), sz) ? std::make_optional(v) : std::nullopt;
+    }
+
+    std::optional<std::string> read_string(size_t sz) {
+        std::string str (sz, '\0');
+        return sz == read(str.data(), sz) ? std::make_optional(str) : std::nullopt;
+    }
+
+    template <typename T>
+    std::optional<std::string> read_value() {
+        const auto len = read<T>();
+        if(!len) return std::nullopt;
+        const auto val = read_string(*len);
+        return val;
+    }
+    virtual size_t read(char* target, size_t size) = 0; 
+    virtual bool eof() const = 0; 
+};
+
+class ByteStream : public StreamBase {
 public:
     ByteStream(const std::vector<uint8_t>& vec) : m_vec(vec) {}
-    ByteStream& read(char* target, size_t size) {
+    size_t read(char* target, size_t size) {
         auto sz = std::min(m_vec.size() - m_pos, size);
         if(sz > 0) {
             std::memcpy(target, &m_vec[m_pos], sz);
             m_pos += sz;
         }
-        return *this; 
+        return sz;
     }
     bool eof() const {return m_pos >= m_vec.size();}
 private:
@@ -24,16 +49,28 @@ private:
     size_t m_pos = 0;
 };
 
-class BytePtrStream {
+class IfStream : public StreamBase {
+public:
+    IfStream(std::ifstream& strm) : m_strm{strm} {}
+    size_t read(char* target, size_t size) {
+        m_strm.read(target, size);
+        return m_strm.gcount();
+        }
+    bool eof() const {return m_strm.eof();}    
+private:
+    std::ifstream& m_strm;
+};
+
+class BytePtrStream : public StreamBase {
 public:
     BytePtrStream(const uint8_t* bytes, size_t sz) : m_bytes(bytes), m_sz(sz) {}
-    BytePtrStream& read(char* target, size_t size) {
+    size_t read(char* target, size_t size) {
         auto sz = std::min(m_sz - m_pos, size);
         if(sz > 0) {
             std::memcpy(target, &m_bytes[m_pos], sz);
             m_pos += sz;
         }
-        return *this; 
+        return sz;
     }
     bool eof() const {return m_pos >= m_sz;}
 private:
@@ -42,23 +79,16 @@ private:
     size_t m_pos = 0;
 };
 
-template<typename S>
-std::unordered_map<std::string, std::string> readMeta(S& strm) {
+static
+std::optional<std::unordered_map<std::string, std::string>> readMeta(StreamBase& strm) {
     std::unordered_map<std::string, std::string> map;
-    std::uint8_t sz = 0;
-    strm.read(reinterpret_cast<char*>(&sz), sizeof(sz));
+    const auto sz = strm.read<uint8_t>();
     for(auto i = 0; i < sz; i++) {
-        std::uint8_t keyl = 0;
-        strm.read(reinterpret_cast<char*>(&keyl), sizeof(keyl));
-        std::string key(keyl, '\0');
-        strm.read(&key[0], keyl);
-
-        std::uint8_t vall = 0;
-        strm.read(reinterpret_cast<char*>(&vall), sizeof(vall));
-        std::string val(vall, '\0');
-        strm.read(&val[0], vall);
-
-        map[key] = val;
+        const auto key = strm.read_value<uint8_t>();
+        if(!key) return std::nullopt;
+        const auto val = strm.read_value<uint8_t>();
+        if(!val) return std::nullopt;
+        map[*key] = *val;
     }
     return map;
 }
@@ -124,43 +154,84 @@ Layer::InitStrategy Neuropia::initStrategyMap(ActivationFunction af) {
     return Layer::InitStrategy::Norm;
 }
 
+template <typename T> 
+void write(std::ofstream& stream, NeuronType nt) {
+    const auto v = static_cast<T>(nt);
+    stream.write(reinterpret_cast<const char*>(&v), sizeof(T));
+}
 
-void Neuron::save(std::ofstream& stream) const {
+void Neuron::save(std::ofstream& stream, SaveType saveType) const {
+
+    std::function<void (std::ofstream& stream, NeuronType n)> write_fn = nullptr;
+
+    switch (saveType) {
+    case SaveType::NeuronType:
+        write_fn = &write<NeuronType>;
+        break;
+    case SaveType::Double:
+        write_fn = &write<double>;
+        break;
+    case SaveType::Float:
+        write_fn = &write<float>;
+        break;
+    case SaveType::LongDouble:
+        write_fn = &write<long double>;
+        break;        
+        
+    }
+
+
     const auto sz = static_cast<std::uint32_t>(m_weights.size());
     stream.write(reinterpret_cast<const char*>(&sz), sizeof(sz));
     for(const auto& w : m_weights) {
-        stream.write(reinterpret_cast<const char*>(&w), sizeof(NeuronType));
+        write_fn(stream, w);
     }
-    stream.write(reinterpret_cast<const char*>(&m_bias), sizeof(NeuronType));
+    write_fn(stream, m_bias);
 }
 
 
-bool Neuron::load(std::ifstream& stream) {
-    return loadNeuron(stream);
+bool Neuron::load(std::ifstream& stream, SaveType saveType) {
+    IfStream if_stream{stream};
+    return loadNeuron(if_stream, saveType);
 }
 
-bool Neuron::load(const std::vector<uint8_t>& data) {
+bool Neuron::load(const std::vector<uint8_t>& data, SaveType saveType) {
     ByteStream stream{data};
-    return loadNeuron(stream);
+    return loadNeuron(stream, saveType);
 }
 
-template<typename S>
-bool Neuron::loadNeuron(S& stream) {
+bool Neuron::loadNeuron(StreamBase& stream, SaveType saveType) {
     m_weights.clear();
-    std::uint32_t  sz = 0;
-    stream.read(reinterpret_cast<char*>(&sz), sizeof(sz));
-    if(stream.eof())
+    const auto size = stream.read<uint32_t>();
+    if(!size || stream.eof())
         return false;
-    m_weights.resize(sz);
-    for(size_t s = 0; s < sz; s++) {
+    m_weights.resize(*size);
+    auto neuron_sz = sizeof(NeuronType);
+    switch (saveType) {
+    case SaveType::Float:
+        neuron_sz = sizeof(float);
+        break;
+    case SaveType::Double:
+        neuron_sz = sizeof(double); 
+        break;
+    case SaveType::LongDouble: 
+        neuron_sz = sizeof(long double); 
+        break;
+    case SaveType::NeuronType: 
+        neuron_sz = sizeof(NeuronType); 
+        break;
+    } 
+    for(size_t s = 0; s < *size; s++) {
         NeuronType w{};
-        stream.read(reinterpret_cast<char*>(&w), sizeof(NeuronType));
+        if(neuron_sz != stream.read(reinterpret_cast<char*>(&w), neuron_sz))
+            return false;
         setWeight(s, w);
     }
     if(stream.eof())
         return false;
     NeuronType b;
-    stream.read(reinterpret_cast<char*>(&b), sizeof(NeuronType));
+    if(neuron_sz != stream.read(reinterpret_cast<char*>(&b), neuron_sz))
+        return false;
     setBias(b);
     return true;
 }
@@ -292,7 +363,7 @@ const Layer* Layer::previousLayer(const Layer* current) const {
  //see://www.youtube.com/watch?v=QJoa0JYaX1I - there are several episode
  //video how that works, therefore only the most basic comments are injected here that may
  //help you the implementation vs. explanation on video
-bool Layer::backpropagation(const ValueVector& outValues, const ValueVector& expectedValues, double learningRate, double lambdaL2, const DerivativeFunction& df) {
+bool Layer::backpropagation(const ValueVector& outValues, const ValueVector& expectedValues, NeuronType learningRate, NeuronType lambdaL2, const DerivativeFunction& df) {
 
 //expected values as Matrix
     const auto expected = Matrix<NeuronType>::fromArray(expectedValues, Matrix<NeuronType>::VecDir::row);
@@ -343,8 +414,8 @@ bool Layer::backpropagation(const ValueVector& outValues, const ValueVector& exp
         const auto layerDataTransposed = layerData.transpose();
 
         if(lambdaL2 > 0.0) {
-            const auto L2 = gradients.reduce<double>(0, [](auto a, auto r){return a + (r * r);}) /
-                static_cast<double>(gradients.rows());
+            const auto L2 = gradients.reduce<NeuronType>(0, [](auto a, auto r){return a + (r * r);}) /
+                static_cast<NeuronType>(gradients.rows());
             const auto l = lambdaL2 * L2;
             gradients.mapThis([l](auto v){return v - l;});
         }
@@ -395,8 +466,10 @@ bool Layer::backpropagation(const ValueVector& outValues, const ValueVector& exp
     return true;
 }
 
-constexpr char H[] = {'N', 'E', 'U', '0', '0', '0', '0', '2'};
-static bool Hcomp(const char* h) {
+constexpr char H2[] = {'N', 'E', 'U', '0', '0', '0', '0', '2'};
+constexpr char H3[] = {'N', 'E', 'U', '0', '0', '0', '0', '3'};
+
+static bool Hcomp(const std::string& h, const char* H = H3) {
     for(auto i = 0U; i < sizeof(H); i++)
         if(h[i] != H[i]) {
             return false;
@@ -404,9 +477,10 @@ static bool Hcomp(const char* h) {
     return true;
 }
 
-void Layer::save(std::ofstream& strm, const std::unordered_map<std::string, std::string>& meta) const {
+void Layer::save(std::ofstream& strm, const std::unordered_map<std::string, std::string>& meta, SaveType saveType) const {
     if(isInput()) {
-        strm.write(H, sizeof(H));
+        strm.write(H3, sizeof(H3));
+        strm.write(reinterpret_cast<const char*>(&saveType), sizeof(saveType));
         writeMeta(strm, meta);
     }
 
@@ -421,95 +495,116 @@ void Layer::save(std::ofstream& strm, const std::unordered_map<std::string, std:
     strm.write(reinterpret_cast<const char*>(&sz), sizeof(sz));
 
     for(const auto& n : m_neurons) {
-        n.save(strm);
-        }
+        n.save(strm, saveType);
+    }
 
     if(m_next) {
-        m_next->save(strm);
+        m_next->save(strm, {}, saveType);
     }
 }
 
-std::optional<std::unordered_map<std::string, std::string>> Layer::load(std::ifstream& strm)  {
-
-    char hdr[sizeof(H)];
-    strm.read(hdr, sizeof(H));
-    if(!Hcomp(hdr)) {
-        std::cerr << "Corrupted import stream or wrong version" << std::endl;
-        return std::nullopt;
+static
+std::optional<SaveType> read_header(StreamBase& stream) {
+    const auto hdr =  stream.read_string(sizeof(H3));
+    if(hdr) {
+        if(Hcomp(*hdr)) {
+            const auto save_type = stream.read<uint8_t>();
+            if(save_type && *save_type <= static_cast<uint8_t>(SaveType::LongDouble) ) {
+                return std::make_optional(static_cast<SaveType>(*save_type));
+            }
+        }
+        if(Hcomp(*hdr, H2)) {
+            return SaveType::NeuronType;
+        }
+    }    
+    std::cerr << "Corrupted import stream or wrong version" << std::endl;
+    return std::nullopt;
     }
+
+std::optional<std::unordered_map<std::string, std::string>> Layer::load(std::ifstream& if_strm)  {
+    
+    IfStream strm(if_strm);
+    
+    const auto save_type = read_header(strm);
+    if(!save_type)
+        return std::nullopt;
 
     const auto meta = readMeta(strm);
 
-    loadLayer(strm);
+    if(meta && !loadLayer(strm, *save_type))
+        return std::nullopt;
     return meta;
     }
 
 std::optional<std::unordered_map<std::string, std::string>> Layer::load(const std::vector<uint8_t>& data) {
-    char hdr[sizeof(H)];
     ByteStream strm(data);
-    strm.read(hdr, sizeof(H));
-    if(!Hcomp(hdr)) {
-        std::cerr << "Corrupted import stream or wrong version" << std::endl;
+    
+    const auto save_type = read_header(strm);
+    if(!save_type)
         return std::nullopt;
-    }
 
     const auto meta = readMeta(strm);
 
-    loadLayer(strm);
+    if(meta && !loadLayer(strm, *save_type))
+        return std::nullopt;
     return meta;
     }
 
 std::optional<std::unordered_map<std::string, std::string>> Layer::load(const uint8_t* bytes, size_t sz) {
-    char hdr[sizeof(H)];
     BytePtrStream strm(bytes, sz);
-    strm.read(hdr, sizeof(H));
-    if(!Hcomp(hdr)) {
-        std::cerr << "Corrupted import stream or wrong version" << std::endl;
+    
+    const auto save_type = read_header(strm);
+    if(!save_type)
         return std::nullopt;
-    }
 
     const auto meta = readMeta(strm);
 
-    loadLayer(strm);
+    if(meta && !loadLayer(strm, *save_type))
+        return std::nullopt;
     return meta;
     }
 
 
-template<typename S>
-void Layer::loadLayer(S &strm) {
-    std::uint8_t namel = 0;
-    strm.read(reinterpret_cast<char*>(&namel), sizeof(namel));
+bool Layer::loadLayer(StreamBase &strm, SaveType saveType) {
+    const auto name = strm.read_value<uint8_t>();
 
-    std::string name(namel, '\0');
-    strm.read(&name[0], namel);
+    if(!name)
+        return false;
 
-    if(signumFunction.name() == name)
+    if(signumFunction.name() == *name)
         m_activationFunction = signumFunction;
-    else if(binaryFunction.name() == name)
+    else if(binaryFunction.name() == *name)
         m_activationFunction = binaryFunction;
-    else if(sigmoidFunction.name() == name)
+    else if(sigmoidFunction.name() == *name)
         m_activationFunction = sigmoidFunction;
-    else if(reLuFunction.name() == name)
+    else if(reLuFunction.name() == *name)
         m_activationFunction = reLuFunction;
-    else if(eluFunction.name() == name)
+    else if(eluFunction.name() == *name)
         m_activationFunction = eluFunction;
+    else
+        return false;    
 
-    std::uint32_t  dropout = 0;
-    strm.read(reinterpret_cast<char*>(&dropout), sizeof(dropout));
-    m_dropOut = static_cast<double>(dropout) / 100000.;
+    const auto dropout = strm.read<uint32_t>();
+    if(!dropout)
+        return false;
 
+    m_dropOut = static_cast<NeuronType>(*dropout) / 100000.;
 
-   std::uint32_t  count = 0;
-   strm.read(reinterpret_cast<char*>(&count), sizeof(count));
-   fill(count, Neuron(m_activationFunction));
+    const auto count = strm.read<uint32_t>();
+    if(!count)
+        return false;
+
+   fill(*count, Neuron(m_activationFunction));
 
     for(auto& n : m_neurons) {
-        n.loadNeuron(strm);
+        if(!n.loadNeuron(strm, saveType))
+            return false;
        }
 
     if(!strm.eof()) {
         auto layer = new Layer();
-        layer->loadLayer(strm);
+        if(!layer->loadLayer(strm, saveType))
+            return false;
         if(layer->size() > 0) {
             m_next.reset(layer);
             m_next->m_prev = this;
@@ -517,6 +612,7 @@ void Layer::loadLayer(S &strm) {
             delete layer; //bit clumsy
         }
     }
+    return true;
 }
 
 
@@ -544,7 +640,7 @@ Layer& Layer::operator=(const Layer& other) noexcept {
     return *this;
 }
 
-void Layer::merge(const Layer& other, double factor) {
+void Layer::merge(const Layer& other, NeuronType factor) {
     neuropia_assert(other.size() == size());
     neuropia_assert(factor >= 0 && factor <= 1.0);
     if(!isInput()) {
@@ -598,7 +694,7 @@ Layer::~Layer() {
 
 void Layer::initialize(InitStrategy strategy) {
     if(!isInput()) {  //actually not needed as setweights wont do notting for input layers
-        double r = 0;
+        NeuronType r = 0;
         switch (strategy) {
         case Layer::InitStrategy::Norm:
             r = 1.0;
@@ -644,7 +740,7 @@ void Layer::dropout(std::default_random_engine& gen) {
     if(m_dropOut > 0.0) {
         if(!isOutput()) { // outputs are not dropped
             const auto sz = static_cast<unsigned>(m_neurons.size());
-            const auto dropCount = static_cast<unsigned>(static_cast<double>(sz * m_dropOut));
+            const auto dropCount = static_cast<unsigned>(static_cast<NeuronType>(sz * m_dropOut));
             std::vector<bool> set(sz);
             std::fill(set.begin(), set.end(), false);
             auto count = 0U;
@@ -688,7 +784,7 @@ void Layer::inverseDropout(bool inherit) {
         m_next->inverseDropout();
 }
 
-void Layer::dropout(double dropoutRate, bool inherit) {
+void Layer::dropout(NeuronType dropoutRate, bool inherit) {
     neuropia_assert_always(dropoutRate >= 0.0 && dropoutRate < 1.0, "dropoutRate >= 0 && dropoutRate < 1.0");
     if(m_dropOut > 0.0) {
         inverseDropout(false);

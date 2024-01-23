@@ -9,9 +9,9 @@
 #include <vector>
 #include <unordered_map>
 #include <optional>
+#include "neuropia.h"
 
 namespace Neuropia {
-class Layer;
 
 void timed(const std::function<void ()>& f, const std::string& label = "");
 
@@ -19,9 +19,9 @@ size_t iterator(size_t iterations, const std::function<bool (size_t it)>& f);
 
 size_t iterator(size_t iterations, const std::function<bool ()>& f);
 
-void save(const std::string& filename, const Layer& network, const std::unordered_map<std::string, std::string>& = {});
+void save(const std::string& filename, const Layer& network, const std::unordered_map<std::string, std::string>& = {}, SaveType savetype = SaveType::NeuronType);
 
-void save(const std::string& filename, const std::vector<Layer>& ensembles);
+void save(const std::string& filename, const std::vector<Layer>& ensembles, SaveType savetype = SaveType::NeuronType);
 
 std::vector<Layer> loadEnsemble(const std::string& filename);
 

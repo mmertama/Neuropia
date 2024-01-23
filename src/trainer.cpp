@@ -22,11 +22,11 @@ bool Trainer::train() {
         if(m_maxTrainTime >= MaxTrainTime) {
             if(!m_quiet)
                 persentage(it + 1, m_iterations);
-            m_learningRate += (1.0 / static_cast<double>(m_iterations)) * (m_learningRateMin - m_learningRateMax);
+            m_learningRate += (1.0 / static_cast<NeuronType>(m_iterations)) * (m_learningRateMin - m_learningRateMax);
         } else {
             m_passedIterations = it;
             const auto stop = std::chrono::high_resolution_clock::now();
-            const auto delta = static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(stop - m_start).count());
+            const auto delta = static_cast<NeuronType>(std::chrono::duration_cast<std::chrono::seconds>(stop - m_start).count());
             if(delta > m_maxTrainTime) {
                 return false;
             }
@@ -34,7 +34,7 @@ bool Trainer::train() {
             m_gap = delta;
             if(!m_quiet)
                 persentage(delta, m_maxTrainTime, " " + std::to_string(m_learningRate));
-            this->m_learningRate += (static_cast<double>(change) / static_cast<double>(m_maxTrainTime)) * (m_learningRateMin - m_learningRateMax);
+            this->m_learningRate += (static_cast<NeuronType>(change) / static_cast<NeuronType>(m_maxTrainTime)) * (m_learningRateMin - m_learningRateMax);
         }
 
         const auto imageSize = m_images.size(1) * m_images.size(2);

@@ -7,6 +7,8 @@
 #include <memory>
 #include <map>
 #include <functional>
+#include "neuropia.h"
+
 
 /**
  * @brief Wraps Neuropia behind a simple interface.
@@ -19,11 +21,13 @@ using NeuropiaPtr = std::shared_ptr<NeuropiaEnv>;
 using ParamType = std::map<std::string, std::vector<std::string>>;
 
 
+
 enum class TrainType {
     Basic,
     Evolutional,
     Parallel
 };
+
 
 
 /**
@@ -45,9 +49,9 @@ void free(NeuropiaPtr env);
  * 
  * @param env 
  * @param input 
- * @return std::vector<double> 
+ * @return std::vector<NeuronType> 
  */
-std::vector<double> feed(NeuropiaPtr env, const std::vector<double>& input);
+std::vector<Neuropia::NeuronType> feed(NeuropiaPtr env, const std::vector<Neuropia::NeuronType>& input);
 
 /**
  * @brief Set the Param values, see parameter names from params.h or default.h, where te default parameters defined
@@ -96,7 +100,7 @@ bool train(const NeuropiaPtr& env, TrainType type);
  * @param env 
  * @param filename 
  */
-void save(const NeuropiaPtr& env, const std::string& filename);
+void save(const NeuropiaPtr& env, const std::string& filename, Neuropia::SaveType savetype = Neuropia::SaveType::NeuronType);
 
 /**
  * @brief Load network from a file.

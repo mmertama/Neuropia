@@ -6,10 +6,12 @@
 #include "neuropia.h"
 #include "idxreader.h"
 
-constexpr double MaxTrainTime = 999999;
 
 namespace Neuropia {
     class Params;
+
+
+constexpr NeuronType MaxTrainTime = 999999;
 
 class TrainerBase {
 public:
@@ -26,18 +28,18 @@ protected:
     Neuropia::IdxRandomReader<unsigned char> m_images;
     Neuropia::IdxRandomReader<unsigned char> m_labels;
     Neuropia::Layer m_network;
-    const std::vector<double> m_dropoutRate;
+    const std::vector<NeuronType> m_dropoutRate;
     size_t m_passedIterations = 0;
     std::chrono::high_resolution_clock::time_point m_start;
-    double m_learningRate;
-    const double m_learningRateMin;
-    const double m_learningRateMax;
-    double m_gap = 0;
+    NeuronType m_learningRate;
+    const NeuronType m_learningRateMin;
+    const NeuronType m_learningRateMax;
+    NeuronType m_gap = 0;
     unsigned m_iterations;
     unsigned m_testVerifyFrequency;
-    double m_lambdaL2;
+    NeuronType m_lambdaL2;
     bool m_quiet;
-    const double m_maxTrainTime;
+    const NeuronType m_maxTrainTime;
     const std::function<void (const std::function<void ()>&, const std::string&)> m_control;
 };
 }

@@ -90,7 +90,7 @@ public:
         m_testImages(imageFile, IoBufSz), m_testLabels(labelFile, IoBufSz) {
     }
     bool verify();
-    double verifyResult() const {return m_testLabels.size() ? static_cast<double>(m_found) / static_cast<double>(m_testLabels.size()) : -1.0;}
+    NeuronType verifyResult() const {return m_testLabels.size() ? static_cast<NeuronType>(m_found) / static_cast<NeuronType>(m_testLabels.size()) : -1.0;}
 private:
     const Neuropia::Layer& m_network;
     Neuropia::IdxReader<unsigned char> m_testImages;
@@ -153,7 +153,7 @@ void NeuropiaSimple::free(NeuropiaPtr env) {
     env.reset();
 }
 
-std::vector<double> NeuropiaSimple::feed(NeuropiaPtr env, const std::vector<double>& input) {
+std::vector<NeuronType> NeuropiaSimple::feed(NeuropiaPtr env, const std::vector<NeuronType>& input) {
     ASSERT(env && env->m_network.isValid());
     return env->m_network.feed(input);
 }
@@ -220,10 +220,10 @@ bool NeuropiaSimple::train(const NeuropiaPtr& env, TrainType type) {
    return true;
 }
 
-void NeuropiaSimple::save(const NeuropiaPtr& env, const std::string& filename) {
+void NeuropiaSimple::save(const NeuropiaPtr& env, const std::string& filename, SaveType savetype) {
     ASSERT(env && env->m_network.isValid());
     const auto params = env->m_params.toMap();
-    Neuropia::save(filename, env->m_network, params);
+    Neuropia::save(filename, env->m_network, params, savetype);
 }
 
 bool NeuropiaSimple::load(const NeuropiaPtr& env, const std::string& filename) {
@@ -305,10 +305,10 @@ bool SimpleTrainer::train() {
     if(m_maxTrainTime >= MaxTrainTime) {
         if(!m_quiet)
             persentage(m_passedIterations, m_iterations);
-        m_learningRate += (1.0 / static_cast<double>(m_iterations)) * (m_learningRateMin - m_learningRateMax);
+        m_learningRate += (1.0 / static_cast<NeuronType>(m_iterations)) * (m_learningRateMin - m_learningRateMax);
     } else {
         const auto stop = std::chrono::high_resolution_clock::now();
-        const auto delta = static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(stop - m_start).count());
+        const auto delta = static_cast<NeuronType>(std::chrono::duration_cast<std::chrono::seconds>(stop - m_start).count());
         if(delta > m_maxTrainTime) {
             return false;
         }
@@ -316,7 +316,7 @@ bool SimpleTrainer::train() {
         m_gap = delta;
         if(!m_quiet)
             persentage(delta, m_maxTrainTime, " " + std::to_string(m_learningRate));
-        this->m_learningRate += (static_cast<double>(change) / static_cast<double>(m_maxTrainTime)) * (m_learningRateMin - m_learningRateMax);
+        this->m_learningRate += (static_cast<NeuronType>(change) / static_cast<NeuronType>(m_maxTrainTime)) * (m_learningRateMin - m_learningRateMax);
     }
 
     const auto imageSize = m_images.size(1) * m_images.size(2);
@@ -429,7 +429,7 @@ bool isNetworkValid(const NeuropiaPtr& env) {
     return env->m_network.isValid();
 }
 
-double verifyResult(const NeuropiaPtr& env) {
+NeuronType verifyResult(const NeuropiaPtr& env) {
     ASSERT(env);
     if(env->m_verifier) {
         env->m_logStream->freeze(false);
@@ -471,11 +471,11 @@ std::vector<T> fromJSArray(const emscripten::val& v) {
     return vec;
 }
 
-std::vector<double> feed(NeuropiaPtr env, emscripten::val a) {
-    const auto image = fromJSArray<double>(a);
+std::vector<NeuronType> feed(NeuropiaPtr env, emscripten::val a) {
+    const auto image = fromJSArray<NeuronType>(a);
 
     std::vector<unsigned char> test(image.size());
-    std::transform(image.begin(), image.end(), test.begin(), [](double c) {
+    std::transform(image.begin(), image.end(), test.begin(), [](NeuronType c) {
         ASSERT(c >=  0 && c <= 255);
         return static_cast<unsigned char>(c);
     });
@@ -488,7 +488,7 @@ std::vector<double> feed(NeuropiaPtr env, emscripten::val a) {
 */
 
     std::vector<Neuropia::NeuronType> inputs(image.size());
-    std::transform(image.begin(), image.end(), inputs.begin(), [](double c) {
+    std::transform(image.begin(), image.end(), inputs.begin(), [](NeuronType c) {
         return Neuropia::normalize(static_cast<Neuropia::NeuronType>(c), 0., 255.);
     });
     return NeuropiaSimple::feed(env, inputs);
@@ -503,7 +503,7 @@ std::vector<double> feed(NeuropiaPtr env, emscripten::val a) {
 #ifdef __EMSCRIPTEN__
 EMSCRIPTEN_BINDINGS(Neuropia) {
     class_<NeuropiaEnv>("Neuropia").smart_ptr_constructor("Neuropia", &std::make_shared<NeuropiaEnv, const std::string&>);
-    register_vector<double>("ValueVector");
+    register_vector<NeuronType>("ValueVector");
     register_vector<std::string>("StringVector");
     register_map<ParamType::key_type, ParamType::mapped_type>("ParamMap");
     function("create", &NeuropiaSimple::create);

@@ -31,21 +31,21 @@ Neuropia::timed([&]() {
         if(m_maxTrainTime >= MaxTrainTime) {
             if(!this->m_quiet)
                 std::cout << "\r"
-                          << std::setprecision(2) << (100.0 * (static_cast<double>(progressCount) / static_cast<double>(load))) << '%' << std::flush;
+                          << std::setprecision(2) << (100.0 * (static_cast<NeuronType>(progressCount) / static_cast<NeuronType>(load))) << '%' << std::flush;
         } else {
             this->m_passedIterations = it;
             const auto stop = std::chrono::high_resolution_clock::now();
-            const auto delta = static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(stop - this->m_start).count());
+            const auto delta = static_cast<NeuronType>(std::chrono::duration_cast<std::chrono::seconds>(stop - this->m_start).count());
             if(delta > this->m_maxTrainTime) {
                 return false;    //out of time, exit
             }
             const auto change = delta - this->m_gap;
             this->m_gap = delta;
-            this->m_learningRate += (static_cast<double>(change) / static_cast<double>(this->m_maxTrainTime)) * (this->m_learningRateMin - this->m_learningRateMax);
+            this->m_learningRate += (static_cast<NeuronType>(change) / static_cast<NeuronType>(this->m_maxTrainTime)) * (this->m_learningRateMin - this->m_learningRateMax);
 
             if(!this->m_quiet)
                 std::cout << "\r"
-                          << std::setprecision(3) << (100.0 * (delta / static_cast<double>(this->m_maxTrainTime))) << '%' << std::flush;
+                          << std::setprecision(3) << (100.0 * (delta / static_cast<NeuronType>(this->m_maxTrainTime))) << '%' << std::flush;
         }
 
         //copy network for jobs
@@ -86,7 +86,7 @@ Neuropia::timed([&]() {
 
         //then merge the results by caclucate each offspring relative contribution
         for(const auto& offspring : offsprings) {
-            this->m_network.merge(offspring, 1.0 / static_cast<double>(m_jobs));
+            this->m_network.merge(offspring, 1.0 / static_cast<NeuronType>(m_jobs));
         }
 
         return true;
