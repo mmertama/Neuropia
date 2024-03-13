@@ -84,7 +84,7 @@ using ValueVector = std::vector<NeuronType>;
  * 
  */
 enum class SaveType : uint8_t {
-    NeuronType, Double, Float, LongDouble
+    SameAsNeuronType, Double, Float, LongDouble
 };
 
 //C++ functions are uncomparable and typedef is not hard, thus we make a wrapper functor to help this
@@ -104,7 +104,7 @@ protected:
     NFunction(std::function<R(U...)> f, const std::string& name):  m_f(f), m_name(name){}
 private:
    std::function<R(U...)> m_f = nullptr;
-   std::string m_name;
+   std::string m_name = {};
 };
 
 /**
@@ -325,7 +325,7 @@ public:
      * @brief save
      * @param stream
      */
-    void save(std::ofstream& stream, SaveType saveType = SaveType::NeuronType) const;
+    void save(std::ofstream& stream, SaveType saveType = SaveType::SameAsNeuronType) const;
 
     /**
      * @brief load
@@ -333,7 +333,7 @@ public:
      * @param savetype 
      * @return
      */
-    bool load(std::ifstream& stream, SaveType saveType = SaveType::NeuronType);
+    bool load(std::ifstream& stream, SaveType saveType = SaveType::SameAsNeuronType);
 
     /**
      * @brief 
@@ -341,7 +341,7 @@ public:
      * @param savetype 
      * @return 
      */
-    bool load(const std::vector<uint8_t>& bytes, SaveType saveType = SaveType::NeuronType);
+    bool load(const std::vector<uint8_t>& bytes, SaveType saveType = SaveType::SameAsNeuronType);
 
     /**
      * @brief operator <<
@@ -356,7 +356,7 @@ public:
 private:
     
     std::function<NeuronType (NeuronType)> m_af = nullptr;
-    ValueVector m_weights;
+    ValueVector m_weights = {};
     NeuronType m_bias = 1;
 };
 
@@ -491,7 +491,7 @@ public:
      */
     Layer& join(IteratorIt begin, IteratorIt end, const Neuron& proto) {
         for(auto it = begin; it != end; it++) {
-            join(*it, proto);
+            join(static_cast<size_t>(*it), proto);
         }
         return *this;
     }
@@ -594,7 +594,7 @@ public:
      * @brief save
      * @param stream
      */
-    void save(std::ofstream& stream, const std::unordered_map<std::string, std::string>& meta = {}, SaveType saveType = SaveType::NeuronType) const;
+    void save(std::ofstream& stream, const std::unordered_map<std::string, std::string>& meta = {}, SaveType saveType = SaveType::SameAsNeuronType) const;
 
 
     /**
@@ -751,12 +751,12 @@ public:
     }
 
 private:
-    std::vector<Neuron> m_neurons;
-    std::unique_ptr<Layer> m_next;
+    std::vector<Neuron> m_neurons = {};
+    std::unique_ptr<Layer> m_next = nullptr;
     Layer* m_prev = nullptr;
     ActivationFunction m_activationFunction = nullptr;
     NeuronType m_dropOut = 0.0;
-    mutable ValueVector m_outBuffer;
+    mutable ValueVector m_outBuffer = {};
 };
 
 
@@ -774,7 +774,7 @@ NeuronType Neuron::feed(const IT& begin, const IT& end) const {
     const auto sz = static_cast<size_t>(std::distance(begin, end));
     neuropia_assert(m_weights.size() >= sz);
     for(size_t i = 0; i < sz; i++) {
-        sum += (m_weights[i] * *(begin + i));
+        sum += (m_weights[i] * *(begin + static_cast<Neuropia::ValueVector::difference_type>(i)));
     }
     return m_af(sum);
 }

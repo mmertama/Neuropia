@@ -320,9 +320,9 @@ bool SimpleTrainer::train() {
     }
 
     const auto imageSize = m_images.size(1) * m_images.size(2);
-    const auto at = m_images.random();
-    const auto image = m_images.next(at, imageSize);
-    const auto label = static_cast<unsigned>(m_labels.next(at));
+    const auto at = m_random.random(m_images.size());
+    const auto image = m_images.readAt(at, imageSize);
+    const auto label = static_cast<unsigned>(m_labels.readAt(at));
 
 #ifdef DEBUG_SHOW
     Neuropia::printimage(image.data()); //ASCII print images
@@ -355,8 +355,8 @@ bool SimpleVerifier::verify() {
     if(m_position >= sz)
         return false;
     const auto imageSize = m_testImages.size(1) * m_testImages.size(2);
-    const auto image = m_testImages.next(imageSize);
-    const auto label = static_cast<unsigned>(m_testLabels.next());
+    const auto image = m_testImages.read(imageSize);
+    const auto label = static_cast<unsigned>(m_testLabels.read());
 
     std::vector<Neuropia::NeuronType> inputs(imageSize);
 
@@ -440,17 +440,17 @@ NeuronType verifyResult(const NeuropiaPtr& env) {
 
 int showImage(const NeuropiaPtr& env, const std::string& imageName, const std::string& labelName, unsigned index) {
     ASSERT(env);
-    Neuropia::IdxRandomReader<std::array<unsigned char, 28 * 28>> idxi(Neuropia::absPath(env->m_root, imageName));
+    Neuropia::IdxReader<std::array<unsigned char, 28 * 28>> idxi(Neuropia::absPath(env->m_root, imageName));
     if(!idxi.ok() || idxi.dimensions() != 3)
         return -1;
 
-    Neuropia::IdxRandomReader<unsigned char> idxl(Neuropia::absPath(env->m_root, labelName));
+    Neuropia::IdxReader<unsigned char> idxl(Neuropia::absPath(env->m_root, labelName));
     if(!idxl.ok() || idxl.dimensions() != 1)
         return -2;
 
-    const auto data = idxi.next(index);
+    const auto data = idxi.readAt(index);
     Neuropia::printimage(data.data());
-    return idxl.next(index);
+    return idxl.readAt(index);
 }
 
 

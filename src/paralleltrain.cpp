@@ -49,7 +49,7 @@ Neuropia::timed([&]() {
         }
 
         //copy network for jobs
-        std::fill(offsprings.begin(), offsprings.end(), this->m_network);
+        std::fill(offsprings.begin(), offsprings.end(), m_network);
         const auto inputSize = m_images.size(1) * m_images.size(2);
 
         for(auto job = 0U; job < m_jobs; ++job)  {
@@ -58,8 +58,8 @@ Neuropia::timed([&]() {
             batchData.resize(m_batchSize);
 
             for(auto i = 0U; i < m_batchSize; i++)  {
-                const auto at = this->m_images.random();
-                batchData[i] = {this->m_images.next(at, inputSize), this->m_labels.next(at)};
+                const auto at = m_random.random(m_images.size());
+                batchData[i] = {m_images.readAt(at, inputSize), m_labels.readAt(at)};
             }
 
             // start thread

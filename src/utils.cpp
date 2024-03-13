@@ -1,6 +1,7 @@
 #include <chrono>       // std::chrono::system_clock
 #include <fstream>
 #include <algorithm>
+#include <random>
 #include "neuropia.h"
 #include "utils.h"
 #include "matrix.h"
@@ -129,3 +130,17 @@ std::string Neuropia::absPath(const std::string& root, const std::string& relati
     return root.empty() || (!relativePath.empty() && relativePath.front() == '/') ?
         relativePath : root + "/" + relativePath;
 }
+
+Random::Random(unsigned seed) : m_gen(seed) {}
+
+Random::Random() : m_gen(
+#ifndef RANDOM_SEED
+    static_cast<unsigned>(std::chrono::system_clock::now().time_since_epoch().count())
+#else
+    RANDOM_SEED
+#endif
+) {}
+
+size_t Random::random(size_t atop) {
+    return (m_gen() % atop);
+    }

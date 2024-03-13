@@ -19,9 +19,9 @@ size_t iterator(size_t iterations, const std::function<bool (size_t it)>& f);
 
 size_t iterator(size_t iterations, const std::function<bool ()>& f);
 
-void save(const std::string& filename, const Layer& network, const std::unordered_map<std::string, std::string>& = {}, SaveType savetype = SaveType::NeuronType);
+void save(const std::string& filename, const Layer& network, const std::unordered_map<std::string, std::string>& = {}, SaveType savetype = SaveType::SameAsNeuronType);
 
-void save(const std::string& filename, const std::vector<Layer>& ensembles, SaveType savetype = SaveType::NeuronType);
+void save(const std::string& filename, const std::vector<Layer>& ensembles, SaveType savetype = SaveType::SameAsNeuronType);
 
 std::vector<Layer> loadEnsemble(const std::string& filename);
 
@@ -40,6 +40,16 @@ void persentage(T1 fraction, T2 total, const std::string& extra = "") {
         const auto f = 100.0 * (static_cast<double>(fraction) / static_cast<double>(total));
         std::cout << "\r" << std::fixed << std::setprecision(3) << f << '%' << extra << std::flush;
 }
+
+class Random {
+public:
+    explicit Random(unsigned seed);
+    Random();
+    size_t random(size_t atop);
+private:
+    std::default_random_engine m_gen;
+};
+
 }
 
 template <typename T>
@@ -52,6 +62,8 @@ std::ostream& operator << (std::ostream& strm, const std::vector<T>& values) {
     strm << ']';
     return strm;
 }
+
+
 
 
 #endif // UTILS_H

@@ -100,7 +100,7 @@ bool train(const NeuropiaPtr& env, TrainType type);
  * @param env 
  * @param filename 
  */
-void save(const NeuropiaPtr& env, const std::string& filename, Neuropia::SaveType savetype = Neuropia::SaveType::NeuronType);
+void save(const NeuropiaPtr& env, const std::string& filename, Neuropia::SaveType savetype = Neuropia::SaveType::SameAsNeuronType);
 
 /**
  * @brief Load network from a file.

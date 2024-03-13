@@ -27,8 +27,8 @@ std::tuple<int, unsigned> Neuropia::verify(const Neuropia::Layer& network,
         const auto imageSize = testImages.size(1) * testImages.size(2);
         std::vector<Neuropia::NeuronType> inputs(imageSize);
         for(auto i = from; i < std::min(count, testLabels.size()); i++) {
-            const auto image = testImages.next(imageSize);
-            const auto label = static_cast<unsigned>(testLabels.next());
+            const auto image = testImages.read(imageSize);
+            const auto label = static_cast<unsigned>(testLabels.read());
 
             std::transform(image.begin(), image.end(), inputs.begin(), [](unsigned char c) {
                 return Neuropia::normalize(static_cast<Neuropia::NeuronType>(c), 0, 255);
@@ -77,8 +77,8 @@ std::tuple<int, unsigned> Neuropia::verifyEnseble(const std::vector<Neuropia::La
     Neuropia::timed([&]() {
         std::vector<Neuropia::NeuronType> inputs(imageSize);
         for(auto i = from; i < std::min(count, testLabels.size()); i++) {
-            const auto image = testImages.next(imageSize);
-            const size_t label = testLabels.next();
+            const auto image = testImages.read(imageSize);
+            const size_t label = testLabels.read();
 
             std::transform(image.begin(), image.end(), inputs.begin(), [](auto c) {
                 return Neuropia::normalize(static_cast<Neuropia::NeuronType>(c), 0, 255);

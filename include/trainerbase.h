@@ -5,6 +5,7 @@
 #include <vector>
 #include "neuropia.h"
 #include "idxreader.h"
+#include "utils.h"
 
 
 namespace Neuropia {
@@ -25,8 +26,8 @@ public:
 protected:
     const std::string m_imageFile;
     const std::string m_labelFile;
-    Neuropia::IdxRandomReader<unsigned char> m_images;
-    Neuropia::IdxRandomReader<unsigned char> m_labels;
+    Neuropia::IdxReader<unsigned char> m_images;
+    Neuropia::IdxReader<unsigned char> m_labels;
     Neuropia::Layer m_network;
     const std::vector<NeuronType> m_dropoutRate;
     size_t m_passedIterations = 0;
@@ -41,6 +42,7 @@ protected:
     bool m_quiet;
     const NeuronType m_maxTrainTime;
     const std::function<void (const std::function<void ()>&, const std::string&)> m_control;
+    Neuropia::Random m_random;
 };
 }
 

@@ -30,6 +30,7 @@ public:
     }
     virtual size_t read(char* target, size_t size) = 0; 
     virtual bool eof() const = 0; 
+    virtual ~StreamBase() = default;
 };
 
 class ByteStream : public StreamBase {
@@ -53,8 +54,8 @@ class IfStream : public StreamBase {
 public:
     IfStream(std::ifstream& strm) : m_strm{strm} {}
     size_t read(char* target, size_t size) {
-        m_strm.read(target, size);
-        return m_strm.gcount();
+        m_strm.read(target, static_cast<std::streamsize>(size));
+        return static_cast<std::size_t>(m_strm.gcount());
         }
     bool eof() const {return m_strm.eof();}    
 private:
@@ -73,6 +74,8 @@ public:
         return sz;
     }
     bool eof() const {return m_pos >= m_sz;}
+    BytePtrStream(const BytePtrStream&) = delete;
+    BytePtrStream& operator=(const BytePtrStream&) = delete;
 private:
     const uint8_t* m_bytes;
     const size_t m_sz;
@@ -165,7 +168,7 @@ void Neuron::save(std::ofstream& stream, SaveType saveType) const {
     std::function<void (std::ofstream& stream, NeuronType n)> write_fn = nullptr;
 
     switch (saveType) {
-    case SaveType::NeuronType:
+    case SaveType::SameAsNeuronType:
         write_fn = &write<NeuronType>;
         break;
     case SaveType::Double:
@@ -177,7 +180,8 @@ void Neuron::save(std::ofstream& stream, SaveType saveType) const {
     case SaveType::LongDouble:
         write_fn = &write<long double>;
         break;        
-        
+    default:
+        neuropia_assert_always(false, "bad");    
     }
 
 
@@ -217,9 +221,11 @@ bool Neuron::loadNeuron(StreamBase& stream, SaveType saveType) {
     case SaveType::LongDouble: 
         neuron_sz = sizeof(long double); 
         break;
-    case SaveType::NeuronType: 
+    case SaveType::SameAsNeuronType: 
         neuron_sz = sizeof(NeuronType); 
         break;
+    default:
+        neuropia_assert_always(false, "bad");        
     } 
     for(size_t s = 0; s < *size; s++) {
         NeuronType w{};
@@ -514,7 +520,7 @@ std::optional<SaveType> read_header(StreamBase& stream) {
             }
         }
         if(Hcomp(*hdr, H2)) {
-            return SaveType::NeuronType;
+            return SaveType::SameAsNeuronType;
         }
     }    
     std::cerr << "Corrupted import stream or wrong version" << std::endl;
@@ -700,11 +706,13 @@ void Layer::initialize(InitStrategy strategy) {
             r = 1.0;
             break;
         case Layer::InitStrategy::Logistic:
-             r = std::sqrt(6.0 / (m_neurons.size() + m_prev->m_neurons.size()));
+             r = std::sqrt(6.0 / static_cast<double>(m_neurons.size() + m_prev->m_neurons.size()));
             break;
         case Layer::InitStrategy::ReLu:
-             r = std::sqrt(2.0) *  std::sqrt(6.0 / (m_neurons.size() + m_prev->m_neurons.size()));
+             r = std::sqrt(2.0) *  std::sqrt(6.0 / static_cast<double>(m_neurons.size() + m_prev->m_neurons.size()));
             break;
+        default:
+            neuropia_assert_always(false, "bad");        
         }
 
         unsigned seed =

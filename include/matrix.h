@@ -54,7 +54,7 @@ private:
             Node* next;
             T* block;
         };
-        std::map<size_t, Node*> nodes;
+        std::map<size_t, Node*> nodes = {};
         ~Pool() {
             std::allocator<char> byteAllocator;
             for(auto it = nodes.begin(); it != nodes.end(); it++) {
@@ -98,7 +98,7 @@ public:
         }
     }
 private:
-    thread_local static Pool  m_pool;
+    thread_local static Pool m_pool;
 };
 
 template <class T>
@@ -294,7 +294,9 @@ public:
     std::function<T(decltype(*begin)) > adaptor = [](const auto& v) {return v;}) {
         auto it = begin;
         const auto len = std::distance(begin, end);
-        Matrix<T> m(colLen <= 0 ? len : colLen, colLen <= 0 ? 1 : len / colLen);
+        Matrix<T> m(
+            static_cast<index_type>(colLen <= 0 ? len : colLen),
+            static_cast<index_type>(colLen <= 0 ? 1 : len / colLen));
         if(len > 0) {
             for(auto r = 0U; r < m.rows(); r++) {
                 for(auto c = 0U; c < m.cols(); c++) {
@@ -315,11 +317,12 @@ public:
     static Matrix<T> fromIterator(typename C::const_iterator begin,
                                   typename C::const_iterator end,
                                   index_type colLen,
-                                  std::function<T(decltype(*begin), int c) > adaptor) {
-        Matrix<T> m(colLen, std::distance(begin, end));
+                                  std::function<T(decltype(*begin), index_type c) > adaptor) {
+        Matrix<T> m(colLen, static_cast<index_type>(std::distance(begin, end)));
+        neuropia_assert_always(begin <= end, "Invalid");
         for(auto it = begin; it != end; ++it) {
-            const auto r = std::distance(begin, it);
-            for(auto c = 0U; c < colLen; ++c) {
+            const auto r = static_cast<index_type>(std::distance(begin, it));
+            for(index_type c = 0; c < colLen; ++c) {
                 m(c, r) = adaptor(*it, c);
             }
         }
@@ -329,7 +332,7 @@ public:
     template <typename C>
     static Matrix<T> fromArray(const C& array, index_type colLen,
                                std::function<T(decltype(*(array.begin())), index_type c) > adaptor) {
-        return fromIterator<C>(array.begin(), array.end(), static_cast<int>(colLen), adaptor);
+        return fromIterator<C>(array.begin(), array.end(), static_cast<index_type>(colLen), adaptor);
     }
 
     static Matrix<T> multiply(const Matrix<T>& m1, const Matrix<T>& m2) {
@@ -474,7 +477,7 @@ private:
         m_data.erase(it, m_data.end());
     }
 private:
-    MatrixData m_data;
+    MatrixData m_data = {};
     index_type m_colSize = 0;
 };
 

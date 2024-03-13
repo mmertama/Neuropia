@@ -38,9 +38,9 @@ bool Trainer::train() {
         }
 
         const auto imageSize = m_images.size(1) * m_images.size(2);
-        const auto at = m_images.random();
-        const auto image = m_images.next(at, imageSize);
-        const auto label = static_cast<unsigned>(m_labels.next(at));
+        const auto at = m_random.random(m_images.size());
+        const auto image = m_images.readAt(at, imageSize);
+        const auto label = static_cast<unsigned>(m_labels.readAt(at));
 
 #ifdef DEBUG_SHOW
             Neuropia::printimage(image.data()); //ASCII print images

@@ -4,8 +4,7 @@
 #include <fstream>
 #include <string>
 #include <memory>
-#include <random>
-#include <chrono>
+
 
 
 
@@ -52,7 +51,7 @@ public:
 
     /**
      * @brief position
-     * @return position at readong
+     * @return position at reading
      */
     size_t position() const {return static_cast<size_t>(m_stream.tellg());}
 
@@ -96,23 +95,48 @@ public:
     IdxReader(const std::string& name, unsigned iobufsz = DefaultIobufSz) : IdxReaderBase(name, iobufsz) {}
 
     /**
-     * @brief next
+     * @brief read one
      * @return iterate over data, see dimension(0) how many times to be done
      */
-    T next() {
+    T read() {
         T data;
-        read(reinterpret_cast<char*>(&data), sizeof(T), 1);
+        IdxReaderBase::read(reinterpret_cast<char*>(&data), sizeof(T), 1);
         return data;
     }
 
     /**
-     * @brief next
+     * @brief read many
      * @param sz
      * @return iterate over data, see dimension(0) how many times to be done
      */
-    std::vector<T> next(size_t sz) {
+    std::vector<T> read(size_t sz) {
         std::vector<T> data(sz);
-        read(reinterpret_cast<char*>(data.data()), sizeof(T), sz);
+        IdxReaderBase::read(reinterpret_cast<char*>(data.data()), sizeof(T), sz);
+        return data;
+    }
+
+        /**
+     * @brief readAt one from position
+     * @param pos
+     * @return iterate over data, see dimension(0) how many times to be done
+     */
+    T readAt(size_t pos) {
+        T data;
+        moveTo(pos * sizeof(T));
+        IdxReaderBase::read(reinterpret_cast<char*>(&data), sizeof(T), 1);
+        return data;
+    }
+
+    /**
+     * @brief readAt many from position
+     * @param pos
+     * @param sz
+     * @return
+     */
+    std::vector<T> readAt(size_t pos, size_t sz) {
+        std::vector<T> data(sz);
+        moveTo(pos * (sizeof(T) * sz));
+        IdxReaderBase::read(reinterpret_cast<char*>(data.data()), sizeof(T), sz);
         return data;
     }
 };
@@ -131,112 +155,27 @@ public:
      */
     IdxReader(const std::string& name, unsigned iobufsz = DefaultIobufSz) : IdxReaderBase(name, iobufsz) {}
     /**
-     * @brief next
+     * @brief read
      * @return array of data.  see dimension(0) how many times to be done -  then other dimensions will defines what would be the size.
      * Except it is expected that user know data dimensions before hand as array size is give compile time.
      */
-    std::array<T, S> next() {
+    std::array<T, S> read() {
         std::array<T, S> data;
-        read(reinterpret_cast<char*>(data.data()),  sizeof(T), S);
-        return data;
-    }
-};
-
-
-class IdxRandomReaderBase : public IdxReaderBase {
-public:
-    IdxRandomReaderBase(const std::string& name, unsigned seed, unsigned iobufsz = DefaultIobufSz)
-        : IdxReaderBase(name, iobufsz),  m_gen(seed) {}
-    /**
-     * @brief random
-     * @return
-     */
-    size_t random() const {
-        return (m_gen() % size());
-    }
-private:
-    mutable std::default_random_engine m_gen;
-};
-
-template <typename T>
-/**
- * @brief The IdxReader class single element data, e.g. Bytes, Ints, Doubles...
- */
-class IdxRandomReader : public IdxRandomReaderBase {
-public:
-    /**
-     * @brief IdxReader
-     * @param name filename
-     * @param iobufsz buffer size, default is DefaultIobufSz
-     */
-    IdxRandomReader(const std::string& name,
-                    unsigned seed =
-        #ifndef RANDOM_SEED
-            static_cast<unsigned>(std::chrono::system_clock::now().time_since_epoch().count())
-        #else
-            RANDOM_SEED
-        #endif
-                    , unsigned iobufsz = DefaultIobufSzRandom) : IdxRandomReaderBase(name, seed, iobufsz) {}
-
-    /**
-     * @brief next
-     * @param pos
-     * @return iterate over data, see dimension(0) how many times to be done
-     */
-    T next(size_t pos) {
-        T data;
-        moveTo(pos * sizeof(T));
-        read(reinterpret_cast<char*>(&data), sizeof(T), 1);
+        IdxReaderBase::read(reinterpret_cast<char*>(data.data()),  sizeof(T), S);
         return data;
     }
 
     /**
-     * @brief next
-     * @param pos
-     * @param sz
-     * @return
-     */
-    std::vector<T> next(size_t pos, size_t sz) {
-        std::vector<T> data(sz);
-        moveTo(pos * (sizeof(T) * sz));
-        read(reinterpret_cast<char*>(data.data()), sizeof(T), sz);
-        return data;
-    }
-};
-
-
-template <typename T, size_t S>
-/**
- * @brief The IdxReader<std::array<T, S> > class for data arrays
- */
-class IdxRandomReader<std::array<T, S>> : public IdxRandomReaderBase {
-public:
-    /**
-     * @brief IdxReader
-     * @param name as above
-     * @param iobufsz as above
-     */
-    IdxRandomReader(const std::string& name,
-                    unsigned seed =
-                #ifndef RANDOM_SEED
-                    static_cast<unsigned>(std::chrono::system_clock::now().time_since_epoch().count())
-                #else
-                    RANDOM_SEED
-                #endif
-                    , unsigned iobufsz = DefaultIobufSzRandom) : IdxRandomReaderBase(name, seed, iobufsz) {}
-    /**
-     * @brief next
+     * @brief readAt
      * @return array of data.  see dimension(0) how many times to be done -  then other dimensions will defines what would be the size.
      * Except it is expected that user know data dimensions before hand as array size is give compile time.
      */
-    std::array<T, S> next(size_t pos) {
+    std::array<T, S> readAt(size_t pos) {
         std::array<T, S> data;
         moveTo(pos * S * sizeof(T));
-        read(reinterpret_cast<char*>(data.data()),  sizeof(T), S);
+        IdxReaderBase::read(reinterpret_cast<char*>(data.data()),  sizeof(T), S);
         return data;
     }
-private:
-    std::default_random_engine m_gen;
 };
 
 }

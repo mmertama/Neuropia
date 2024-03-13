@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 3.15)
 
 project(neuropiaML)
 
+file(CREATE_LINK ${CMAKE_SOURCE_DIR}/wasm/mnist ${CMAKE_SOURCE_DIR}/data SYMBOLIC) # tests expects one location, WASM another, copy not ok :-D
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()

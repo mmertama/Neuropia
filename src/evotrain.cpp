@@ -35,16 +35,16 @@ bool TrainerEvo::train() {
                 batchData.resize(m_batchSize);
 
                 for(auto i = 0U; i < m_batchSize; i++)  {
-                    const auto at = m_images.random();
-                    batchData[i] = {m_images.next(at, inputSize), m_labels.next(at)};
+                    const auto at = m_random.random(m_images.size());
+                    batchData[i] = {m_images.readAt(at, inputSize), m_labels.readAt(at)};
                 }
 
                 auto& batchVerifyData = batchesVerify[job];
                 batchVerifyData.resize(m_batchVerifySize);
 
                 for(auto i = 0U; i < m_batchVerifySize; i++)  {
-                    const auto at = m_images.random();
-                batchVerifyData[i] = {m_images.next(at, inputSize), m_labels.next(at)};
+                    const auto at = m_random.random(m_images.size());
+                batchVerifyData[i] = {m_images.readAt(at, inputSize), m_labels.readAt(at)};
                 }
 
                 // start thread

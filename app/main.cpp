@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    Neuropia::SaveType save_type = Neuropia::SaveType::NeuronType;
+    Neuropia::SaveType save_type = Neuropia::SaveType::SameAsNeuronType;
 
     if(argparse.hasOption("data_type")) {
         if(argparse.option("data_type") == "double")
