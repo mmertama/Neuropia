@@ -34,10 +34,14 @@ def label_byte(ascii):
 
 def progress_bar(progress, all, bar_length = 60):
     percent = float(progress) / all
+    if progress_bar.pre_percent == percent:
+        return
+    progress_bar.pre_percent = percent
     hashes = '#' * int(round(percent * bar_length))
     spaces = ' ' * (bar_length - len(hashes))
     print("\r[{0}] {1}%".format(hashes + spaces, int(round(percent * 100))), end='')
-    
+progress_bar.pre_percent = -1
+
 if __name__ == "__main__":
     zip_file = sys.argv[1]
     target_folder = sys.argv[2]
