@@ -169,6 +169,7 @@ bool NeuropiaSimple::setParam(const NeuropiaPtr& env, const std::string& name, c
 }
 
 // just make API more pleasant, the param is still changed to string... could be done in future that param is internally stored as a variant
+// maybe more types could be introduced as int range and file path
 bool NeuropiaSimple::setParam(const NeuropiaPtr& env, const std::string& name, const std::variant<int, double, float, bool>& value) {
     auto ok = false;
     std::visit([&](auto&& arg) {

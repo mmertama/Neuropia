@@ -26,10 +26,10 @@ $neuropia mnist/t10k-images-idx3-ubyte mnist/t10k-labels-idx1-ubyte neuropia.bin
 
 ```
 
-`neuropia_test` is used to run network efficency evaluations (see Testing below).
+`neuropia_test` is used to run network efficiency evaluations (see Testing below).
 
 #### Embedded libraries
-Minimal API in `neuropia_lib` folder to utilize pre-trained network with minimal resources, for example in embeded systems (MCUs). 
+Minimal API in `neuropia_lib` folder to utilize pre-trained network with minimal resources, for example in embedded systems (MCUs). 
 
 The API:
 
@@ -161,12 +161,12 @@ For testing copy the Mnist data from [huggingface](https://huggingface.co/datase
 
 Extract GZ files data/mnist folder (tests_all.sh assume that folder, but otherwise pick freely)
 
-For `neuropia_test`, there is a commandline option -r to tell the folder. 
+For `neuropia_test`, there is a command line option -r to tell the folder. 
 
 ## Run test
 Easiest way to run is to use tests. Note that for tests data files has to be renamed.
 E.g. you have use CMakeLists.txt in the separate build folder, then if mnist data is located in the source folder, you can do something like:
-`./neuropia_test ../neuropia/tests/tests2.txt -v -r ../neuropia/data/mnist`
+`Neuropia/build$ ./test/neuropia_test ../tests/tests2.txt -v -r ../data/mnist`
 
 
 

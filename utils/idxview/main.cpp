@@ -14,7 +14,7 @@ std::string info(const Neuropia::IdxReaderBase& reader) {
 void app_main(Gempyre::Ui& ui, int argc, char** argv) {
     const auto& [params, options] = GempyreUtils::parse_args(argc, argv, {});
     if(params.size() < 3) {
-        ui.alert("Bad arguments - expectd IMAGES.idx LABELS.idx INDEX");
+        ui.alert("Bad arguments - expected IMAGES.idx LABELS.idx INDEX");
         return;
     }
 
