@@ -31,15 +31,15 @@ def label_byte(ascii):
     byte = ascii.to_bytes(1, byteorder='big')
     return byte
     
-
 def progress_bar(progress, all, bar_length = 60):
-    percent = float(progress) / all
+    fraction = float(progress) / all
+    percent = int(round(fraction * 100))
     if progress_bar.pre_percent == percent:
         return
     progress_bar.pre_percent = percent
-    hashes = '#' * int(round(percent * bar_length))
+    hashes = '#' * int(round(fraction * bar_length))
     spaces = ' ' * (bar_length - len(hashes))
-    print("\r[{0}] {1}%".format(hashes + spaces, int(round(percent * 100))), end='')
+    print("\r[{0}] {1}%".format(hashes + spaces, percent), end='')
 progress_bar.pre_percent = -1
 
 if __name__ == "__main__":
