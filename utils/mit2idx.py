@@ -44,6 +44,9 @@ if __name__ == "__main__":
     name_prefix = sys.argv[3]
     w = int(sys.argv[4])
     h = int(sys.argv[5])
+    label_set = set()
+    train_entries = 0
+    hsf_entries = 0
     with zipfile.ZipFile(zip_file, 'r') as zip:
         entries = zip.namelist()
         elen = len(entries)
@@ -63,16 +66,19 @@ if __name__ == "__main__":
             except Exception as err:
                 print(err, path)
                 exit(1)
+            label_set.add(ascii)    
             if path[2].startswith('train'):
                labels = train_labels
                images = train_images
+               train_entries += 1
             else:
                 labels = hsf_labels
-                images = hsf_images            
+                images = hsf_images
+                hsf_entries += 1            
             with zip.open(e) as infile:
                 progress_bar(progress, elen)
                 progress += 1  
                 labels.write(label_byte(ascii))
                 bytes = infile.read()
                 images.write(image_bytes(bytes, w, h))
-    print("") # newline when progressbar is gone
+    print("\nhsf: ", hsf_entries, "train: ", train_entries, "classes: ", len(label_set), " ", [chr(x) for x in label_set]) # newline when progressbar is gone

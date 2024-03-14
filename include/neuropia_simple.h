@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include <variant>
 #include <functional>
 #include "neuropia.h"
 
@@ -63,6 +64,7 @@ std::vector<Neuropia::NeuronType> feed(NeuropiaPtr env, const std::vector<Neurop
  * @return false 
  */
 bool setParam(const NeuropiaPtr& env, const std::string& name, const std::string& value);
+bool setParam(const NeuropiaPtr& env, const std::string& name, const std::variant<int, double, float, bool>& value);
 
 /**
  * @brief Test if a a given paramter is valid. 

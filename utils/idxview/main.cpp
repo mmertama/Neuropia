@@ -11,10 +11,6 @@ std::string info(const Neuropia::IdxReaderBase& reader) {
 }
 
 
-std::string_view right(std::string_view str, size_t p) {
-    return str.substr(str.length()- p);
-}
-
 void app_main(Gempyre::Ui& ui, int argc, char** argv) {
     const auto& [params, options] = GempyreUtils::parse_args(argc, argv, {});
     if(params.size() < 3) {

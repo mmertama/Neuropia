@@ -113,10 +113,48 @@ add_dependencies(${PROJECT_NAME} neuropia_generation)
 
 ```
 
+#### Using Neuropia Simple
+
+Basically just create + train/load/save based on parameters given. Minimum parameters are input images and labels filenames.
+The default parameters are defined in´ [default.h](https://github.com/mmertama/Neuropia/blob/master/include/default.h).
+
+
+```cpp
+
+// create a Neuropia
+auto neuropia = NeuropiaSimple::create("");
+// most of parameters you can use defaults
+NeuropiaSimple::setParam(neuropia, "Images", "images.idx");
+NeuropiaSimple::setParam(neuropia, "Labels", "labels.idx");
+// Set output layers default is 10, input layers it get from images dimensions
+NeuropiaSimple::setParam(neuropia, "Classes", 10); 
+NeuropiaSimple::setParam(neuropia, "Iterations", 10000);
+// do train
+NeuropiaSimple::train(neuropia, NeuropiaSimple::TrainType::Basic);
+NeuropiaSimple::save(neuropia, "neuropia.bin" , Neuropia::SaveType::Double);
+
+
+```
+
+### Utils (in the utils folder)
+ 
+* idxview 
+    *  to view idx file content 
+    * `idxview IMAGES.idx LABELS.idx INDEX`
+    * Uses [Gempyre](https://github.com/mmertama/Gempyre) 
+* bin2code.py
+    * Generates C++ header from a binary
+    * `bin2code.py BIN_FILE HEADER_FILE C_ARRAY_NAME`
+* mit2idx.py
+    * `mit2idx.py by_class.zip TARGET_FOLDER NAME_PREFIX IMAGE_WIDTH IMAGE_HEIGHT`
+    * Convert 'mit' to idx (in practice https://data.world/nist/nist-handprinted-form-charactezip to idx)
+
 ## Build
 Use cmake
 
 Supports Windows MSCV, GCC and Clang, Emscripten (Web Assembly)
+
+
 
 ## Testing
 For testing copy the Mnist data from [huggingface](https://huggingface.co/datasets/mnist)

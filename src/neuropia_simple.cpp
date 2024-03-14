@@ -168,6 +168,19 @@ bool NeuropiaSimple::setParam(const NeuropiaPtr& env, const std::string& name, c
    return env->m_params.set(name, value);
 }
 
+// just make API more pleasant, the param is still changed to string... could be done in future that param is internally stored as a variant
+bool NeuropiaSimple::setParam(const NeuropiaPtr& env, const std::string& name, const std::variant<int, double, float, bool>& value) {
+    auto ok = false;
+    std::visit([&](auto&& arg) {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T,bool>)
+            ok = setParam(env, name, std::string(arg ? "true" : "false"));
+        else 
+            ok = setParam(env, name, std::to_string(arg));
+    }, value);
+    return ok;    
+}
+
 ParamType NeuropiaSimple::params(const NeuropiaPtr& env) {
     ASSERT(env);
     ParamType out;
