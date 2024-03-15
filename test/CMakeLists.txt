@@ -26,13 +26,9 @@ add_executable(${PROJECT_NAME}
     ${DIR}/src/argparse.cpp
 )
 
-if(MSVC)
-  target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
-else()
-  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror)
-endif()
+include (../compiler.cmake)
+SET_COMPILER_FLAGS()
 
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 target_link_libraries (${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 
 

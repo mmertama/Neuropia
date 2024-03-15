@@ -27,9 +27,9 @@ public:
     std::string option(const std::string& k) const;
     size_t paramCount() const;
 protected:
-    std::vector<std::string> m_parameters;
-    std::unordered_map<std::string, std::tuple<bool, bool, std::string>> m_options;
-    std::unordered_map<std::string, std::string> m_optionsAlias;
+    std::vector<std::string> m_parameters = {};
+    std::unordered_map<std::string, std::tuple<bool, bool, std::string>> m_options = {};
+    std::unordered_map<std::string, std::string> m_optionsAlias = {};
 };
 
 #endif // ARGPARSE_H

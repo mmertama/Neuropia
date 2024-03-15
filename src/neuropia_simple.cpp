@@ -16,6 +16,7 @@ using namespace Neuropia;
 using namespace emscripten;
 #endif
 
+static
 bool fatal(const char* t, const char* f, int line, const char* file) {
     std::cerr << "Assert:" << t << " in line " << line << " at " << f << "  in "<< file << "." << std::endl;
     std::abort();
@@ -73,9 +74,11 @@ using SimpleLogStream = LogStream<2048>;
 
 class SimpleTrainer : public TrainerBase {
 public:
-    SimpleTrainer(const std::string& root, const Neuropia::Params& params, bool quiet, const std::function<void (Layer&& layer, bool)>& onEnd) : TrainerBase(root, params, quiet), m_onEnd(onEnd) {}
+    SimpleTrainer(const std::string& root, const Neuropia::Params& params, bool quiet, const std::function<void (Layer&& layer, bool)>& onEnd) : 
+        TrainerBase(root, params, quiet), m_onEnd(onEnd) {}
     bool train(unsigned its, SimpleLogStream& stream);
     bool isOk() const {return isReady() && m_ok;}
+
 private:
     bool train();
     std::function<void (Layer&& layer, bool)> m_onEnd;
@@ -106,6 +109,8 @@ NeuropiaPtr NeuropiaSimple::create(const std::string& root) {
 
 class NeuropiaSimple::NeuropiaEnv {
 public:
+    NeuropiaEnv(const NeuropiaEnv&) = delete;
+    NeuropiaEnv& operator=(const NeuropiaEnv&) = delete;
     NeuropiaEnv(const std::string& root) :  m_root(root) {
         m_params.addHelp( topologyRe, "\',\'-separated list of integers");
         m_params.addHelp( activationFunctionRe, "\',\'-separated list of activation functions: \"sigmoid, relu or elu\"");
@@ -123,18 +128,18 @@ public:
         m_prevStreamBufCout = std::cout.rdbuf(m_logStream.get());
         m_prevStreamBufCerr = std::cerr.rdbuf(m_logStream.get());
     }
-    Layer m_network;
+    Layer m_network = {};
     Params m_params = {
         DEFAULT_PARAMS
 };
     const std::string m_root;
-    std::unique_ptr<SimpleLogStream> m_logStream;
+    std::unique_ptr<SimpleLogStream> m_logStream = {};
     std::streambuf* m_prevStreamBufCout = nullptr;
     std::streambuf* m_prevStreamBufCerr = nullptr;
     bool m_once = false;
 
-    std::unique_ptr<SimpleTrainer> m_trainer;
-    std::unique_ptr<SimpleVerifier> m_verifier;
+    std::unique_ptr<SimpleTrainer> m_trainer = {};
+    std::unique_ptr<SimpleVerifier> m_verifier = {};
 };
 
 // to avoid warning
@@ -146,7 +151,6 @@ NeuropiaEnv::~NeuropiaEnv() {
         std::cout.rdbuf(m_prevStreamBufCout);
     }
 }
-
 
 
 void NeuropiaSimple::free(NeuropiaPtr env) {
@@ -224,6 +228,12 @@ bool NeuropiaSimple::train(const NeuropiaPtr& env, TrainType type) {
     case TrainType::Parallel:
         trainer = std::make_unique<TrainerParallel>(env->m_root, env->m_params, false);
         break;
+    default:
+        neuropia_assert_always(true, "bad");    
+    }
+    if(!trainer->init()) {
+        std::cerr << "Invalid trainer" << std::endl;
+        return false;
     }
     if(!trainer->isReady()) {
         std::cerr << "Training data is not ready" << std::endl;
@@ -240,11 +250,11 @@ void NeuropiaSimple::save(const NeuropiaPtr& env, const std::string& filename, S
     Neuropia::save(filename, env->m_network, params, savetype);
 }
 
-bool NeuropiaSimple::load(const NeuropiaPtr& env, const std::string& filename) {
+std::optional<Neuropia::Sizes> NeuropiaSimple::load(const NeuropiaPtr& env, const std::string& filename) {
     ASSERT(env);
     const auto loaded = Neuropia::load(Neuropia::absPath(env->m_root, filename));
     if(!loaded) {
-        return false;
+        return std::nullopt;
     }
 
     env->m_network = std::move(std::get<Layer>(*loaded));
@@ -252,15 +262,16 @@ bool NeuropiaSimple::load(const NeuropiaPtr& env, const std::string& filename) {
         for(const auto& p : std::get<1>(*loaded)) {
             env->m_params.set(p.first, p.second);
         }
-        return true;
+        return env->m_network.sizes();
     }
-    return false;
+    return std::nullopt;
 }
 
 int NeuropiaSimple::verify(const NeuropiaPtr& env) {
     ASSERT(env && env->m_network.isValid());
     const auto t = Neuropia::verify(env->m_network, Neuropia::absPath(env->m_root, env->m_params["ImagesVerify"]),
-                             Neuropia::absPath(env->m_root, env->m_params["LabelsVerify"]));
+                             Neuropia::absPath(env->m_root, env->m_params["LabelsVerify"]),
+                             false);
     return std::get<0>(t);
 }
 
@@ -271,6 +282,12 @@ void NeuropiaSimple::setLogger(const NeuropiaPtr& env, std::function<void (const
     });
     std::cout << "Neuropia loaded" << std::endl;
 }
+
+
+const Layer& NeuropiaSimple::network(const NeuropiaPtr& env) {
+    return env->m_network;
+}
+
 
 bool SimpleTrainer::train(unsigned its, SimpleLogStream& stream) {
     const auto it = std::min(its, m_iterations);
@@ -396,6 +413,7 @@ bool SimpleVerifier::verify() {
     return true;
 }
 
+static
 bool train(const NeuropiaPtr& env, unsigned iteration) {
     ASSERT(env);
 
@@ -410,6 +428,7 @@ bool train(const NeuropiaPtr& env, unsigned iteration) {
     return env->m_trainer->train(iteration, *env->m_logStream);
 }
 
+static
 bool verify(const NeuropiaPtr& env, int iteration) {
     if(iteration == 0 || !env->m_verifier) {
         ASSERT(env->m_network.isValid());
@@ -421,7 +440,7 @@ bool verify(const NeuropiaPtr& env, int iteration) {
     return env->m_verifier->verify();
 }
 
-
+static
 ParamType basicParams(const NeuropiaPtr& env) {
     auto p = NeuropiaSimple::params(env);
     p.erase("Jobs");    //mt
@@ -430,11 +449,10 @@ ParamType basicParams(const NeuropiaPtr& env) {
     p.erase("Hard"); //for ensenble
     p.erase("Extra"); //this is for ensemble
     p.erase("LearningRate"); //use only min and max
-    p.erase("Classes"); //irrelevant
-    return p;
     return p;
 }
 
+static
 bool isNetworkValid(const NeuropiaPtr& env) {
     ASSERT(env);
     if(env->m_trainer) {
@@ -443,6 +461,7 @@ bool isNetworkValid(const NeuropiaPtr& env) {
     return env->m_network.isValid();
 }
 
+static
 NeuronType verifyResult(const NeuropiaPtr& env) {
     ASSERT(env);
     if(env->m_verifier) {
@@ -452,6 +471,8 @@ NeuronType verifyResult(const NeuropiaPtr& env) {
     return -2.0; //arbitrary negative number, but not -1
 }
 
+#if 0
+static
 int showImage(const NeuropiaPtr& env, const std::string& imageName, const std::string& labelName, unsigned index) {
     ASSERT(env);
     Neuropia::IdxReader<std::array<unsigned char, 28 * 28>> idxi(Neuropia::absPath(env->m_root, imageName));
@@ -466,7 +487,7 @@ int showImage(const NeuropiaPtr& env, const std::string& imageName, const std::s
     Neuropia::printimage(data.data());
     return idxl.readAt(index);
 }
-
+#endif
 
 #ifdef __EMSCRIPTEN__
 void setLogger(const NeuropiaPtr& env, emscripten::val cb) {

@@ -15,7 +15,7 @@ namespace Neuropia
 {
     using Bytes = std::vector<uint8_t>;
     using Values = std::vector<NeuronType>;
-    struct Sizes {unsigned in_layer; unsigned out_layer;};
+    
     class Network {
         public:
             Network() {}
@@ -29,7 +29,7 @@ namespace Neuropia
             std::optional<Sizes> load(const uint8_t* bytes, size_t sz) {
                 const auto map = m_network.load(bytes, sz);
                 if(!map) return std::nullopt;
-                return sizes();
+                return m_network->sizes();
             }
             std::optional<Sizes> load(const Bytes& bytes) {
                 const auto map = m_network.load(bytes);
@@ -45,12 +45,13 @@ namespace Neuropia
 
             template <typename IT>
             const Values& feed(const IT& begin, const IT& end) const {{return m_network.feed(begin, end);}}
-        private:
-            Sizes sizes() const {
-                return Sizes{
-                    static_cast<unsigned>(m_network.size()),
-                    static_cast<unsigned>(m_network.outLayer()->size())};
-            }
+
+            /**
+             * @brief Access to Neuropia network input layer
+             * 
+             * @return const Layer& 
+             */
+            const Layer& network() const {return m_network}
         private:
             Layer m_network;
    };

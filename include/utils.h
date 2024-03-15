@@ -9,6 +9,7 @@
 #include <vector>
 #include <unordered_map>
 #include <optional>
+#include <string_view>
 #include "neuropia.h"
 
 namespace Neuropia {
@@ -29,7 +30,7 @@ std::optional<std::tuple<Neuropia::Layer, std::unordered_map<std::string, std::s
 
 void debug(const Layer& network, std::ostream& strm = std::cout, const std::set<int>& excluded = {});
 
-void printimage(const unsigned char* c);
+void printimage(const unsigned char* c, int width, int height);
 
 std::string absPath(const std::string& root, const std::string& relativePath);
 
@@ -50,7 +51,9 @@ private:
     std::default_random_engine m_gen;
 };
 
+std::string_view to_string(Neuropia::SaveType st);
 }
+
 
 template <typename T>
 std::ostream& operator << (std::ostream& strm, const std::vector<T>& values) {
@@ -62,6 +65,7 @@ std::ostream& operator << (std::ostream& strm, const std::vector<T>& values) {
     strm << ']';
     return strm;
 }
+
 
 
 

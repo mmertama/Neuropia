@@ -78,6 +78,8 @@ using ValueMap = std::unordered_map<int, NeuronType>;
  */
 using ValueVector = std::vector<NeuronType>;
 
+using MetaInfo = std::unordered_map<std::string, std::string>;
+
 /**
  * @brief Save data types. NeuronType is a Neuropia::NeuronType, others are C++ FP data types 
  * 
@@ -86,6 +88,23 @@ using ValueVector = std::vector<NeuronType>;
 enum class SaveType : uint8_t {
     SameAsNeuronType, Double, Float, LongDouble
 };
+
+
+struct Header {
+    const SaveType saveType;
+    const unsigned layers;
+};
+
+
+/**
+ * @brief Verify that file is Neuropia file
+ * 
+ * @param filename 
+ * @return std::optional<SaveType, unsigned> where unsigne is number of layers 
+ */
+std::optional<Header> isValidFile(const std::string& filename);
+
+struct Sizes {unsigned in_layer; unsigned out_layer;};
 
 //C++ functions are uncomparable and typedef is not hard, thus we make a wrapper functor to help this
 template <typename R, typename ...U>
@@ -349,6 +368,14 @@ public:
      * @param layer
      * @return
      */
+
+    /**
+     * @brief memory consumption
+     * 
+     * @return size_t 
+     */
+    size_t consumption() const;
+
     friend std::ostream& ::operator<<(std::ostream& output, const Neuron& neuron);
 
     // @internal
@@ -552,9 +579,9 @@ public:
         std::default_random_engine gen(seed);
         dropout(gen);
 
-        const auto out = feedTrain(inputs, inputs + m_neurons.size()); //go forward first
+        const auto out = feedTrain(inputs, inputs + static_cast<int>(m_neurons.size())); //go forward first
         ValueVector expectedValues(out.size());
-        std::copy(expectedOutputs, expectedOutputs + out.size(), expectedValues.begin());
+        std::copy(expectedOutputs, expectedOutputs + static_cast<int>(out.size()), expectedValues.begin());
         const auto df = dfp == nullptr ? Neuropia::derivativeMap(m_activationFunction) : dfp;
         return backpropagation(out, expectedValues, learningRate, lambdaL2, df);
     }
@@ -579,7 +606,7 @@ public:
     size_t size() const {return m_neurons.size();}
 
     /**
-     * @brief isInpu
+     * @brief isInput
      * @return
      */
     bool isInput() const {return m_prev == nullptr;}
@@ -594,7 +621,7 @@ public:
      * @brief save
      * @param stream
      */
-    void save(std::ofstream& stream, const std::unordered_map<std::string, std::string>& meta = {}, SaveType saveType = SaveType::SameAsNeuronType) const;
+    void save(std::ofstream& stream, const MetaInfo& meta = {}, SaveType saveType = SaveType::SameAsNeuronType) const;
 
 
     /**
@@ -602,21 +629,21 @@ public:
      * @param stream
      * @return
      */
-    std::optional<std::unordered_map<std::string, std::string>> load(std::ifstream& stream);
+    std::optional<MetaInfo> load(std::ifstream& stream);
 
     /**
      * @brief load
      * @param stream
      * @return
      */
-    std::optional<std::unordered_map<std::string, std::string>> load(const std::vector<uint8_t>& stream);
+    std::optional<MetaInfo> load(const std::vector<uint8_t>& stream);
 
     /**
      * @brief load
      * @param stream
      * @return
      */
-    std::optional<std::unordered_map<std::string, std::string>> load(const uint8_t* bytes, size_t sz);
+    std::optional<MetaInfo> load(const uint8_t* bytes, size_t sz);
 
     /**
      * @brief merge
@@ -633,7 +660,7 @@ public:
     int compare(const Layer& other) const;
 
     /**
-     * @brief The InitStategy enum
+     * @brief The InitStrategy enum
      */
     enum class InitStrategy{Norm, Logistic, ReLu};
 
@@ -710,13 +737,37 @@ public:
     Layer* outLayer();
     const Layer* outLayer() const;
 
+    /**
+     * @brief in and out sizes
+     * 
+     * @return Sizes 
+     */
+    Sizes sizes() const;
+
+    /**
+     * @brief memory consumption
+     * 
+     * @return size_t 
+     */
+    size_t consumption(bool cumulative) const;
+
+    /**
+     * @brief get input layer (most cases assert(layer == layer->inputLayer()))
+     * 
+     * @return const Layer* 
+     */
+    const Layer* inputLayer() const;
+    
  protected:
-    [[nodiscard]] bool loadLayer(StreamBase& stream, SaveType saveType);
+    [[nodiscard]] bool loadLayer(StreamBase& stream, SaveType saveType, unsigned layer_count);
 
     Layer* previousLayer(Layer* current);
     const Layer* previousLayer(const Layer* current) const;
+
     bool backpropagation(const ValueVector& out, const ValueVector& expected, NeuronType learningRate, NeuronType lambdaL2, const DerivativeFunction& df);
     void dropout(std::default_random_engine& gen);
+
+    std::optional<MetaInfo> doLoad(StreamBase& strm);
 
     template<typename IteratorIt>
     const ValueVector& feedTrain(IteratorIt begin, IteratorIt end) const {

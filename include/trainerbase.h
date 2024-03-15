@@ -16,13 +16,15 @@ constexpr NeuronType MaxTrainTime = 999999;
 
 class TrainerBase {
 public:
-    enum class Show{Nothing, Progress};
     TrainerBase(const std::string& root, const Neuropia::Params& params, bool quiet);
     void setDropout();
     virtual bool train() = 0;
     virtual ~TrainerBase() = default;
     Neuropia::Layer&& network() {return std::move(m_network);}
     bool isReady() const;
+    /// @brief must be called before train
+    /// @return 
+    bool init();
 protected:
     const std::string m_imageFile;
     const std::string m_labelFile;
@@ -40,9 +42,13 @@ protected:
     unsigned m_testVerifyFrequency;
     NeuronType m_lambdaL2;
     bool m_quiet;
+    const unsigned m_classes;
+    const std::vector<int> m_topology;
+    const std::vector<Neuropia::ActivationFunction> m_afs;
+    const Layer::InitStrategy m_initStrategy;
     const NeuronType m_maxTrainTime;
     const std::function<void (const std::function<void ()>&, const std::string&)> m_control;
-    Neuropia::Random m_random;
+    Neuropia::Random m_random = {};
 };
 }
 

@@ -32,21 +32,24 @@ void tree(const std::string& root) {
 */
 using namespace Neuropia;
 
+static
 auto toIntVec(const std::string& s) {
-    return Neuropia::Params::toVector<int>(s, [](const auto& s){return std::atoi(s.c_str());});
+    return Neuropia::Params::toVector<int>(s, [](const auto& p){return std::atoi(p.c_str());});
 }
 
+static
 auto toRealVec(const std::string& s) {
-    return Neuropia::Params::toVector<NeuronType>(s, [](const auto& s){return std::atof(s.c_str());});
+    return Neuropia::Params::toVector<NeuronType>(s, [](const auto& p){return std::atof(p.c_str());});
 }
 
+static
 auto toFunction(const std::string& names) {
     const auto nameVec = Neuropia::Params::split(names);
     std::vector<Neuropia::ActivationFunction> functions;
     for(const auto& name : nameVec) {
         const auto cmp = [name](const std::string& n) {
-            const auto toLower = [](std::string n) { std::transform(n.begin(), n.end(), n.begin(), [](auto c){
-                    return c >= 'A' && c <= 'Z' ? c - ('A' - 'a') : c; }); return n;};
+            const auto toLower = [](std::string nl) { std::transform(nl.begin(), nl.end(), nl.begin(), [](auto c){
+                    return c >= 'A' && c <= 'Z' ? c - ('A' - 'a') : c; }); return nl;};
             return toLower(n.substr(0, n.length() - std::string("Function").length())) == name;};
         if(cmp(Neuropia::signumFunction.name()))
             functions.push_back(Neuropia::signumFunction);
@@ -64,6 +67,7 @@ auto toFunction(const std::string& names) {
     return functions;
 }
 
+static
 auto toInitStrategy(const std::string& strategy, const Neuropia::ActivationFunction& af) {
     if(strategy == "logistic")
         return Neuropia::Layer::InitStrategy::Logistic;
@@ -74,10 +78,12 @@ auto toInitStrategy(const std::string& strategy, const Neuropia::ActivationFunct
     return Neuropia::initStrategyMap(af);
 }
 
+static
 auto lrMin(const Neuropia::Params & p) {
     return p["LearningRate"] == "0" ? std::stod(p["LearningRateMin"]) : std::stod(p["LearningRate"]);
 }
 
+static
 auto lrMax(const Neuropia::Params & p) {
     return p["LearningRate"] == "0" ? std::stod(p["LearningRateMax"]) : std::stod(p["LearningRate"]);
 }
@@ -98,42 +104,58 @@ TrainerBase::TrainerBase(const std::string & root, const Neuropia::Params& param
     m_testVerifyFrequency(params.uinteger("TestFrequency")),
     m_lambdaL2(params.real("L2")),
     m_quiet(quiet),
-    m_maxTrainTime(params.real("MaxTrainTime")),m_control(m_maxTrainTime >= MaxTrainTime ?
+    m_classes(params.uinteger("Classes")),
+    m_topology(toIntVec(params["Topology"])),
+    m_afs(toFunction(params["ActivationFunction"])),
+    m_initStrategy(toInitStrategy(params["InitStrategy"], toFunction(params["ActivationFunction"])[0])),
+    m_maxTrainTime(params.real("MaxTrainTime")), m_control(m_maxTrainTime >= MaxTrainTime ?
                                            static_cast<decltype (m_control)>(Neuropia::timed) :
                                            static_cast<decltype (m_control)>([this](const std::function<void ()>& f, const std::string & label) {
                                                f();
                                                std::cout << (!label.empty() ? label + " " : "") << "iterations:" << m_passedIterations << std::endl;
-                                               })){
+                                               })){}
+
+    bool TrainerBase::init() {
+
+        if(!m_images.ok()) {
+            std::cerr << "Cannot open images from \"" << m_imageFile << "\"" << std::endl;
+            return false;
+        }
+        if(!m_labels.ok()) {
+            std::cerr << "Cannot open labels from \"" << m_labelFile << "\"" << std::endl;
+            return false;
+        }
+        //  tree("/");
+
+        if(m_topology.begin() == m_topology.end()) {
+            std::cerr << "Bad topology " << std::endl;
+            return false; 
+        }
 
 
-    const auto topology = toIntVec(params["Topology"]);
-    const auto afs = toFunction(params["ActivationFunction"]);
-    const auto initStrategy = toInitStrategy(params["InitStrategy"], toFunction(params["ActivationFunction"])[0]);
 
-    if(!m_images.ok())
-        std::cerr << "Cannot open images from " << m_imageFile << std::endl;
-    if(!m_labels.ok())
-         std::cerr << "Cannot open labels from " << m_labelFile << std::endl;
+        if(m_classes == 0) {
+            std::cerr << "Bad classes " << std::endl;
+            return false;
+        }
 
-    //  tree("/");
+        m_network
+        .join(m_topology.begin(), m_topology.end())
+        .join(m_classes);
 
-
-    m_network
-    .join(topology.begin(), topology.end())
-    .join(params.uinteger("Classes"));
-
-    for(auto i = 1U; i < afs.size(); i++) {
+    for(auto i = 1U; i < m_afs.size(); i++) {
         auto npt = m_network.get(static_cast<int>(i));
         neuropia_assert_always(npt, "Too many items in list");
-        npt->setActivationFunction(afs[i]);
+        npt->setActivationFunction(m_afs[i]);
     }
 
-    m_network.initialize(initStrategy);
+    m_network.initialize(m_initStrategy);
     setDropout();
+    return true;
 }
 
 bool TrainerBase::isReady() const {
-    return m_images.ok() && m_labels.ok();
+    return m_images.ok() && m_labels.ok() && m_network.size() > 0;
 }
 
 void TrainerBase::setDropout() {

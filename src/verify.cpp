@@ -1,5 +1,6 @@
-#include <map>
 #include "verify.h"
+#include "utils.h"
+#include <map>
 
 using namespace Neuropia;
 
@@ -7,18 +8,19 @@ using namespace Neuropia;
 std::tuple<int, unsigned> Neuropia::verify(const Neuropia::Layer& network,
                  const std::string& imageFile,
                  const std::string& labelFile,
+                 bool quiet,
                  size_t from,
                  size_t count) {
     Neuropia::IdxReader<unsigned char> testImages(imageFile);
     Neuropia::IdxReader<unsigned char> testLabels(labelFile);
 
     if(!testImages.ok()) {
-        std::cerr << "Cannot open images from " << imageFile << std::endl;
+        std::cerr << "Cannot open images from \"" << imageFile << "\"" << std::endl;
         return std::make_tuple(0, 0);
     }
 
     if(!testLabels.ok()) {
-         std::cerr << "Cannot open labels from " << labelFile << std::endl;
+         std::cerr << "Cannot open labels from \"" << labelFile << "\"" << std::endl;
          return std::make_tuple(0, 0);
     }
 
@@ -26,7 +28,8 @@ std::tuple<int, unsigned> Neuropia::verify(const Neuropia::Layer& network,
     Neuropia::timed([&]() {
         const auto imageSize = testImages.size(1) * testImages.size(2);
         std::vector<Neuropia::NeuronType> inputs(imageSize);
-        for(auto i = from; i < std::min(count, testLabels.size()); i++) {
+        const auto iterations = std::min(count, testLabels.size());
+        for(auto i = from; i < iterations; i++) {
             const auto image = testImages.read(imageSize);
             const auto label = static_cast<unsigned>(testLabels.read());
 
@@ -36,6 +39,10 @@ std::tuple<int, unsigned> Neuropia::verify(const Neuropia::Layer& network,
             const auto& outputs = network.feed(inputs.begin(), inputs.end());
             const auto max = static_cast<unsigned>(std::distance(outputs.begin(),
                                                  std::max_element(outputs.begin(), outputs.end())));
+
+            if(!quiet) {
+                persentage(i, iterations);
+            }                                     
 
 
 #ifdef DEBUG_SHOW
@@ -57,18 +64,19 @@ std::tuple<int, unsigned> Neuropia::verifyEnseble(const std::vector<Neuropia::La
                                                   bool hard,
                                                   const std::string& imageFiles,
                                                   const std::string& labelFiles,
+                                                  bool quiet,
                                                   size_t from,
                                                   size_t count) {
     Neuropia::IdxReader<unsigned char> testImages(imageFiles);
     Neuropia::IdxReader<unsigned char> testLabels(labelFiles);
 
     if(!testImages.ok()) {
-        std::cerr << "Cannot open images from " << imageFiles << std::endl;
+        std::cerr << "Cannot open images from \"" << imageFiles << "\"" << std::endl;
         return std::make_tuple(0, 0);
     }
 
     if(!testLabels.ok()) {
-         std::cerr << "Cannot open labels from " << labelFiles << std::endl;
+         std::cerr << "Cannot open labels from \"" << labelFiles << "\"" << std::endl;
          return std::make_tuple(0, 0);
     }
 
@@ -76,7 +84,8 @@ std::tuple<int, unsigned> Neuropia::verifyEnseble(const std::vector<Neuropia::La
     int found = 0;
     Neuropia::timed([&]() {
         std::vector<Neuropia::NeuronType> inputs(imageSize);
-        for(auto i = from; i < std::min(count, testLabels.size()); i++) {
+        const auto iterations = std::min(count, testLabels.size());
+        for(auto i = from; i < iterations; i++) {
             const auto image = testImages.read(imageSize);
             const size_t label = testLabels.read();
 
@@ -99,6 +108,10 @@ std::tuple<int, unsigned> Neuropia::verifyEnseble(const std::vector<Neuropia::La
                     }
                 }
             }
+
+            if(!quiet) {
+                persentage(i, iterations);
+            }     
 
             size_t max;
 

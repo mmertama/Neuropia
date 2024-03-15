@@ -87,6 +87,15 @@ bool Params::boolean(const std::string& key) const {
     return (v == "false" || v == "0" || v.empty());
 }
 
+/*
+static
+bool isNumber(const std::string& s) {
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it)) ++it;
+    return !s.empty() && it == s.end();
+}
+*/
+
 int Params::integer(const std::string& key) const {
     return std::stoi(operator[](key));
 }
@@ -141,14 +150,14 @@ bool Params::readTask(const std::string& filename,
         is >> key;
         ++lineNo;
         if(key.empty() || key[0] == '#') {
-            std::string line;
-            std::getline(is, line); //eat and forget line
+            std::string d_line;
+            std::getline(is, d_line); //eat and forget line
             continue;
         }
         if(key == "print") {
-            std::string line;
-            std::getline(is, line);
-            std::cout << formatPrint(line.erase(0, 1)) << std::endl;
+            std::string p_line;
+            std::getline(is, p_line);
+            std::cout << formatPrint(p_line.erase(0, 1)) << std::endl;
             continue;
         }
         if(key == "run") {

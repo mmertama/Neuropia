@@ -74,11 +74,11 @@ protected:
 private:
     void readBE(char* data, size_t size);
 private:
-    mutable std::ifstream m_stream;
+    mutable std::ifstream m_stream = {};
     Type m_type = Type::Invalid;
-    std::vector<size_t> m_dimensions;
-    std::unique_ptr<char[]> m_iobuf;
-    size_t m_headerSize;
+    std::vector<size_t> m_dimensions = {};
+    std::unique_ptr<char[]> m_iobuf = {};
+    size_t m_headerSize = {};
 };
 
 template <typename T>

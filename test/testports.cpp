@@ -3,6 +3,7 @@
 #include "neuropia.h"
 #include "utils.h"
 
+static
 void testGates(const std::string& name, const std::vector<std::tuple<Neuropia::ValueVector, Neuropia::ValueVector>>& data) {
 
     auto network = Neuropia::Layer(2);
@@ -33,6 +34,7 @@ void testGates(const std::string& name, const std::vector<std::tuple<Neuropia::V
     }
 }
 
+void testLogicalPorts();
 void testLogicalPorts() {
     Neuropia::timed([]() {
         testGates("xor", {

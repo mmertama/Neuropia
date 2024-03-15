@@ -19,6 +19,7 @@ namespace Neuropia {
 std::tuple<int, unsigned> verify(const Neuropia::Layer& network,
                  const std::string& imageFile,
                  const std::string& labelFile,
+                 bool quiet,
                  size_t from = 0,
                  size_t count = std::numeric_limits<unsigned>::max());
 /**
@@ -32,6 +33,7 @@ std::tuple<int, unsigned> verifyEnseble(const std::vector<Neuropia::Layer>& ense
                    bool hard,
                    const std::string& imageFile,
                    const std::string& labelFile,
+                   bool quiet,
                    size_t from = 0,
                    size_t count = std::numeric_limits<unsigned>::max());
 }

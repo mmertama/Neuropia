@@ -20,7 +20,6 @@
 
 extern void testLogicalPorts();
 
-
 int main(int argc, char* argv[]) {
 
     Neuropia::Params params = {
@@ -29,6 +28,9 @@ int main(int argc, char* argv[]) {
 
     bool quiet = false;
 
+    // set testing specific params
+    params.set("Classes", "10");
+    params.set("File", "mnistdata.bin");
 
     const std::unordered_map<std::string, std::function<void(const std::string&)>> tests = {
     {
@@ -39,7 +41,7 @@ int main(int argc, char* argv[]) {
     },{
             "trainMnist", [&](const std::string & root) {
                 Neuropia::Trainer trainer(root, params, quiet);
-                const bool ok = trainer.train();
+                const bool ok = trainer.init() && trainer.train();
                 const auto network = trainer.network();
 
                 assert(network.isValid());
@@ -51,10 +53,10 @@ int main(int argc, char* argv[]) {
                 if(ok) {
                     Neuropia::printVerify(verify(network,
                                            Neuropia::absPath(root, params["Images"]),
-                                           Neuropia::absPath(root, params["Labels"]), 0, 1000), "Train");
+                                           Neuropia::absPath(root, params["Labels"]), true, 0, 1000), "Train");
                     Neuropia::printVerify(verify(network,
                                            Neuropia::absPath(root, params["ImagesVerify"]),
-                                           Neuropia::absPath(root, params["LabelsVerify"])), "Verify");
+                                           Neuropia::absPath(root, params["LabelsVerify"]), true), "Verify");
                 } else {
                     std::cerr << "Training failed ";
                     auto l = &network;
@@ -72,7 +74,7 @@ int main(int argc, char* argv[]) {
         {
             "trainMnistEvo", [&](const std::string & root) {
                 Neuropia::TrainerEvo trainer(root, params, quiet);
-                const auto ok = trainer.train();
+                const auto ok = trainer.init() && trainer.train();
                 const auto network = trainer.network();
 
                 if(ok && !params["File"].empty()) {
@@ -82,7 +84,7 @@ int main(int argc, char* argv[]) {
 
                 Neuropia::printVerify(verify(network,
                                        Neuropia::absPath(root, params["ImagesVerify"]),
-                                       Neuropia::absPath(root, params["LabelsVerify"])), "Verify");
+                                       Neuropia::absPath(root, params["LabelsVerify"]), true), "Verify");
                 std::cout << std::endl;
             }
         },
@@ -90,7 +92,7 @@ int main(int argc, char* argv[]) {
             "trainMnistParallel", [&](const std::string & root) {
                Neuropia::TrainerParallel trainer(root, params, quiet);
 
-               const auto ok = trainer.train();
+               const auto ok = trainer.init() && trainer.train();
                const auto network = trainer.network();
 
                if(ok && !params["File"].empty()) {
@@ -100,7 +102,7 @@ int main(int argc, char* argv[]) {
 
                Neuropia::printVerify(verify(network,
                                        Neuropia::absPath(root, params["ImagesVerify"]),
-                                       Neuropia::absPath(root, params["LabelsVerify"])), "Verify");
+                                       Neuropia::absPath(root, params["LabelsVerify"]), true), "Verify");
                std::cout << std::endl;
         }
         },
@@ -119,7 +121,7 @@ int main(int argc, char* argv[]) {
                
 
                 Neuropia::printVerify(verify(std::get<0>(*loaded), Neuropia::absPath(root, params["ImagesVerify"]),
-                         Neuropia::absPath(root, params["LabelsVerify"])), "Verify data");
+                         Neuropia::absPath(root, params["LabelsVerify"]), true), "Verify data");
                 std::cout << std::endl;
             },
         },
@@ -138,7 +140,7 @@ int main(int argc, char* argv[]) {
                 }
                 Neuropia::printVerify(Neuropia::verifyEnseble(ensebles, params.boolean("Hard"),
                         Neuropia::absPath(root, params["ImagesVerify"]),
-                        Neuropia::absPath(root, params["LabelsVerify"])), "Verify data");
+                        Neuropia::absPath(root, params["LabelsVerify"]), true), "Verify data");
                 std::cout << std::endl;
             }
         }

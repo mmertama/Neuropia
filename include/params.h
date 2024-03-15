@@ -91,8 +91,8 @@ public:
 private:
     std::string formatPrint(const std::string& line) const;
 private:
-    std::unordered_map<std::string, std::string> m_helps;
-    std::vector<std::tuple<std::string, std::string, std::string>> m_data;
+    std::unordered_map<std::string, std::string> m_helps = {};
+    std::vector<std::tuple<std::string, std::string, std::string>> m_data = {};
 public:
     decltype (m_data)::iterator begin() {return m_data.begin();}
     decltype (m_data)::iterator end() {return m_data.end();}

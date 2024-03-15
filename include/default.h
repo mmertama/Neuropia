@@ -19,7 +19,7 @@ constexpr char dropoutRateRe[] = R"(\d+\.?\d*(,\d+\.?\d*)*$)";
 {"BatchVerifySize", "100", Neuropia::Params::Int}, \
 {"Topology", "64,32", topologyRe}, \
 {"MaxTrainTime", std::to_string(static_cast<int>(Neuropia::MaxTrainTime)), Neuropia::Params::Int}, \
-{"File", "mnistdata.bin", Neuropia::Params::File}, \
+{"File", "", Neuropia::Params::File}, \
 {"Extra", "", Neuropia::Params::String}, \
 {"Hard", "false", Neuropia::Params::Bool}, \
 {"ActivationFunction", "sigmoid", activationFunctionRe}, \
@@ -27,6 +27,6 @@ constexpr char dropoutRateRe[] = R"(\d+\.?\d*(,\d+\.?\d*)*$)";
 {"DropoutRate", "0.0", dropoutRateRe}, \
 {"TestFrequency", "9999999", Neuropia::Params::Int}, \
 {"L2", "0.0", Neuropia::Params::Real}, \
-{"Classes", "10", Neuropia::Params::Int} \
+{"Classes", "0", Neuropia::Params::Int} \
 
 #endif // DEFAULT_H

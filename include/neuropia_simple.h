@@ -112,7 +112,7 @@ void save(const NeuropiaPtr& env, const std::string& filename, Neuropia::SaveTyp
  * @return true 
  * @return false 
  */
-bool load(const NeuropiaPtr& env, const std::string& filename);
+std::optional<Neuropia::Sizes> load(const NeuropiaPtr& env, const std::string& filename);
 
 /**
  * @brief Calculates test material over the network to comparative value of network match accuracy.
@@ -130,6 +130,12 @@ int verify(const NeuropiaPtr& env);
  */
 void setLogger(const NeuropiaPtr& env, std::function<void (const std::string&) > cb);
 
+ /**
+ * @brief Access to Neuropia network input layer
+ * 
+ * @return const Layer& 
+ */
+const Neuropia::Layer& network(const NeuropiaPtr& env);
 }
 
 #endif // NEUROPIA_SIMPLE_H

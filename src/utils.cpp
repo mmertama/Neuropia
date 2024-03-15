@@ -15,10 +15,10 @@ static char mapGrey(unsigned char m) {
     return greys[9 - p];
 }
 
-void Neuropia::printimage(const unsigned char* c)  {
+void Neuropia::printimage(const unsigned char* c, int width, int height)  {
     int p = 0;
-    for(int j = 0; j < 28; j++) {
-        for(int i = 0; i < 28; i++) {
+    for(int j = 0; j < height; j++) {
+        for(int i = 0; i < width; i++) {
             std::cout << mapGrey(c[p]);
             ++p;
         }
@@ -97,9 +97,11 @@ std::optional<std::tuple<Neuropia::Layer, std::unordered_map<std::string, std::s
     str.open(filename, std::ios::out | std::ios::binary);
     if(str.is_open()) {
         const auto map = network.load(str);
-        if(map) {
-            return std::make_tuple(network, *map); 
+        if(!map) {
+            std::cerr << "filename " << filename << " is corrupted" << std::endl;
+            return std::nullopt;
         }
+        return std::make_tuple(network, *map);
     } 
     std::cerr << "filename " << filename << " cannot be opened" << std::endl;
     return std::nullopt;
@@ -144,3 +146,12 @@ Random::Random() : m_gen(
 size_t Random::random(size_t atop) {
     return (m_gen() % atop);
     }
+
+std::string_view Neuropia::to_string(Neuropia::SaveType st) {
+    static const std::unordered_map<Neuropia::SaveType, std::string_view> map{
+        {Neuropia::SaveType::SameAsNeuronType, "SameAsNeuronType"}, 
+        {Neuropia::SaveType::Double, "Double"}, 
+        {Neuropia::SaveType::Float, "Float"}, 
+        {Neuropia::SaveType::LongDouble, "LongDouble"}};
+    return map.at(st);    
+}    
