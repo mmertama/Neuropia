@@ -17,6 +17,7 @@
 #include "params.h"
 #include "argparse.h"
 #include "default.h"
+#include "../neuropialib/neuropialib.h"
 
 extern void testLogicalPorts();
 

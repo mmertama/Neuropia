@@ -29,12 +29,12 @@ namespace Neuropia
             std::optional<Sizes> load(const uint8_t* bytes, size_t sz) {
                 const auto map = m_network.load(bytes, sz);
                 if(!map) return std::nullopt;
-                return m_network->sizes();
+                return m_network.sizes();
             }
             std::optional<Sizes> load(const Bytes& bytes) {
                 const auto map = m_network.load(bytes);
                 if(!map) return std::nullopt;
-                return sizes(); 
+                return m_network.sizes();
             }
             /**
              * @brief Feed values to network, get calculated output.
@@ -51,8 +51,8 @@ namespace Neuropia
              * 
              * @return const Layer& 
              */
-            const Layer& network() const {return m_network}
+            const Layer& network() const {return m_network;}
         private:
-            Layer m_network;
+            Layer m_network = {};
    };
 } // namespace Neuropia
