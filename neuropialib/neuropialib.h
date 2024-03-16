@@ -44,7 +44,7 @@ namespace Neuropia
              */
 
             template <typename IT>
-            const Values& feed(const IT& begin, const IT& end) const {{return m_network.feed(begin, end);}}
+            const Values& feed(const IT& begin, const IT& end) const {return m_network.feed(begin, end);}
 
             /**
              * @brief Access to Neuropia network input layer
