@@ -93,8 +93,25 @@ enum class SaveType : uint8_t {
 struct Header {
     const SaveType saveType;
     const unsigned layers;
+    const bool bigEndian;
 };
 
+
+inline constexpr
+bool isBigEndian() {
+   // before supports C++20, then this can be written reliably
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+    return false;
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+    return true;
+#else
+    union {
+        uint32_t i;
+        uint8_t c[4];
+    } bint = {0x01020304};
+    return bint.c[0] == 1; // luck
+    #endif
+}
 
 /**
  * @brief Verify that file is Neuropia file
@@ -117,7 +134,7 @@ public:
     explicit operator bool() const noexcept {return m_f != nullptr;}
     std::function<R (U...)> function() {return m_f;}
     R operator()(U... values) const {return m_f(values...);}
-    std::string name() const noexcept {return m_name;}
+    constexpr std::string_view name() const noexcept {return m_name;}
 protected:
     NFunction() {}
     NFunction(std::function<R(U...)> f, const std::string& name):  m_f(f), m_name(name){}
@@ -757,6 +774,13 @@ public:
      * @return const Layer* 
      */
     const Layer* inputLayer() const;
+
+
+    /**
+     * @brief next
+     * @return
+     */
+    const Layer* next() const {return get(1);}
     
  protected:
     [[nodiscard]] bool loadLayer(StreamBase& stream, SaveType saveType, unsigned layer_count);
@@ -825,7 +849,7 @@ NeuronType Neuron::feed(const IT& begin, const IT& end) const {
     const auto sz = static_cast<size_t>(std::distance(begin, end));
     neuropia_assert(m_weights.size() >= sz);
     for(size_t i = 0; i < sz; i++) {
-        sum += (m_weights[i] * *(begin + static_cast<Neuropia::ValueVector::difference_type>(i)));
+        sum += (m_weights[i] * *(begin + static_cast<typename IT::difference_type>(i)));
     }
     return m_af(sum);
 }

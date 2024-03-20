@@ -8,12 +8,13 @@ function (SET_COMPILER_FLAGS)
 
     target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
-    if(NOT MSCV)
+    set(PEDANTIC_WARNINGS FALSE)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         set(PEDANTIC_WARNINGS TRUE)
     endif()  
 
 
-    if(PEDANTIC_WARNINGS)
+    if(PEDANTIC_WARNINGS )
         target_compile_options(${PROJECT_NAME} PRIVATE 
             -pedantic
             -Wall 

@@ -19,7 +19,7 @@ namespace NeuropiaSimple {
 
 class NeuropiaEnv;
 using NeuropiaPtr = std::shared_ptr<NeuropiaEnv>;
-using ParamType = std::map<std::string, std::vector<std::string>>;
+using ParamMap = std::map<std::string, std::vector<std::string>>;
 
 
 
@@ -67,7 +67,7 @@ bool setParam(const NeuropiaPtr& env, const std::string& name, const std::string
 bool setParam(const NeuropiaPtr& env, const std::string& name, const std::variant<int, double, float, bool>& value);
 
 /**
- * @brief Test if a a given paramter is valid. 
+ * @brief Test if a a given parameter is valid. 
  * 
  * @param env 
  * @param name 
@@ -81,9 +81,9 @@ bool isValid(const NeuropiaPtr& env, const std::string& name, const std::string&
  * @brief Get current parameters.
  * 
  * @param env 
- * @return ParamType 
+ * @return ParamMap
  */
-ParamType params(const NeuropiaPtr& env);
+ParamMap params(const NeuropiaPtr& env);
 
 
 /**
@@ -118,7 +118,7 @@ std::optional<Neuropia::Sizes> load(const NeuropiaPtr& env, const std::string& f
  * @brief Calculates test material over the network to comparative value of network match accuracy.
  * 
  * @param env 
- * @return int 
+ * @return int items correctly found from the training material
  */
 int verify(const NeuropiaPtr& env);
 

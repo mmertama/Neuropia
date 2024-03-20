@@ -186,9 +186,9 @@ bool NeuropiaSimple::setParam(const NeuropiaPtr& env, const std::string& name, c
     return ok;    
 }
 
-ParamType NeuropiaSimple::params(const NeuropiaPtr& env) {
+ParamMap NeuropiaSimple::params(const NeuropiaPtr& env) {
     ASSERT(env);
-    ParamType out;
+    ParamMap out;
     for(const auto& item : env->m_params) {
         const auto key = std::get<0>(item);
         if(key.length() > 0 && !(std::islower(key[0]))) {
@@ -335,7 +335,7 @@ bool SimpleTrainer::train() {
 
     if(m_maxTrainTime >= MaxTrainTime) {
         if(!m_quiet)
-            persentage(m_passedIterations, m_iterations);
+            percentage(m_passedIterations, m_iterations);
         m_learningRate += (1.0 / static_cast<NeuronType>(m_iterations)) * (m_learningRateMin - m_learningRateMax);
     } else {
         const auto stop = std::chrono::high_resolution_clock::now();
@@ -346,7 +346,7 @@ bool SimpleTrainer::train() {
         const auto change = delta - m_gap;
         m_gap = delta;
         if(!m_quiet)
-            persentage(delta, m_maxTrainTime, " " + std::to_string(m_learningRate));
+            percentage(delta, m_maxTrainTime, " " + std::to_string(m_learningRate));
         this->m_learningRate += (static_cast<NeuronType>(change) / static_cast<NeuronType>(m_maxTrainTime)) * (m_learningRateMin - m_learningRateMax);
     }
 
@@ -407,12 +407,13 @@ bool SimpleVerifier::verify() {
 
     ++m_position;
     if((m_position % (sz / 10)) == 0) {
-        Neuropia::persentage(m_position, sz);
+        Neuropia::percentage(m_position, sz);
     }
 
     return true;
 }
 
+#ifdef __EMSCRIPTEN__
 static
 bool train(const NeuropiaPtr& env, unsigned iteration) {
     ASSERT(env);
@@ -435,13 +436,14 @@ bool verify(const NeuropiaPtr& env, int iteration) {
         env->m_logStream->freeze(false);
         std::cout << "Create verifier"  << std::endl;;
         env->m_verifier.reset(new SimpleVerifier(env->m_network, Neuropia::absPath(env->m_root, env->m_params["ImagesVerify"]), Neuropia::absPath(env->m_root,env->m_params["LabelsVerify"])));
-        Neuropia::persentage(0, 1);
+        Neuropia::percentage(0, 1);
     }
     return env->m_verifier->verify();
 }
 
+
 static
-ParamType basicParams(const NeuropiaPtr& env) {
+ParamMap basicParams(const NeuropiaPtr& env) {
     auto p = NeuropiaSimple::params(env);
     p.erase("Jobs");    //mt
     p.erase("BatchSize"); //mt
@@ -471,7 +473,7 @@ NeuronType verifyResult(const NeuropiaPtr& env) {
     return -2.0; //arbitrary negative number, but not -1
 }
 
-#if 0
+
 static
 int showImage(const NeuropiaPtr& env, const std::string& imageName, const std::string& labelName, unsigned index) {
     ASSERT(env);
@@ -540,7 +542,7 @@ EMSCRIPTEN_BINDINGS(Neuropia) {
     class_<NeuropiaEnv>("Neuropia").smart_ptr_constructor("Neuropia", &std::make_shared<NeuropiaEnv, const std::string&>);
     register_vector<NeuronType>("ValueVector");
     register_vector<std::string>("StringVector");
-    register_map<ParamType::key_type, ParamType::mapped_type>("ParamMap");
+    register_map<ParamMap::key_type, ParamMap::mapped_type>("ParamMap");
     function("create", &NeuropiaSimple::create);
     function("free", &NeuropiaSimple::free);
     function("feed", &::feed);

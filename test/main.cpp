@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
                                        Neuropia::absPath(root, params["ImagesVerify"]),
                                        Neuropia::absPath(root, params["LabelsVerify"]), true), "Verify");
                std::cout << std::endl;
-        }
+            }
         },
         {
             "verifyMnist", [&](const std::string & root) {
@@ -177,7 +177,7 @@ int main(int argc, char* argv[]) {
             std::cerr << "file " << argparse.param(1) << " cannot be open" << std::endl;
         }
     } else if(argparse.paramCount() == 1 || tests.find(argv[1]) == tests.end()) {
-        std::cerr << "neuropia TEST|TESTFILE <test parameters>" << std::endl;
+        std::cerr << "neuropia_test TEST|TESTFILE <test parameters>" << std::endl;
         std::cerr << "e.g trainMnistEvo neuropia/data/t10k-images-idx3-ubyte neuropia/data/t10k-labels-idx1-ubyte neuropia/data/train-images-idx3-ubyte neuropia/data/train-labels-idx1-ubyte 10 8" << std::endl;
         std::cerr << "e.g tests2.txt -r data/mnist" << std::endl;
         std::cerr << "tests:" << std::endl;

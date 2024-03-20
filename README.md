@@ -113,6 +113,23 @@ add_dependencies(${PROJECT_NAME} neuropia_generation)
 
 ```
 
+##### Out of memory when building
+Compiling the `neuropia_feed.h` uses a lot of memory. My Ubuntu 32G with 2G swap was far too small. Even
+for the most simple (rom_text) network I has to increase the swap size to 20G! You can temporary add
+another swapfile with following snippet:
+
+```bash
+ 
+ $ sudo fallocate -l 20G /swapfile2
+ $ sudo chmod 600 /swapfile2
+ $ sudo mkswap /swapfile2
+ $ sudo swapon /swapfile2
+
+```
+
+On next reboot thaw swapfile should be removed.
+
+
 #### Using Neuropia Simple
 
 Basically just create + train/load/save based on parameters given. Minimum parameters are input images and labels filenames.

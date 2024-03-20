@@ -37,8 +37,8 @@ std::string absPath(const std::string& root, const std::string& relativePath);
 void printVerify(const std::tuple<size_t, size_t>& result, const std::string& txt);
 
 template <typename T1, typename T2>
-void persentage(T1 fraction, T2 total, const std::string& extra = "") {
-        const auto f = 100.0 * (static_cast<double>(fraction) / static_cast<double>(total));
+void percentage(T1 fraction, T2 total, const std::string& extra = "") {
+        const auto f = 100.0 * (static_cast<double>(fraction + 1) / static_cast<double>(total));
         std::cout << "\r" << std::fixed << std::setprecision(3) << f << '%' << extra << std::flush;
 }
 

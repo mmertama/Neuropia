@@ -9,7 +9,7 @@ if __name__ == '__main__':
     item_len = 0
     with open(out_name, 'w') as out:
         with open(bin_name, 'rb') as file:
-            print('// this file is generated\n', file=out)
+            print('#pragma once\n#include<stdint.h>\n// this file is generated\n', file=out)
             print('constexpr uint8_t ', data_name, '[] = {\n', file=out)
             while True:
                 data = file.read(1);

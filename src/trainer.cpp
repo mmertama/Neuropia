@@ -21,7 +21,7 @@ bool Trainer::train() {
 #endif
         if(m_maxTrainTime >= MaxTrainTime) {
             if(!m_quiet)
-                persentage(it + 1, m_iterations);
+                percentage(it + 1, m_iterations);
             m_learningRate += (1.0 / static_cast<NeuronType>(m_iterations)) * (m_learningRateMin - m_learningRateMax);
         } else {
             m_passedIterations = it;
@@ -33,7 +33,7 @@ bool Trainer::train() {
             const auto change = delta - m_gap;
             m_gap = delta;
             if(!m_quiet)
-                persentage(delta, m_maxTrainTime, " " + std::to_string(m_learningRate));
+                percentage(delta, m_maxTrainTime, " " + std::to_string(m_learningRate));
             this->m_learningRate += (static_cast<NeuronType>(change) / static_cast<NeuronType>(m_maxTrainTime)) * (m_learningRateMin - m_learningRateMax);
         }
 

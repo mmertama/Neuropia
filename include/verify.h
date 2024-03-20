@@ -14,7 +14,7 @@ namespace Neuropia {
  * @param labelFile
  * @param from
  * @param count
- * @return
+ * @return values found, values looked 
  */
 std::tuple<int, unsigned> verify(const Neuropia::Layer& network,
                  const std::string& imageFile,

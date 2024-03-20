@@ -42,15 +42,27 @@ auto toRealVec(const std::string& s) {
     return Neuropia::Params::toVector<NeuronType>(s, [](const auto& p){return std::atof(p.c_str());});
 }
 
+static bool icomp(std::string_view name, std::string_view n, size_t len) {
+    if(std::min(len, name.length()) != std::min(len, n.length()))
+        return false;
+    for(size_t i = 0; i < std::min(len, n.length()); ++i) {
+        constexpr auto off = 'a' - 'A';
+        static_assert(off > 0);
+        if(name[i] != n[i] &&
+            ((name[i] > 'z' || name[i] < 'A') || 
+            !((name[i] + off ==  n[i]) || (n[i] <= 'Z' && n[i] + off == name[i]))
+            ))
+            return false;
+        }
+    return true;
+}    
+
 static
 auto toFunction(const std::string& names) {
     const auto nameVec = Neuropia::Params::split(names);
     std::vector<Neuropia::ActivationFunction> functions;
     for(const auto& name : nameVec) {
-        const auto cmp = [name](const std::string& n) {
-            const auto toLower = [](std::string nl) { std::transform(nl.begin(), nl.end(), nl.begin(), [](auto c){
-                    return c >= 'A' && c <= 'Z' ? c - ('A' - 'a') : c; }); return nl;};
-            return toLower(n.substr(0, n.length() - std::string("Function").length())) == name;};
+        const auto cmp = [&name](std::string_view n) {return icomp(name, n, name.length());};
         if(cmp(Neuropia::signumFunction.name()))
             functions.push_back(Neuropia::signumFunction);
         else if(cmp(Neuropia::binaryFunction.name()))
@@ -62,7 +74,7 @@ auto toFunction(const std::string& names) {
         else if(cmp(Neuropia::eluFunction.name()))
             functions.push_back(Neuropia::eluFunction);
         else
-            neuropia_assert_always(false, "Invalid activation function");
+            neuropia_assert_always(false, "Invalid activation function: " + name );
     }
     return functions;
 }

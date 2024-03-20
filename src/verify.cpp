@@ -41,7 +41,7 @@ std::tuple<int, unsigned> Neuropia::verify(const Neuropia::Layer& network,
                                                  std::max_element(outputs.begin(), outputs.end())));
 
             if(!quiet) {
-                persentage(i, iterations);
+                percentage(i, iterations);
             }                                     
 
 
@@ -110,7 +110,7 @@ std::tuple<int, unsigned> Neuropia::verifyEnseble(const std::vector<Neuropia::La
             }
 
             if(!quiet) {
-                persentage(i, iterations);
+                percentage(i, iterations);
             }     
 
             size_t max;

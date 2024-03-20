@@ -1,6 +1,7 @@
 #include "argparse.h"
 #include "neuropia_simple.h"
 #include "utils.h"
+#include "idxreader.h"
 #include <iostream>
 
 
@@ -23,7 +24,7 @@ int main(int argc, char* argv[]) {
 
     const auto header = Neuropia::isValidFile(argparse.param(1));
     if(!header) {
-        std::cerr << "Corrupted file: " << argparse.param(1) << std::endl;
+        std::cerr << "Corrupted or missing file: " << argparse.param(1) << std::endl;
         return 3;
     }
 
@@ -36,7 +37,7 @@ int main(int argc, char* argv[]) {
     std::cout << 
     "Network loaded\nin:" << sizes->in_layer << 
     " out:" << sizes->out_layer << 
-    " layers: " << header->layers  << 
+    " layers:" << header->layers  << 
     " mem:"  << NeuropiaSimple::network(neuropia).consumption(true) << 
     " type:" << Neuropia::to_string(header->saveType) <<  std::endl;
     /*for(const auto& [p, v] : NeuropiaSimple::params(neuropia)) {
@@ -56,8 +57,14 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
+        Neuropia::IdxReader<unsigned char> idx(argparse.param(3));
+
+        if(!idx.ok() || idx.size() == 0) {
+            std::cerr << "Bad parameter LABELS" << std::endl;
+            return 1;
+        }
         const auto v = NeuropiaSimple::verify(neuropia);
-        std::cout << "verify index:" << v << std::endl; 
+        std::cout << "Verify match:" << (static_cast<double>(v) * 100.)/ static_cast<double>(idx.size()) << "% size:" << idx.size() << std::endl; 
     }
 
   

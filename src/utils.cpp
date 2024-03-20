@@ -50,7 +50,7 @@ void Neuropia::timed(const std::function<void ()>& f, const std::string& label) 
     const auto start = std::chrono::high_resolution_clock::now();
     f();
     const auto stop = std::chrono::high_resolution_clock::now();
-    std::cout << (!label.empty() ? label + " " : "")
+    std::cout << "\n" << (!label.empty() ? label + " " : "")
               << "timed:" << std::chrono::duration_cast<std::chrono::seconds>(stop - start).count()
               << "." <<  std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count()
               - std::chrono::duration_cast<std::chrono::seconds>(stop - start).count() * 1000000 << std::endl;

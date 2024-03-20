@@ -16,7 +16,6 @@ if(NOT NOLIB)
   add_subdirectory(neuropialib)
 endif()
 
-
 if(NOT NOAPP)
   add_subdirectory(app)
 endif()
@@ -27,4 +26,13 @@ endif()
 
 if(NOT NOAPP)
   add_subdirectory(verify)
+endif()
+
+if(GUTIL)
+  add_subdirectory(utils/idxview)
+endif()
+
+if(EXAMPLES)
+  add_subdirectory(example/romtest)
+  add_subdirectory(example/compare)
 endif()
