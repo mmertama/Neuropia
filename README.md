@@ -52,6 +52,46 @@ network.load(neuropia_bin, sizeof(neuropia_bin));
 
 ```
 
+#### Feeder
+
+When memory is tight (e.g. embedded devices, or tons of parallel networks needed) 
+the `neuropia_feed.h` implements a header only Neuropia::Feed class that loads a pre-trained network from the included file (see above) without any dynamic allocation. It is a templated class reads values directly from the included header, since all the parameters are known at build time, the network itself is constructed at build time. Cost of radically decreased memory consumption is a slight performance hit.
+
+
+Using is simple:
+
+Add the pre-compiled data as a header:
+
+```cmake
+
+# Bake results in
+add_custom_command(
+    OUTPUT "${BIN_FOLDER}/neuropia_bin.h"
+    COMMAND ${Python3_EXECUTABLE} ${NEUROPIA_DIR}/utils/bin2code.py "${BIN_FOLDER}/neuropia.bin" "${BIN_FOLDER}/neuropia_bin.h" "neuropia_bin"
+    DEPENDS "${BIN_FOLDER}/neuropia.bin"
+)
+
+
+```
+
+Call Neuropia::Feed::feed with your data:
+
+
+```cpp
+
+#include "neuropia_bin.h"
+
+using NeuropiaFeed = Neuropia::Feed<neuropia_bin, sizeof(neuropia_bin)>;
+
+...
+
+  const auto outputs = NeuropiaFeed::feed(inputs.begin(), inputs.end());
+....          
+
+```
+
+
+
 ##### Hints for CMake
 
 ```
@@ -113,22 +153,6 @@ add_dependencies(${PROJECT_NAME} neuropia_generation)
 
 ```
 
-##### Out of memory when building
-Compiling the `neuropia_feed.h` uses a lot of memory. My Ubuntu 32G with 2G swap was far too small. Even
-for the most simple (rom_text) network I has to increase the swap size to 20G! You can temporary add
-another swapfile with following snippet:
-
-```bash
- 
- $ sudo fallocate -l 20G /swapfile2
- $ sudo chmod 600 /swapfile2
- $ sudo mkswap /swapfile2
- $ sudo swapon /swapfile2
-
-```
-
-On next reboot thaw swapfile should be removed.
-
 
 #### Using Neuropia Simple
 
@@ -171,7 +195,21 @@ Use cmake
 
 Supports Windows MSCV, GCC and Clang, Emscripten (Web Assembly)
 
+##### Out of memory when building
+Compiling the `neuropia_feed.h` uses a lot of memory. My Ubuntu 32G with 2G swap was far too small. Even
+for the most simple (rom_text) network I has to increase the swap size to 25G! You can temporary add
+another swapfile with following snippet:
 
+```bash
+ 
+ $ sudo fallocate -l 25G /swapfile2
+ $ sudo chmod 600 /swapfile2
+ $ sudo mkswap /swapfile2
+ $ sudo swapon /swapfile2
+
+```
+
+On next reboot thaw swapfile should be removed.
 
 ## Testing
 For testing copy the Mnist data from [huggingface](https://huggingface.co/datasets/mnist)
