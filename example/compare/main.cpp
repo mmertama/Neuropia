@@ -36,16 +36,16 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Loaded..." << std::endl;
 
-    int i = 0;
+    int layer_index = 0;
     for(const auto& [key, value] : params) {
-        std::cout << ++i << ") " << key << "->" << value << std::endl;
+        std::cout << ++layer_index << ") " << key << "->" << value << std::endl;
     }
 
-    i = 0;
+    layer_index = 0;
     size_t layers_sz = 0;
     auto next = &network;
     while(next) {
-         std::cout << "L:" << i << " " << next->size() << " " << next->activationFunction().name() << std::endl;
+         std::cout << "L:" << layer_index << " " << next->size() << " " << next->activationFunction().name() << std::endl;
          next = next->next();
          ++layers_sz;
     }

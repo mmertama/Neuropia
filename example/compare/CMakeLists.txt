@@ -59,7 +59,8 @@ target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 add_dependencies(${PROJECT_NAME} neuropia_generation)
 add_dependencies(neuropia_generation neuropia)
 
-
+include (../../compiler.cmake)
+SET_COMPILER_FLAGS()
 
 
 

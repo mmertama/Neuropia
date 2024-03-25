@@ -193,7 +193,7 @@ NeuropiaSimple::save(neuropia, "neuropia.bin" , Neuropia::SaveType::Double);
 ## Build
 Use cmake
 
-Supports Windows MSCV, GCC and Clang, Emscripten (Web Assembly)
+Supports Windows MSVC, GCC and Clang, Emscripten (Web Assembly)
 
 ##### Out of memory when building
 Compiling the `neuropia_feed.h` uses a lot of memory. My Ubuntu 32G with 2G swap was far too small. Even

@@ -10,6 +10,8 @@ using NeuropiaFeed = Neuropia::Feed<neuropia_bin, sizeof(neuropia_bin)>;
 
 int main(int argc, char* argv[]) {
 
+    static_assert(NeuropiaFeed::in_layer_size() == 28 * 28); // MNIST data size
+    static_assert(NeuropiaFeed::out_layer_size() ==  10);    // gives you digits!
     ArgParse argparse;
     argparse.addOpt('q', "quiet");
     argparse.set(argc, argv);
@@ -54,7 +56,7 @@ int main(int argc, char* argv[]) {
         const auto imageSize = testImages.size(1) * testImages.size(2);
         std::vector<Neuropia::NeuronType> inputs(imageSize);
         const auto iterations = testLabels.size();
-        for(auto i = 0; i < iterations; i++) {
+        for(auto i = 0U; i < iterations; i++) {
             const auto image = testImages.read(imageSize);
             const auto label = static_cast<unsigned>(testLabels.read());
 

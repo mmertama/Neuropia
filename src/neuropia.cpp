@@ -1,9 +1,11 @@
 #include "neuropia.h"
+#include "matrix.h"
+#include <string_view>
 #include <random>
 #include <iostream>
 #include <cstring>
 #include <optional>
-#include "matrix.h"
+
 
 using namespace Neuropia;
 
@@ -409,11 +411,11 @@ void Layer::randomize(NeuronType min, NeuronType max) {
 
         for(auto& n : m_neurons) {
             for(size_t i = 0; i < n.size(); i++) {
-                n.setWeight(i, dis(gen));
+                n.setWeight(i, static_cast<NeuronType>(dis(gen)));
             }
         }
         for(auto& n : m_neurons) { //for certain testability reasons we have second loop to set biases
-            n.setBias(dis(gen));
+            n.setBias(static_cast<NeuronType>(dis(gen)));
         }
     } else {
         for(auto& n : m_neurons) {
@@ -763,8 +765,8 @@ void Layer::merge(const Layer& other, NeuronType factor) {
             auto& nThis = m_neurons[n];
             auto& nOther = other.m_neurons[n];
             for(auto i = 0U; i < nThis.size(); i++) {
-                nThis.setWeight(i, nThis.weight(i) * (1. - factor)
-                                + nOther.weight(i) * factor);
+                nThis.setWeight(i, static_cast<NeuronType>(nThis.weight(i) * (1. - factor)
+                                + nOther.weight(i) * factor));
             }
             nThis.setBias(nThis.bias() * (1 - factor) + nOther.bias() * factor);
         }
@@ -816,10 +818,10 @@ void Layer::initialize(InitStrategy strategy) {
             r = 1.0;
             break;
         case Layer::InitStrategy::Logistic:
-             r = std::sqrt(6.0 / static_cast<double>(m_neurons.size() + m_prev->m_neurons.size()));
+             r = static_cast<NeuronType>(std::sqrt(6.0 / static_cast<double>(m_neurons.size() + m_prev->m_neurons.size())));
             break;
         case Layer::InitStrategy::ReLu:
-             r = std::sqrt(2.0) *  std::sqrt(6.0 / static_cast<double>(m_neurons.size() + m_prev->m_neurons.size()));
+             r = static_cast<NeuronType>(std::sqrt(2.0) *  std::sqrt(6.0 / static_cast<double>(m_neurons.size() + m_prev->m_neurons.size())));
             break;
         default:
             neuropia_assert_always(false, "bad");        
@@ -838,11 +840,11 @@ void Layer::initialize(InitStrategy strategy) {
 
         for(auto& n : m_neurons) {
             for(size_t i = 0; i < n.size(); i++) {
-                n.setWeight(i, dis(gen));
+                n.setWeight(i, static_cast<NeuronType>(dis(gen)));
             }
         }
         for(auto& n : m_neurons) { //for certain testability reasons we have second loop to set biases
-            n.setBias(dis(gen));
+            n.setBias(static_cast<NeuronType>(dis(gen)));
         }
     } else {
         for(auto& n : m_neurons) {
@@ -858,7 +860,7 @@ void Layer::dropout(std::default_random_engine& gen) {
     if(m_dropOut > 0.0) {
         if(!isOutput()) { // outputs are not dropped
             const auto sz = static_cast<unsigned>(m_neurons.size());
-            const auto dropCount = static_cast<unsigned>(static_cast<NeuronType>(sz * m_dropOut));
+            const auto dropCount = static_cast<unsigned>(static_cast<NeuronType>(sz) * m_dropOut);
             std::vector<bool> set(sz);
             std::fill(set.begin(), set.end(), false);
             auto count = 0U;
@@ -888,7 +890,7 @@ void Layer::dropout(std::default_random_engine& gen) {
 
 void Layer::inverseDropout(bool inherit) {
     if(!isOutput() && m_dropOut > 0.0) {
-        const auto dropKeepRate =  1.0 / (1.0 - m_dropOut);
+        const auto dropKeepRate =  static_cast<NeuronType>(1.0 / (1.0 - m_dropOut));
         for(auto& n : m_neurons) {
             n.setActivationFunction(m_activationFunction);
             for(auto i = 0U; i < n.size(); i++) {

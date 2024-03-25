@@ -20,9 +20,9 @@ size_t iterator(size_t iterations, const std::function<bool (size_t it)>& f);
 
 size_t iterator(size_t iterations, const std::function<bool ()>& f);
 
-void save(const std::string& filename, const Layer& network, const std::unordered_map<std::string, std::string>& = {}, SaveType savetype = SaveType::SameAsNeuronType);
+void save(const std::string& filename, const Layer& network, const std::unordered_map<std::string, std::string>& = {}, SaveType saveType = SaveType::SameAsNeuronType);
 
-void save(const std::string& filename, const std::vector<Layer>& ensembles, SaveType savetype = SaveType::SameAsNeuronType);
+void save(const std::string& filename, const std::vector<Layer>& ensembles, SaveType saveType = SaveType::SameAsNeuronType);
 
 std::vector<Layer> loadEnsemble(const std::string& filename);
 

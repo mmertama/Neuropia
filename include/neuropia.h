@@ -57,7 +57,7 @@ namespace Neuropia {
 }
 
 //Not in namespace
-std::ostream& operator<< (std::ostream& strm, const std::vector<Neuropia::NeuronType>& values);
+std::ostream& operator<< (std::ostream& stream, const std::vector<Neuropia::NeuronType>& values);
 std::ostream& operator<<(std::ostream& output, const Neuropia::Layer& layer);
 std::ostream& operator<<(std::ostream& output, const Neuropia::Neuron& neuron);
 
@@ -69,7 +69,7 @@ namespace Neuropia {
  */
 /**
  * @brief ValueMap
- * Hash map type for non continous NeuronType data
+ * Hash map type for non continuous NeuronType data
  */
 using ValueMap = std::unordered_map<int, NeuronType>;
 /**
@@ -81,7 +81,7 @@ using ValueVector = std::vector<NeuronType>;
 using MetaInfo = std::unordered_map<std::string, std::string>;
 
 /**
- * @brief Save data types. NeuronType is a Neuropia::NeuronType, others are C++ FP data types 
+ * @brief Save data types. NeuronType is a Neuropia::NeuronType, others are C++ floating point data types 
  * 
  * 
  */
@@ -117,7 +117,7 @@ bool isBigEndian() {
  * @brief Verify that file is Neuropia file
  * 
  * @param filename 
- * @return std::optional<SaveType, unsigned> where unsigne is number of layers 
+ * @return std::optional<SaveType, unsigned> where unsigned is number of layers 
  */
 std::optional<Header> isValidFile(const std::string& filename);
 
@@ -169,8 +169,8 @@ public:
 #define ACTIVATION_FUNCTION(name, f) const ActivationFunction name(f, #name);
 #define DERIVATIVE_FUNCTION(name, f) const DerivativeFunction name(f, #name);
 
-constexpr NeuronType LeakyReLuFactor = 0.05; //too small makes backpropagation not working
-constexpr NeuronType EluFactor = 1.0;
+constexpr NeuronType LeakyReLuFactor = static_cast<NeuronType>(0.05); //too small makes backpropagation not working
+constexpr NeuronType EluFactor = static_cast<NeuronType>(1.0);
 
 ACTIVATION_FUNCTION(signumFunction, [](NeuronType value) -> NeuronType{
     return value < 0.0 ? -1.0 : value > 0.0 ? 1.0 : 0.0;
@@ -181,7 +181,7 @@ ACTIVATION_FUNCTION(binaryFunction, [](Neuropia::NeuronType value) -> Neuropia::
 })
 
 ACTIVATION_FUNCTION(sigmoidFunction, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
-    return 1.0 / (1.0 + std::exp(-value));
+    return static_cast<NeuronType>(1.0 / (1.0 + std::exp(-value)));
 })
 
 ACTIVATION_FUNCTION(reLuFunction, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
@@ -189,7 +189,7 @@ ACTIVATION_FUNCTION(reLuFunction, [](Neuropia::NeuronType value) -> Neuropia::Ne
 })
 
 ACTIVATION_FUNCTION(eluFunction, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
-    return value < 0.0 ? EluFactor * (std::exp(value) - 1.0) : value;
+    return static_cast<NeuronType>(value < 0.0 ? EluFactor * (std::exp(value) - 1.0) : value);
 })
 
 #ifndef DEFAULT_AF
@@ -200,15 +200,15 @@ ACTIVATION_FUNCTION(eluFunction, [](Neuropia::NeuronType value) -> Neuropia::Neu
   Default Derivative function
   */
 DERIVATIVE_FUNCTION(sigmoidFunctionDerivative, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
-    return value * (1.0 - value);
+    return value * (static_cast<NeuronType>(1.0) - value);
 })
 
 DERIVATIVE_FUNCTION(reLuFunctionDerivative, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
-    return value > 0.0 ? 1.0 : LeakyReLuFactor;
+    return static_cast<NeuronType>(value > 0.0 ? 1.0 : LeakyReLuFactor);
 })
 
 DERIVATIVE_FUNCTION(eluFunctionDerivative, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
-    return value > 0.0 ? 1.0 : EluFactor * std::exp(value);
+    return static_cast<NeuronType>(value > 0.0 ? 1.0 : EluFactor * std::exp(value));
 })
 
 /**
@@ -228,10 +228,10 @@ NeuronType normalize(NeuronType value, NeuronType min, NeuronType max) {
 
 /**
  * @brief derivativeMap
- * @param af
+ * @param activation_function
  * @return
  */
-DerivativeFunction derivativeMap(ActivationFunction af);
+DerivativeFunction derivativeMap(ActivationFunction activation_function);
 
 
 /**
@@ -250,23 +250,23 @@ public:
      * Weights used for this neuron
      * @param bias
      * Bias used for this neuron
-     * @param mf
-     * ActivationFunction for ths neuron
+     * @param activation_function
+     * ActivationFunction for this neuron
      */
-    Neuron(ActivationFunction af,
+    Neuron(ActivationFunction activation_function,
            const ValueVector& weights = ValueVector(),
-           NeuronType bias = 1) noexcept : m_af(af), m_weights(weights), m_bias(bias) {
+           NeuronType bias = 1) noexcept : m_af(activation_function), m_weights(weights), m_bias(bias) {
     }
 
 
     /**
      * @brief setActivationFunction
      * Set ActivationFunction
-     * @param af
+     * @param activation_function
      * @return
      */
-    void setActivationFunction(ActivationFunction af) {
-        m_af = af.function();
+    void setActivationFunction(ActivationFunction activation_function) {
+        m_af = activation_function.function();
     }
 
     /**
@@ -366,7 +366,7 @@ public:
     /**
      * @brief load
      * @param stream
-     * @param savetype 
+     * @param saveType 
      * @return
      */
     bool load(std::ifstream& stream, SaveType saveType = SaveType::SameAsNeuronType);
@@ -374,7 +374,7 @@ public:
     /**
      * @brief 
      * @param bytes 
-     * @param savetype 
+     * @param saveType 
      * @return 
      */
     bool load(const std::vector<uint8_t>& bytes, SaveType saveType = SaveType::SameAsNeuronType);
@@ -427,9 +427,9 @@ public:
      * @brief Layer
      * @param count
      * @param activationFunction
-     * @param proto
+     * @param prototype
      */
-    Layer(size_t count, const ActivationFunction& activationFunction, const Neuron& proto) noexcept;
+    Layer(size_t count, const ActivationFunction& activationFunction, const Neuron& prototype) noexcept;
 
     /**
      * @brief Layer
@@ -478,9 +478,9 @@ public:
     /**
      * @brief fill
      * @param count
-     * @param proto
+     * @param prototype
      */
-    void fill(size_t count, const Neuron& proto);
+    void fill(size_t count, const Neuron& prototype);
 
     /**
      * @brief join
@@ -493,10 +493,10 @@ public:
     /**
      * @brief join
      * @param count
-     * @param proto
+     * @param prototype
      * @return
      */
-    Layer& join(size_t count, const Neuron& proto);
+    Layer& join(size_t count, const Neuron& prototype);
 
     /**
      * @brief join
@@ -510,10 +510,10 @@ public:
     /**
      * @brief join
      * @param topology
-     * @param proto
+     * @param prototype
      * @return
      */
-    Layer& join(const std::initializer_list<int>& topology, const Neuron& proto);
+    Layer& join(const std::initializer_list<int>& topology, const Neuron& prototype);
 
     /**
      * @brief join
@@ -530,12 +530,12 @@ public:
      * @brief join
      * @param begin
      * @param end
-     * @param proto
+     * @param prototype
      * @return
      */
-    Layer& join(IteratorIt begin, IteratorIt end, const Neuron& proto) {
+    Layer& join(IteratorIt begin, IteratorIt end, const Neuron& prototype) {
         for(auto it = begin; it != end; it++) {
-            join(static_cast<size_t>(*it), proto);
+            join(static_cast<size_t>(*it), prototype);
         }
         return *this;
     }
@@ -582,10 +582,10 @@ public:
      * @param inputs
      * @param expectedOutputs
      * @param learningRate
-     * @param df
+     * @param derivativeFunction
      * @return
      */
-    bool train(IteratorItInput inputs, IteratorItOutput expectedOutputs, NeuronType learningRate, NeuronType lambdaL2, const DerivativeFunction& dfp = nullptr) {
+    bool train(IteratorItInput inputs, IteratorItOutput expectedOutputs, NeuronType learningRate, NeuronType lambdaL2, const DerivativeFunction& derivativeFunction = nullptr) {
         const auto seed =
 #ifndef RANDOM_SEED
                 static_cast<unsigned>(std::chrono::system_clock::now().time_since_epoch().count())
@@ -599,8 +599,8 @@ public:
         const auto out = feedTrain(inputs, inputs + static_cast<int>(m_neurons.size())); //go forward first
         ValueVector expectedValues(out.size());
         std::copy(expectedOutputs, expectedOutputs + static_cast<int>(out.size()), expectedValues.begin());
-        const auto df = dfp == nullptr ? Neuropia::derivativeMap(m_activationFunction) : dfp;
-        return backpropagation(out, expectedValues, learningRate, lambdaL2, df);
+        const auto derivativeFunction_ptr = derivativeFunction == nullptr ? Neuropia::derivativeMap(m_activationFunction) : derivativeFunction;
+        return backpropagation(out, expectedValues, learningRate, lambdaL2, derivativeFunction_ptr);
     }
 
     /**
@@ -723,9 +723,9 @@ public:
 
     /**
      * @brief setActivationFunction
-     * @param af
+     * @param activation_function
      */
-    void setActivationFunction(const ActivationFunction& af) {m_activationFunction = af;}
+    void setActivationFunction(const ActivationFunction& activation_function) {m_activationFunction = activation_function;}
 
     /**
      * @brief activationFunction
@@ -788,10 +788,10 @@ public:
     Layer* previousLayer(Layer* current);
     const Layer* previousLayer(const Layer* current) const;
 
-    bool backpropagation(const ValueVector& out, const ValueVector& expected, NeuronType learningRate, NeuronType lambdaL2, const DerivativeFunction& df);
+    bool backpropagation(const ValueVector& out, const ValueVector& expected, NeuronType learningRate, NeuronType lambdaL2, const DerivativeFunction& derivativeFunction);
     void dropout(std::default_random_engine& gen);
 
-    std::optional<MetaInfo> doLoad(StreamBase& strm);
+    std::optional<MetaInfo> doLoad(StreamBase& stream);
 
     template<typename IteratorIt>
     const ValueVector& feedTrain(IteratorIt begin, IteratorIt end) const {
@@ -837,10 +837,10 @@ private:
 
 /**
  * @brief initStrategyMap
- * @param af
+ * @param activation_function
  * @return
  */
-Layer::InitStrategy initStrategyMap(ActivationFunction af);
+Layer::InitStrategy initStrategyMap(ActivationFunction activation_function);
 
 template<typename IT>
 NeuronType Neuron::feed(const IT& begin, const IT& end) const {

@@ -8,6 +8,7 @@ namespace Neuropia {
     template<const uint8_t* D, size_t SZ, typename SType = float>
     
     /// @brief Read only feed
+    /// Compile time Feed forward network
     class Feed {
        
     private:
@@ -27,6 +28,7 @@ namespace Neuropia {
         enum {NEURON_WEIGHTS, NEURON_BIAS};
 
     public:
+        /// @brief There should not be need to call this
         constexpr Feed() {
             static_assert(SZ > sizeof(H5));
             static_assert(is_equal<sizeof(H5)>(D, H5));
@@ -37,15 +39,21 @@ namespace Neuropia {
             static_assert(layer_count() >= 3); // at least one hidden layer
         }
 
+        /// @brief Number of defined parameters used in network creation
+        /// @return 
         static constexpr auto parameter_count() {
             return static_cast<size_t>(get_8(meta_count_pos));
         }
 
+        /// @brief Number of layers 
+        /// @return 
         static constexpr size_t layer_count() {
             return static_cast<size_t>(get_8(layer_count_pos));
         }
     
-
+        /// @brief get parameters
+        /// @param index 
+        /// @return key and value pair
         static constexpr auto parameter(size_t index) {
             const auto offset_to = meta_offset(index);
             const auto meta = make_meta(offset_to);
@@ -54,15 +62,26 @@ namespace Neuropia {
             return std::pair<std::string_view, std::string_view>{key, value};
         }
 
-            
+        /// @brief in layer size 
+        /// @return constexpr size_t 
+        static constexpr size_t in_layer_size() {
+            return std::get<LAYER_SIZE>(get_layer_info(0));
+        }
+
+        /// @brief out layer size
+        /// @return 
+        static constexpr size_t out_layer_size() {
+            return std::get<LAYER_SIZE>(get_layer_info(layer_count() - 1));
+        }   
+    
     private:
         
-        static constexpr auto slen(const Str& str) {
+        static constexpr auto str_len(const Str& str) {
             return str.second - str.first;
         }
 
         static constexpr auto to_string(const Str& str) {
-            return std::string_view(reinterpret_cast<const char*>(D + str.first), slen(str));
+            return std::string_view(reinterpret_cast<const char*>(D + str.first), str_len(str));
         }
 
         template<size_t SUB_SZ>    
@@ -77,16 +96,6 @@ namespace Neuropia {
             return D[pos];        
         }
 
-        /*
-        static constexpr uint32_t get_32_b(size_t pos) {
-            return
-            static_cast<uint32_t>(D[pos + 0]) << 24    |
-            static_cast<uint32_t>(D[pos + 1]) << 16    |
-            static_cast<uint32_t>(D[pos + 2]) << 8     |
-            static_cast<uint32_t>(D[pos + 3]) << 0;
-        }
-*/
-
                 // little endian!
         static constexpr uint32_t get_32(size_t pos) {
             return static_cast<uint32_t>(D[pos + 0])    |
@@ -94,32 +103,6 @@ namespace Neuropia {
             static_cast<uint32_t>(D[pos + 2]) << 16     |
             static_cast<uint32_t>(D[pos + 3]) << 24;
         }
-
-  
-/*
-    template<typename T> struct tag {};
-    struct _con {
-    union {
-        const uint8_t i;
-        const float f;
-    };
-    constexpr _con(tag<uint8_t>, const uint8_t* d) : i(*d) {}
-    constexpr _con(tag<float>, const uint8_t* d) : f(*d) {}
-    constexpr _con(const uint8_t* v, bool asi) : _con(asi ? _con(tag<uint8_t>(), v) : _con(tag<float>(), v)) {}
-    };
-*/
-    //static constexpr float uint32_to_float(uint32_t bytes) {
-    //    const _con converter(bytes, false);
-    //    return converter.f;
-    //}
-/*
-    static constexpr SType get_real(size_t pos) {
-        const auto d = &D[pos];
-        static_assert(std::is_same<SType, float>::value);
-        const _con c(d, false);
-        return c.f;
-        //return uint32_to_float(bytes);
-    }*/
 
         // not constexpr due runtime cast
         static inline SType read_real(size_t pos) {
@@ -138,8 +121,8 @@ namespace Neuropia {
             return Meta{ make_str(pos), make_str(make_str(pos).second) };
         }
 
-        static constexpr auto name_to_function(const Str& func_name) {
-            const auto name = to_string(func_name);
+        static constexpr auto name_to_function(const Str& function_name) {
+            const auto name = to_string(function_name);
             if (signumFunction.name() == name)
                 return signumFunction;
             else if (binaryFunction.name() == name)
@@ -154,8 +137,6 @@ namespace Neuropia {
                 return ActivationFunction{};
         }
 
-        static constexpr auto out_layer_size() {return std::get<LAYER_SIZE>(get_layer_info(static_cast<size_t>(D[layer_count_pos]) - 1));}
-
         // layer neurons and end position
         static constexpr LayerInfo make_layer_info(size_t pos) {
             const auto af_name = make_str(pos);
@@ -164,11 +145,11 @@ namespace Neuropia {
             const auto sz = get_32(pos);
             pos += sizeof(uint32_t);  // size
             auto n_pos = pos;
-            for(auto i = 0; i < sz; ++i) {
+            for(auto i = 0U; i < sz; ++i) {
                 const auto neuron_info = make_neuron_info(n_pos);
                 n_pos = std::get<NEURON_WEIGHTS>(neuron_info).second;
             }
-            // I read this value here so I dont have to do this for each feed, and memory is (about) the same (or twice more or less depending on config given) :-)
+            // I read this value here so I don't have to do this for each feed, and memory is (about) the same (or twice more or less depending on configuration given) :-)
             // drop is not used for feed const SType drop_out = read(drop_pos);
             return {sz, {pos, n_pos}, af_name};
         }
@@ -208,15 +189,15 @@ namespace Neuropia {
 
 
         template<typename IT>
-        static SType feed_neuron(const Neuron& neuron, const IT& begin, const IT& end, const ActivationFunction& af) {
+        static SType feed_neuron(const Neuron& neuron, const IT& begin, const IT& end, const ActivationFunction& activation_function) {
             auto sum = read_real(std::get<NEURON_BIAS>(neuron));
-            const auto sz = static_cast<size_t>(std::distance(begin, end));
+            const auto sz = std::distance(begin, end);
             auto pos = std::get<NEURON_WEIGHTS>(neuron).first;
-            for(size_t i = 0; i < sz; ++i) {
+            for(auto i = 0; i < sz; ++i) { // difference type is signed - hence int is ok, auto my know better
                 sum += (read_real(pos) * *(begin + i));
                 pos += sizeof(SType);
             }
-            return af(sum);
+            return activation_function(sum);
         }    
 
 
@@ -232,20 +213,20 @@ namespace Neuropia {
          */
         static OutValues feed(const IT& begin, const IT& end) {
             static_assert(std::is_same<typename IT::value_type, SType>::value);
-            std::array<SType, std::get<LAYER_SIZE>(get_layer_info(1))> a_buffer; // - a buffer is 1st write buffer... the maximum buffer size as next layer < prev, and input is outside
-            const auto af = name_to_function(std::get<LAYER_ACTIVATION>(get_layer_info(1)));
+            std::array<SType, std::get<LAYER_SIZE>(get_layer_info(1))> a_buffer; // - a buffer is 1st write buffer... the maximum buffer size as next layer < previous, and input is outside
+            const auto af_1 = name_to_function(std::get<LAYER_ACTIVATION>(get_layer_info(1)));
             constexpr auto off_1 = std::get<LAYER_NEURONS>(get_layer_info(1)); // 0 is input layer , structured bind cannot be constexpr
             auto it = a_buffer.begin();
             auto pos = off_1.first;
             while(pos < off_1.second) {
                 const auto neuron = make_neuron_info(pos);
                 pos = std::get<NEURON_WEIGHTS>(neuron).second;
-                const auto result = feed_neuron(neuron, begin, end, af);
+                const auto result = feed_neuron(neuron, begin, end, af_1);
                 *it = result;
                 ++it;
             }
             
-            std::array<SType, std::get<LAYER_SIZE>(get_layer_info(2))> b_buffer; // the maximum buffer size as next layer < prev, and input is outside
+            std::array<SType, std::get<LAYER_SIZE>(get_layer_info(2))> b_buffer; // the maximum buffer size as next layer < previous, and input is outside
             
             auto write_begin = b_buffer.begin();
             auto read_begin = a_buffer.begin();
@@ -253,13 +234,13 @@ namespace Neuropia {
 
             for(auto i = 2U; i < layer_count(); ++i) { 
                 const auto& [sz, off, af_name] = get_layer_info(i);
-                const auto af = name_to_function(af_name);
+                const auto activation_function = name_to_function(af_name);
                 it = write_begin;
                 pos = off.first;
                 while(pos < off.second) {
                     const auto neuron = make_neuron_info(pos);
                     pos = std::get<NEURON_WEIGHTS>(neuron).second;
-                    const auto result = feed_neuron(neuron, read_begin, read_end, af);
+                    const auto result = feed_neuron(neuron, read_begin, read_end, activation_function);
                     *it = result;
                     ++it;
                 }
@@ -273,15 +254,15 @@ namespace Neuropia {
         }
 
     /**
-     * @brief get a layer info - not much use beyond debug and testing (slow)
+     * @brief get a layer info 
      * 
      * @param index 
-     * @return constexpr auto 
+     * @return tuple of layer size and activation function name 
      */
     static constexpr auto layer_info(size_t index) {
             const auto& [sz, off, af_str] = get_layer_info(index);
             return std::make_tuple(sz, to_string(af_str));
-        }    
+        }         
 
     using NeuronData = std::tuple<std::vector<SType>, SType>;
     /// @brief get a single neuron - not much use beyond debug and testing (slow, allocate)
@@ -296,13 +277,13 @@ namespace Neuropia {
                 const auto& [weights, bias_pos] = make_neuron_info(pos);
                 if(index == neuron_index) {
                     // copy values to dynamic buffer
-                    std::vector<SType> vals;
-                    vals.reserve((weights.second - weights.first) / sizeof(SType));
+                    std::vector<SType> values;
+                    values.reserve((weights.second - weights.first) / sizeof(SType));
                     for(auto w = weights.first; w < weights.second; w += sizeof(SType)) {
-                        vals.push_back(read_real(w));
+                        values.push_back(read_real(w));
                     }
                     const auto bias = read_real(bias_pos);
-                    return NeuronData{std::move(vals), bias};
+                    return NeuronData{std::move(values), bias};
                 }
                 ++index;
                 pos = weights.second;

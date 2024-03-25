@@ -32,7 +32,7 @@ enum class TrainType {
 
 
 /**
- * @brief Create an environent
+ * @brief Create an environment
  * @param root file path root
  * @return NeuropiaPtr 
  */
@@ -55,7 +55,7 @@ void free(NeuropiaPtr env);
 std::vector<Neuropia::NeuronType> feed(NeuropiaPtr env, const std::vector<Neuropia::NeuronType>& input);
 
 /**
- * @brief Set the Param values, see parameter names from params.h or default.h, where te default parameters defined
+ * @brief Set the Param values, see parameter names from params.h or default.h, where the default parameters defined
  * 
  * @param env 
  * @param name 
@@ -102,7 +102,7 @@ bool train(const NeuropiaPtr& env, TrainType type);
  * @param env 
  * @param filename 
  */
-void save(const NeuropiaPtr& env, const std::string& filename, Neuropia::SaveType savetype = Neuropia::SaveType::SameAsNeuronType);
+void save(const NeuropiaPtr& env, const std::string& filename, Neuropia::SaveType saveType = Neuropia::SaveType::SameAsNeuronType);
 
 /**
  * @brief Load network from a file.
@@ -126,9 +126,9 @@ int verify(const NeuropiaPtr& env);
  * @brief Set the logging output handler.
  * 
  * @param env 
- * @param cb 
+ * @param call_back 
  */
-void setLogger(const NeuropiaPtr& env, std::function<void (const std::string&) > cb);
+void setLogger(const NeuropiaPtr& env, std::function<void (const std::string&) > call_back);
 
  /**
  * @brief Access to Neuropia network input layer

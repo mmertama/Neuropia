@@ -244,10 +244,10 @@ bool NeuropiaSimple::train(const NeuropiaPtr& env, TrainType type) {
    return true;
 }
 
-void NeuropiaSimple::save(const NeuropiaPtr& env, const std::string& filename, SaveType savetype) {
+void NeuropiaSimple::save(const NeuropiaPtr& env, const std::string& filename, SaveType saveType) {
     ASSERT(env && env->m_network.isValid());
     const auto params = env->m_params.toMap();
-    Neuropia::save(filename, env->m_network, params, savetype);
+    Neuropia::save(filename, env->m_network, params, saveType);
 }
 
 std::optional<Neuropia::Sizes> NeuropiaSimple::load(const NeuropiaPtr& env, const std::string& filename) {

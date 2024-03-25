@@ -8,10 +8,6 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-if(NOT MSCV)
-  set(PEDANTIC_WARNINGS TRUE)
-endif()  
-
 if(NOT NOLIB)
   add_subdirectory(neuropialib)
 endif()
@@ -36,3 +32,4 @@ if(EXAMPLES)
   add_subdirectory(example/romtest)
   add_subdirectory(example/compare)
 endif()
+

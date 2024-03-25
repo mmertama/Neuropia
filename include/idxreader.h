@@ -14,11 +14,11 @@ constexpr unsigned DefaultIobufSzRandom = 2;
 constexpr unsigned DefaultIobufSz = 200;
 
 /**
- * @brief The IdxReade class reads IDX files
+ * @brief The IdxReader class reads IDX files
  */
 
 /**
- * @brief Dont create a IdxReaderBase, create IdxReader of your data type instead
+ * @brief Don't create a IdxReaderBase, create IdxReader of your data type instead
  */
 class IdxReaderBase {
 public:
