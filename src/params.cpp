@@ -83,7 +83,7 @@ bool Params::isZero(const std::string& key) const {
 
 bool Params::boolean(const std::string& key) const {
     auto v = operator[](key);
-    std::transform(v.begin(), v.end(), v.begin(), ::tolower);
+    std::transform(v.begin(), v.end(), v.begin(), [](const auto c){return static_cast<decltype(c)>(std::tolower(c));});
     return (v == "false" || v == "0" || v.empty());
 }
 

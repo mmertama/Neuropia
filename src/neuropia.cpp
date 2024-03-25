@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cstring>
 #include <optional>
+#include <numeric>
 
 
 using namespace Neuropia;
