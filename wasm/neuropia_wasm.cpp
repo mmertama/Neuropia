@@ -148,7 +148,7 @@ EMSCRIPTEN_BINDINGS(Neuropia) {
     register_vector<Neuropia::NeuronType>("ValueVector");
     register_vector<std::string>("StringVector");
     register_map<NeuropiaSimple::ParamMap::key_type, NeuropiaSimple::ParamMap::mapped_type>("ParamMap");
-    function("create", &NeuropiaSimple::create);
+    function("create", &::create);
     function("free", &NeuropiaSimple::free);
     function("feed", &::feed);
     function("setParam", &::setParam);
