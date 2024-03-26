@@ -1,13 +1,13 @@
 
+#include "simple.h"
 #include "neuropia_simple.h"
-#include <unordered_map>
 #include "params.h"
 #include "evotrain.h"
 #include "trainer.h"
 #include "paralleltrain.h"
 #include "verify.h"
-#include "default.h"
-#include "simple.h"
+#include <unordered_map>
+
 
 using namespace Neuropia;
 using namespace NeuropiaSimple;

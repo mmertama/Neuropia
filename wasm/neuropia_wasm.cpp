@@ -7,9 +7,8 @@
 #include "default.h"
 
 #include <emscripten/bind.h>
+
 using namespace emscripten;
-
-
 using namespace NeuropiaSimple;
 using namespace Neuropia;
 

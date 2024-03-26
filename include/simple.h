@@ -4,6 +4,7 @@
 #include "evotrain.h"
 #include "trainer.h"
 #include "paralleltrain.h"
+#include "default.h"
 
 
 bool fatal(const char* t, const char* f, int line, const char* file);
