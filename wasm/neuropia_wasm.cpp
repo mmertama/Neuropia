@@ -139,7 +139,7 @@ bool load(const NeuropiaSimple::NeuropiaPtr& env, const std::string& filename) {
 
 
 EMSCRIPTEN_BINDINGS(Neuropia) {
-    class_<NeuropiaEnv>("Neuropia").smart_ptr_constructor("Neuropia", &std::make_shared<NeuropiaEnv, const std::string&>);
+    class_<NeuropiaSimple::NeuropiaEnv>("Neuropia").smart_ptr_constructor("Neuropia", &std::make_shared<NeuropiaSimple::NeuropiaEnv, const std::string&>);
     register_vector<Neuropia::NeuronType>("ValueVector");
     register_vector<std::string>("StringVector");
     register_map<NeuropiaSimple::ParamMap::key_type, NeuropiaSimple::ParamMap::mapped_type>("ParamMap");
