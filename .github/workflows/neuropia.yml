@@ -83,8 +83,10 @@ jobs:
         if: startsWith(matrix.config.arch, 'wasm')
         shell: bash
         run: |
-            ./wasm/build.sh
-            exit $!
+            mkdir -p build
+            pushd build
+            emcmake cmake ../wasm/CMakeLists.txt
+            emmake make
 
       - name: Configure
         if: '!startsWith(matrix.config.arch, ''wasm'')'
