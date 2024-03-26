@@ -134,7 +134,7 @@ bool setParam(const NeuropiaSimple::NeuropiaPtr& env, const std::string& name, c
 
 static 
 bool load(const NeuropiaSimple::NeuropiaPtr& env, const std::string& filename) {
-    return NeuropiaSimple(env, filename).has_value();
+    return NeuropiaSimple::load(env, filename).has_value();
 }
 
 
