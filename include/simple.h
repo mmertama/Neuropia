@@ -5,6 +5,15 @@
 #include "trainer.h"
 #include "paralleltrain.h"
 
+
+bool fatal(const char* t, const char* f, int line, const char* file);
+
+#define ASSERT(X) ((X) || fatal("Invalid", __FUNCTION__, __LINE__, __FILE__))
+#define ASSERT_X(X, T) ((X) || fatal((T), __FUNCTION__, __LINE__, __FILE__))
+
+
+
+
 namespace NeuropiaSimple {
 
 template <size_t SZ>

@@ -12,21 +12,10 @@
 using namespace Neuropia;
 using namespace NeuropiaSimple;
 
-
-#ifdef __EMSCRIPTEN__
-#include <emscripten/bind.h>
-using namespace emscripten;
-#endif
-
-static
 bool fatal(const char* t, const char* f, int line, const char* file) {
     std::cerr << "Assert:" << t << " in line " << line << " at " << f << "  in "<< file << "." << std::endl;
     std::abort();
 }
-#define ASSERT(X) ((X) || fatal("Invalid", __FUNCTION__, __LINE__, __FILE__))
-#define ASSERT_X(X, T) ((X) || fatal((T), __FUNCTION__, __LINE__, __FILE__))
-
-
 
 NeuropiaPtr NeuropiaSimple::create(const std::string& root) {
     return std::make_shared<NeuropiaEnv>(root);
