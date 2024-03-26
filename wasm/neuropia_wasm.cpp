@@ -130,7 +130,7 @@ std::vector<NeuronType> feed(NeuropiaPtr env, emscripten::val a) {
 
 // just help find type (cast would do as well)
 static 
-bool set_param(const NeuropiaPtr& env, const std::string& name, const std::string& value) {
+bool setParam(const NeuropiaPtr& env, const std::string& name, const std::string& value) {
    return env->m_params.set(name, value);
 }
 
