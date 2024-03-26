@@ -1,23 +1,16 @@
 
-cmake_minimum_required(VERSION 3.5.1)
+cmake_minimum_required(VERSION 3.21.0)
 
-set(NAME neuropia)
+project (neuropiaW)
 
-project (${NAME})
+include (../compiler.cmake)
+SET_COMPILER_FLAGS()
 
-#option(JS_ONLY "Compiles to native JS (No WASM)" OFF)
-
-set(CMAKE_CXX_STANDARD 14)
-add_definitions(-std=c++14 -O3)
+add_definitions(-O3)
 
 include_directories(../include)
 
-#set(CMAKE_C_COMPILER "emcc")
-#set(CMAKE_CXX_COMPILER "em++")
-
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/public")
-
-add_executable(${NAME}
+add_executable(${PROJECT_NAME}
     ../src/idxreader.cpp
     ../src/neuropia.cpp
     ../src/utils.cpp
@@ -34,6 +27,6 @@ set(EMCC_LINKER_FLAGS "-o neuropia.js \
 
 set(CMAKE_REQUIRED_FLAGS "${EMCC_LINKER_FLAGS}")
 
-set_target_properties(${NAME} PROPERTIES LINK_FLAGS "${EMCC_LINKER_FLAGS}")
+set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "${EMCC_LINKER_FLAGS}")
 
 
