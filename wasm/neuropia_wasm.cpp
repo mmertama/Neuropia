@@ -137,6 +137,11 @@ bool load(const NeuropiaSimple::NeuropiaPtr& env, const std::string& filename) {
     return NeuropiaSimple::load(env, filename).has_value();
 }
 
+static 
+bool create() {
+    return NeuropiaSimple::create();
+}
+
 
 EMSCRIPTEN_BINDINGS(Neuropia) {
     class_<NeuropiaSimple::NeuropiaEnv>("Neuropia").smart_ptr_constructor("Neuropia", &std::make_shared<NeuropiaSimple::NeuropiaEnv, const std::string&>);
