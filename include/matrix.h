@@ -140,7 +140,7 @@ public:
     ~Matrix() = default;
     Matrix& operator=(Matrix&& other) noexcept = default;
 
-    bool isValid() const {
+    bool isValid() const noexcept {
         return !(m_colSize <= 0 || rows() <= 0 || cols() <= 0 || std::isinf(operator()(0, 0)) || std::isnan(operator()(0, 0)));
     }
 
@@ -156,13 +156,13 @@ public:
         }
     }
 
-    static Matrix<T> zero(index_type c, index_type r) {
+    static Matrix<T> zero(index_type c, index_type r) noexcept {
         Matrix<T> m(c, r);
         m.set(0);
         return m;
     }
 
-    void set(T value = 0) {
+    void set(T value = 0) noexcept {
         for(auto  j = 0; j < rows(); j++) {
             for(auto  i = 0; i < cols(); i++) {
                 operator()(i, j) = value;
@@ -190,15 +190,15 @@ public:
         }
     }
 
-    inline T& operator()(index_type c, index_type r) { return m_data[r * m_colSize + c];}
+    inline T& operator()(index_type c, index_type r) noexcept { return m_data[r * m_colSize + c];}
 
-    inline T operator()(index_type c, index_type r) const { return m_data[r * m_colSize + c];}
+    inline T operator()(index_type c, index_type r) const noexcept { return m_data[r * m_colSize + c];}
 
-    inline index_type rows() const {return m_data.size() / m_colSize;}
+    inline index_type rows() const noexcept {return m_data.size() / m_colSize;}
 
-    inline index_type cols() const {return m_colSize;}
+    inline index_type cols() const noexcept {return m_colSize;}
 
-    const MatrixData& data() const {return m_data;}
+    const MatrixData& data() const noexcept {return m_data;}
 
     Matrix concatCols(const Matrix& a) const {
         matrix_assert(a.rows() == rows());
@@ -245,7 +245,7 @@ public:
         return copy(colIndex, start, colIndex, end);
     }
 
-    static Matrix map(const Matrix& a, const Matrix& b, std::function<T(const T&, const T&)> f) {
+    static Matrix map(const Matrix& a, const Matrix& b, std::function<T(const T&, const T&)> f) noexcept {
         matrix_assert(a.cols() == b.cols());
         matrix_assert(a.rows() == b.rows());
         Matrix m(a.cols(), a.rows());
@@ -257,7 +257,7 @@ public:
         return m;
     }
 
-    Matrix map(std::function<T(const T&)> f) const {
+    Matrix map(std::function<T(const T&)> f) const noexcept {
         Matrix m(cols(), rows());
         for(auto j = 0U; j < rows() ; j++) {
             for(auto i = 0U; i < cols() ; i++) {
@@ -267,7 +267,7 @@ public:
         return m;
     }
 
-    void mapThis(const Matrix& b, std::function<T(const T&, const T&)> f) {
+    void mapThis(const Matrix& b, std::function<T(const T&, const T&)> f) noexcept {
         matrix_assert(cols() == b.cols());
         matrix_assert(rows() == b.rows());
         for(auto j = 0U; j < rows() ; j++) {
@@ -277,7 +277,7 @@ public:
         }
     }
 
-    void mapThis(std::function<T(const T&)> f) {
+    void mapThis(std::function<T(const T&)> f) noexcept {
         for(auto j = 0U; j < rows() ; j++) {
             for(auto i = 0U; i < cols() ; i++) {
                 operator()(i, j) = f(operator()(i, j));
@@ -291,7 +291,7 @@ public:
     static Matrix<T> fromIterator(typename C::const_iterator begin,
                                   typename C::const_iterator end,
                                   int colLen = ASVECTOR,
-    std::function<T(decltype(*begin)) > adaptor = [](const auto& v) {return v;}) {
+    std::function<T(decltype(*begin)) > adaptor = [](const auto& v) noexcept {return v;}) {
         auto it = begin;
         const auto len = std::distance(begin, end);
         Matrix<T> m(
@@ -335,12 +335,12 @@ public:
         return fromIterator<C>(array.begin(), array.end(), static_cast<index_type>(colLen), adaptor);
     }
 
-    static Matrix<T> multiply(const Matrix<T>& m1, const Matrix<T>& m2) {
+    static Matrix<T> multiply(const Matrix<T>& m1, const Matrix<T>& m2) noexcept {
         return m1.multiply(m2);
     }
 
     template <typename R>
-    R reduce(const R& init, std::function<R(const R&, const T&)> f) const {
+    R reduce(const R& init, std::function<R(const R&, const T&)> f) const noexcept {
         R out = init;
         for(auto j = 0U; j < rows() ; j++) {
             for(auto i = 0U; i < cols() ; i++) {
@@ -350,11 +350,11 @@ public:
         return out;
     }
 
-    T norm() const {
+    T norm() const noexcept {
         return std::sqrt(reduce<T>(0.0,  [](const T a, const T p) {return a + static_cast<T>(p * p);}));
     }
 
-    Matrix transpose() const {
+    Matrix transpose() const noexcept {
         Matrix m(rows(), cols());
         for(auto j = 0U; j < rows() ; j++) {
             for(auto i = 0U; i < cols() ; i++) {
@@ -365,7 +365,7 @@ public:
     }
 
     /*Naive implementation*/
-    Matrix multiply(const Matrix& other) const {
+    Matrix multiply(const Matrix& other) const noexcept {
         matrix_assert(cols() == other.rows());
         Matrix m(other.cols(), rows());
         for(auto j = 0U; j < m.rows(); j++) {
@@ -380,7 +380,7 @@ public:
         return m;
     }
 
-    /*Not the most effiecent implementation as algortithm wanna do sort in place first*/
+    /*Not the most effiecent implementation as algorithm wanna do sort in place first*/
     Matrix uniqueRows() const {
         auto m = *this;
         m.makeUnique();
@@ -404,19 +404,19 @@ public:
         return vec;
     }
 
-    void operator+=(const Matrix<T>& other) {
+    void operator+=(const Matrix<T>& other) noexcept {
         return Matrix<T>::mapThis(other, [](const T & a, const T & b) {return a + b;});
     }
 
-    void operator*=(const Matrix<T>& other) {
+    void operator*=(const Matrix<T>& other) noexcept {
         return Matrix<T>::mapThis(other, [](const T & a, const T & b) {return a * b;});
     }
 
-    void operator-=(const Matrix<T>& other) {
+    void operator-=(const Matrix<T>& other) noexcept {
         return Matrix<T>::mapThis(other, [](const T & a, const T & b) {return a - b;});
     }
 
-    void operator/=(const Matrix<T>& other) {
+    void operator/=(const Matrix<T>& other) noexcept {
         return Matrix<T>::mapThis(other, [](const T & a, const T & b) {return a / b;});
     }
 
@@ -435,24 +435,24 @@ public:
         return output;
     }
 
-    friend Matrix<T> operator-(const Matrix<T>& m1, const Matrix<T>& m2) {
-        return Matrix<T>::map(m1, m2, [](const T & a, const T & b) {return a - b;});
+    friend Matrix<T> operator-(const Matrix<T>& m1, const Matrix<T>& m2) noexcept {
+        return Matrix<T>::map(m1, m2, [](const T & a, const T & b) noexcept {return a - b;});
     }
 
-    friend Matrix<T> operator+(const Matrix<T>& m1, const Matrix<T>& m2) {
-        return Matrix<T>::map(m1, m2, [](const T & a, const T & b) {return a + b;});
+    friend Matrix<T> operator+(const Matrix<T>& m1, const Matrix<T>& m2) noexcept {
+        return Matrix<T>::map(m1, m2, [](const T & a, const T & b) noexcept {return a + b;});
     }
 
-    friend Matrix<T> operator*(const Matrix<T>& m1, const Matrix<T>& m2) {
-        return Matrix<T>::map(m1, m2, [](const T & a, const T & b) {return a * b;});
+    friend Matrix<T> operator*(const Matrix<T>& m1, const Matrix<T>& m2) noexcept {
+        return Matrix<T>::map(m1, m2, [](const T & a, const T & b) noexcept {return a * b;});
     }
 
-    friend Matrix<T> operator*(const Matrix<T>& m1, const T& v) {
-        return m1.map([v](const T & a) {return a * v;});
+    friend Matrix<T> operator*(const Matrix<T>& m1, const T& v) noexcept {
+        return m1.map([v](const T & a) noexcept {return a * v;});
     }
 
-    friend  Matrix<T> operator*(const T& v, const Matrix<T>& m1) {
-        return m1.map([v](const T & a) {return a * v;});
+    friend  Matrix<T> operator*(const T& v, const Matrix<T>& m1) noexcept {
+        return m1.map([v](const T & a) noexcept {return a * v;});
     }
 
 

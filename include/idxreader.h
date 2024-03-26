@@ -23,6 +23,9 @@ constexpr unsigned DefaultIobufSz = 200;
 class IdxReaderBase {
 public:
     enum class Type{Invalid, Byte, Char, Short, Int, Float, Double};
+    /// @brief Constructor - do not call directly
+    /// @param name 
+    /// @param iobufszKB 
     IdxReaderBase(const std::string& name, unsigned iobufszKB);
     /**
      * @brief type
@@ -64,12 +67,16 @@ public:
 protected:
     /**
      * @brief read inherit your own class if dynamic sizes are needed and use this to access bytes
-     * @param b buffer where data is read to
+     * @param data buffer where data is read to
      * @param size byte size of element
      * @param n amount of the elements to read, note that in little endian device read(b, 1, 64) is different than read(b, 8, 8) even amount of read bytes is the same, later
      * may have bytes swapped to native as IDX data is BE.
      */
     size_t read(char* data, size_t size, size_t n);
+    /**
+     * @brief Move position
+     * @param dataPosition 
+     */
     void moveTo(size_t dataPosition);
 private:
     void readBE(char* data, size_t size);

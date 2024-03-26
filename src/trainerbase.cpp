@@ -34,12 +34,12 @@ using namespace Neuropia;
 
 static
 auto toIntVec(const std::string& s) {
-    return Neuropia::Params::toVector<int>(s, [](const auto& p){return std::atoi(p.c_str());});
+    return Neuropia::Params::toVector<int>(s, [](const auto& p) noexcept {return std::atoi(p.c_str());});
 }
 
 static
 auto toRealVec(const std::string& s) {
-    return Neuropia::Params::toVector<NeuronType>(s, [](const auto& p){return std::atof(p.c_str());});
+    return Neuropia::Params::toVector<NeuronType>(s, [](const auto& p) noexcept {return std::atof(p.c_str());});
 }
 
 static bool icomp(std::string_view name, std::string_view n, size_t len) {
