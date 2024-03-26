@@ -9,17 +9,15 @@
 #include <emscripten/bind.h>
 
 using namespace emscripten;
-using namespace NeuropiaSimple;
-using namespace Neuropia;
 
 static
-bool train(const NeuropiaPtr& env, unsigned iteration) {
+bool train(const NeuropiaSimple::NeuropiaPtr& env, unsigned iteration) {
     ASSERT(env);
 
     if(iteration == 0 || !env->m_trainer) {
         env->m_logStream->freeze(false);
         std::cout << "Create trainer"  << std::endl;;
-        env->m_trainer = std::make_unique<SimpleTrainer>(env->m_root, env->m_params, false, [env](Layer&& layer, bool){
+        env->m_trainer = std::make_unique<NeuropiaSimple::SimpleTrainer>(env->m_root, env->m_params, false, [env](Layer&& layer, bool){
             env->m_network = layer;
         });
     }
@@ -28,12 +26,12 @@ bool train(const NeuropiaPtr& env, unsigned iteration) {
 }
 
 static
-bool verify(const NeuropiaPtr& env, int iteration) {
+bool verify(const NeuropiaSimple::NeuropiaPtr& env, int iteration) {
     if(iteration == 0 || !env->m_verifier) {
         ASSERT(env->m_network.isValid());
         env->m_logStream->freeze(false);
         std::cout << "Create verifier"  << std::endl;;
-        env->m_verifier.reset(new SimpleVerifier(env->m_network, Neuropia::absPath(env->m_root, env->m_params["ImagesVerify"]), Neuropia::absPath(env->m_root,env->m_params["LabelsVerify"])));
+        env->m_verifier.reset(new NeuropiaSimple::SimpleVerifier(env->m_network, Neuropia::absPath(env->m_root, env->m_params["ImagesVerify"]), Neuropia::absPath(env->m_root,env->m_params["LabelsVerify"])));
         Neuropia::percentage(0, 1);
     }
     return env->m_verifier->verify();
@@ -41,7 +39,7 @@ bool verify(const NeuropiaPtr& env, int iteration) {
 
 
 static
-ParamMap basicParams(const NeuropiaPtr& env) {
+ParamMap basicParams(const NeuropiaSimple::NeuropiaPtr& env) {
     auto p = NeuropiaSimple::params(env);
     p.erase("Jobs");    //mt
     p.erase("BatchSize"); //mt
@@ -53,7 +51,7 @@ ParamMap basicParams(const NeuropiaPtr& env) {
 }
 
 static
-bool isNetworkValid(const NeuropiaPtr& env) {
+bool isNetworkValid(const NeuropiaSimple::NeuropiaPtr& env) {
     ASSERT(env);
     if(env->m_trainer) {
         env->m_logStream->freeze(false);
@@ -62,7 +60,7 @@ bool isNetworkValid(const NeuropiaPtr& env) {
 }
 
 static
-NeuronType verifyResult(const NeuropiaPtr& env) {
+NeuronType verifyResult(const NeuropiaSimple::NeuropiaPtr& env) {
     ASSERT(env);
     if(env->m_verifier) {
         env->m_logStream->freeze(false);
@@ -73,7 +71,7 @@ NeuronType verifyResult(const NeuropiaPtr& env) {
 
 
 static
-int showImage(const NeuropiaPtr& env, const std::string& imageName, const std::string& labelName, unsigned index) {
+int showImage(const NeuropiaSimple::NeuropiaPtr& env, const std::string& imageName, const std::string& labelName, unsigned index) {
     ASSERT(env);
     Neuropia::IdxReader<std::array<unsigned char, 28 * 28>> idxi(Neuropia::absPath(env->m_root, imageName));
     if(!idxi.ok() || idxi.dimensions() != 3)
@@ -89,7 +87,7 @@ int showImage(const NeuropiaPtr& env, const std::string& imageName, const std::s
 }
 
 
-void setLogger(const NeuropiaPtr& env, emscripten::val cb) {
+void setLogger(const NeuropiaSimple::NeuropiaPtr& env, emscripten::val cb) {
     NeuropiaSimple::setLogger(env, [cb](const std::string& str){
         cb(str);
     });
@@ -105,7 +103,7 @@ std::vector<T> fromJSArray(const emscripten::val& v) {
     return vec;
 }
 
-std::vector<NeuronType> feed(NeuropiaPtr env, emscripten::val a) {
+std::vector<NeuronType> feed(NeuropiaSimple::NeuropiaPtr env, emscripten::val a) {
     const auto image = fromJSArray<NeuronType>(a);
 
     std::vector<unsigned char> test(image.size());
@@ -130,8 +128,13 @@ std::vector<NeuronType> feed(NeuropiaPtr env, emscripten::val a) {
 
 // just help find type (cast would do as well)
 static 
-bool setParam(const NeuropiaPtr& env, const std::string& name, const std::string& value) {
+bool setParam(const NeuropiaSimple::NeuropiaPtr& env, const std::string& name, const std::string& value) {
    return env->m_params.set(name, value);
+}
+
+static 
+bool load(const NeuropiaSimple::NeuropiaPtr& env, const std::string& filename) {
+    return NeuropiaSimple(env, filename).has_value();
 }
 
 
@@ -147,7 +150,7 @@ EMSCRIPTEN_BINDINGS(Neuropia) {
     function("params", &::basicParams);
     function("train", &::train);
     function("save", &NeuropiaSimple::save);
-    function("load", &NeuropiaSimple::load);
+    function("load", &::load);
     function("verify", &::verify);
     function("setLogger", &::setLogger);
     function("isNetworkValid", &::isNetworkValid);
