@@ -164,12 +164,13 @@ jobs:
       - name: Clean build
         shell: bash
         run: |
-          find build -name CMakeFiles -type d -delete
           find build -name CMakeCache.txt -type f -delete
           find build -name *.cmake -type f -delete
           find build -name *.ninja_* -type f -delete
           find build -name build.ninja -type f -delete
           find build -name CMakeDoxy* -type f -delete
+          rm -rf build/*/CMakeFiles
+          rm -rf build/CMakeFiles
           rm -rf build/html
           rm -rf build/aspell
           rm -rf build/_deps
