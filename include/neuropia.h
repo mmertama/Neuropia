@@ -154,16 +154,16 @@ public:
    ActivationFunction(std::function<NeuronType(NeuronType value)> f, const std::string& name) :  NFunction(f, name){}
 };
 
+/**
+ * @brief DerivativeFunction
+ * 
+ */
 class DerivativeFunction : public NFunction<NeuronType, NeuronType> {
 public:
    DerivativeFunction();
    DerivativeFunction(void* t) {(void)t;}
    DerivativeFunction(std::function<NeuronType(NeuronType value)> f, const std::string& name) :  NFunction(f, name){}
 };
-
-/**
-  Default Activationfunctions
-  */
 
 
 #define ACTIVATION_FUNCTION(name, f) const ActivationFunction name(f, #name);
@@ -172,42 +172,53 @@ public:
 constexpr NeuronType LeakyReLuFactor = static_cast<NeuronType>(0.05); //too small makes backpropagation not working
 constexpr NeuronType EluFactor = static_cast<NeuronType>(1.0);
 
-ACTIVATION_FUNCTION(signumFunction, [](NeuronType value) -> NeuronType{
+/// @brief Signum function
+ACTIVATION_FUNCTION(signumFunction, [](NeuronType value) noexcept -> NeuronType {
     return value < 0.0 ? -1.0 : value > 0.0 ? 1.0 : 0.0;
 })
 
-ACTIVATION_FUNCTION(binaryFunction, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
+/// @brief Binary function
+ACTIVATION_FUNCTION(binaryFunction, [](Neuropia::NeuronType value) noexcept -> Neuropia::NeuronType {
     return value >= 1.0 ? 0.0 : 1.0;
 })
 
-ACTIVATION_FUNCTION(sigmoidFunction, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
+/// @brief Sigmoid function
+ACTIVATION_FUNCTION(sigmoidFunction, [](Neuropia::NeuronType value) noexcept -> Neuropia::NeuronType {
     return static_cast<NeuronType>(1.0 / (1.0 + std::exp(-value)));
 })
 
-ACTIVATION_FUNCTION(reLuFunction, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
+/// @brief ReLu function
+ACTIVATION_FUNCTION(reLuFunction, [](Neuropia::NeuronType value) noexcept -> Neuropia::NeuronType {
     return std::max(value, LeakyReLuFactor * value);
 })
 
-ACTIVATION_FUNCTION(eluFunction, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
+/// @brief eLu function
+ACTIVATION_FUNCTION(eluFunction, [](Neuropia::NeuronType value) noexcept -> Neuropia::NeuronType {
     return static_cast<NeuronType>(value < 0.0 ? EluFactor * (std::exp(value) - 1.0) : value);
 })
+
+
+
+/**
+  @brief Default Derivative function
+*/
 
 #ifndef DEFAULT_AF
 #define DEFAULT_AF sigmoidFunction
 #endif
 
-/**
-  Default Derivative function
-  */
-DERIVATIVE_FUNCTION(sigmoidFunctionDerivative, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
+/// @brief Sigmoid derivative function 
+DERIVATIVE_FUNCTION(sigmoidFunctionDerivative, [](Neuropia::NeuronType value) noexcept -> Neuropia::NeuronType {
     return value * (static_cast<NeuronType>(1.0) - value);
 })
 
-DERIVATIVE_FUNCTION(reLuFunctionDerivative, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
+/// @brief ReLu derivative function 
+DERIVATIVE_FUNCTION(reLuFunctionDerivative, [](Neuropia::NeuronType value) noexcept -> Neuropia::NeuronType {
     return static_cast<NeuronType>(value > 0.0 ? 1.0 : LeakyReLuFactor);
 })
 
-DERIVATIVE_FUNCTION(eluFunctionDerivative, [](Neuropia::NeuronType value) -> Neuropia::NeuronType {
+/// @brief eLu derivative function 
+DERIVATIVE_FUNCTION(eluFunctionDerivative, [](Neuropia::NeuronType value) noexcept -> Neuropia::NeuronType {
     return static_cast<NeuronType>(value > 0.0 ? 1.0 : EluFactor * std::exp(value));
 })
 
