@@ -46,6 +46,7 @@
             Module.setParam(neuropia, "ImagesVerify", "t10k-images-idx3-ubyte");
             Module.setParam(neuropia, "Labels", "train-labels-idx1-ubyte");
             Module.setParam(neuropia, "LabelsVerify", "t10k-labels-idx1-ubyte");
+            Module.setParam(neuropia, "Classes", "10");
             
             const params = Module.params(neuropia); 
             const keys = params.keys();
