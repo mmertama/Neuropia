@@ -17,7 +17,7 @@ bool train(const NeuropiaSimple::NeuropiaPtr& env, unsigned iteration) {
     if(iteration == 0 || !env->m_trainer) {
         env->m_logStream->freeze(false);
         std::cout << "Create trainer"  << std::endl;;
-        env->m_trainer = std::make_unique<NeuropiaSimple::SimpleTrainer>(env->m_root, env->m_params, false, [env](Layer&& layer, bool){
+        env->m_trainer = std::make_unique<NeuropiaSimple::SimpleTrainer>(env->m_root, env->m_params, false, [env](Neuropia::Layer&& layer, bool){
             env->m_network = layer;
         });
     }
@@ -39,7 +39,7 @@ bool verify(const NeuropiaSimple::NeuropiaPtr& env, int iteration) {
 
 
 static
-ParamMap basicParams(const NeuropiaSimple::NeuropiaPtr& env) {
+NeuropiaSimple::ParamMap basicParams(const NeuropiaSimple::NeuropiaPtr& env) {
     auto p = NeuropiaSimple::params(env);
     p.erase("Jobs");    //mt
     p.erase("BatchSize"); //mt
@@ -60,7 +60,7 @@ bool isNetworkValid(const NeuropiaSimple::NeuropiaPtr& env) {
 }
 
 static
-NeuronType verifyResult(const NeuropiaSimple::NeuropiaPtr& env) {
+Neuropia::NeuronType verifyResult(const NeuropiaSimple::NeuropiaPtr& env) {
     ASSERT(env);
     if(env->m_verifier) {
         env->m_logStream->freeze(false);
@@ -103,11 +103,11 @@ std::vector<T> fromJSArray(const emscripten::val& v) {
     return vec;
 }
 
-std::vector<NeuronType> feed(NeuropiaSimple::NeuropiaPtr env, emscripten::val a) {
-    const auto image = fromJSArray<NeuronType>(a);
+std::vector<Neuropia::NeuronType> feed(NeuropiaSimple::NeuropiaPtr env, emscripten::val a) {
+    const auto image = fromJSArray<Neuropia::NeuronType>(a);
 
     std::vector<unsigned char> test(image.size());
-    std::transform(image.begin(), image.end(), test.begin(), [](NeuronType c) {
+    std::transform(image.begin(), image.end(), test.begin(), [](Neuropia::NeuronType c) {
         ASSERT(c >=  0 && c <= 255);
         return static_cast<unsigned char>(c);
     });
@@ -120,7 +120,7 @@ std::vector<NeuronType> feed(NeuropiaSimple::NeuropiaPtr env, emscripten::val a)
 */
 
     std::vector<Neuropia::NeuronType> inputs(image.size());
-    std::transform(image.begin(), image.end(), inputs.begin(), [](NeuronType c) {
+    std::transform(image.begin(), image.end(), inputs.begin(), [](Neuropia::NeuronType c) {
         return Neuropia::normalize(static_cast<Neuropia::NeuronType>(c), 0., 255.);
     });
     return NeuropiaSimple::feed(env, inputs);
@@ -140,9 +140,9 @@ bool load(const NeuropiaSimple::NeuropiaPtr& env, const std::string& filename) {
 
 EMSCRIPTEN_BINDINGS(Neuropia) {
     class_<NeuropiaEnv>("Neuropia").smart_ptr_constructor("Neuropia", &std::make_shared<NeuropiaEnv, const std::string&>);
-    register_vector<NeuronType>("ValueVector");
+    register_vector<Neuropia::NeuronType>("ValueVector");
     register_vector<std::string>("StringVector");
-    register_map<ParamMap::key_type, ParamMap::mapped_type>("ParamMap");
+    register_map<NeuropiaSimple::ParamMap::key_type, NeuropiaSimple::ParamMap::mapped_type>("ParamMap");
     function("create", &NeuropiaSimple::create);
     function("free", &NeuropiaSimple::free);
     function("feed", &::feed);
