@@ -165,10 +165,10 @@ jobs:
         shell: bash
         run: |
           find build -name CMakeCache.txt -type f -delete
-          find build -name *.cmake -type f -delete
-          find build -name *.ninja_* -type f -delete
+          find build -name '*.cmake' -type f -delete
+          find build -name '*.ninja_*'' -type f -delete
           find build -name build.ninja -type f -delete
-          find build -name CMakeDoxy* -type f -delete
+          find build -name 'CMakeDoxy*'' -type f -delete
           rm -rf build/*/CMakeFiles
           rm -rf build/CMakeFiles
           rm -rf build/html
@@ -178,7 +178,7 @@ jobs:
       - name: Make WASM
         if: startsWith(matrix.config.arch, 'wasm')
         shell: bash
-        run: cp -r /wasm/* ./build/
+        run: cp -r ./wasm/* ./build/
 
 
       - name: Upload
