@@ -42,10 +42,10 @@
                 setLog("Demo network loaded" + String.fromCharCode(10));
            
            
-            Module.setParam(neuropia, "Images", "mnist/train-images-idx3-ubyte");
-            Module.setParam(neuropia, "ImagesVerify", "mnist/t10k-images-idx3-ubyte");
-            Module.setParam(neuropia, "Labels", "mnist/train-labels-idx1-ubyte");
-            Module.setParam(neuropia, "LabelsVerify", "mnist/t10k-labels-idx1-ubyte");
+            Module.setParam(neuropia, "Images", "./mnist/train-images-idx3-ubyte");
+            Module.setParam(neuropia, "ImagesVerify", "./mnist/t10k-images-idx3-ubyte");
+            Module.setParam(neuropia, "Labels", "./mnist/train-labels-idx1-ubyte");
+            Module.setParam(neuropia, "LabelsVerify", "./mnist/t10k-labels-idx1-ubyte");
             Module.setParam(neuropia, "Classes", "10");
             
             const params = Module.params(neuropia); 
