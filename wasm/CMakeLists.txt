@@ -1,12 +1,10 @@
 
 cmake_minimum_required(VERSION 3.21.0)
 
-project (neuropiaW)
+project (neuropia) #  neuropia as referred by this name 
 
 include (../compiler.cmake)
 SET_COMPILER_FLAGS()
-
-add_definitions(-O3)
 
 include_directories(../include)
 
