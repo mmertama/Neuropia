@@ -89,10 +89,16 @@ enum class SaveType : uint8_t {
     SameAsNeuronType, Double, Float, LongDouble
 };
 
-
+/**
+ * @brief Stored header information
+ * 
+ */
 struct Header {
+    /// @brief Value type used
     const SaveType saveType;
+    /// @brief Number of layers
     const unsigned layers;
+    /// @brief Endianness used
     const bool bigEndian;
 };
 
@@ -121,12 +127,15 @@ bool isBigEndian() {
  */
 std::optional<Header> isValidFile(const std::string& filename);
 
+/// @brief In and out layer dimensions
 struct Sizes {unsigned in_layer; unsigned out_layer;};
 
-//C++ functions are uncomparable and typedef is not hard, thus we make a wrapper functor to help this
 template <typename R, typename ...U>
+/// @brief helper class
+/// C++ functions are incomparable and typedef is not hard, thus we make a wrapper functor to help this
 class NFunction {
 public:
+/// @cond
     bool operator==(std::nullptr_t) const noexcept {return m_f == nullptr;}
     bool operator!=(std::nullptr_t) const noexcept {return m_f != nullptr;}
     bool operator==(const NFunction& other) const noexcept {return m_name == other.m_name;}
@@ -138,6 +147,7 @@ public:
 protected:
     NFunction() {}
     NFunction(std::function<R(U...)> f, const std::string& name):  m_f(f), m_name(name){}
+ /// @endcond
 private:
    std::function<R(U...)> m_f = nullptr;
    std::string m_name = {};

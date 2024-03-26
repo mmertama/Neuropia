@@ -507,10 +507,16 @@ bool Layer::backpropagation(const ValueVector& outValues, const ValueVector& exp
         const auto layerDataTransposed = layerData.transpose();
 
         if(lambdaL2 > 0.0) {
-            const auto L2 = gradients.reduce<NeuronType>(0, [](auto a, auto r){return a + (r * r);}) /
-                static_cast<NeuronType>(gradients.rows());
+            
+            const auto L2 = gradients.reduce<NeuronType>(0, [](auto a, auto r) noexcept {
+                return a + (r * r);
+                }) / static_cast<NeuronType>(gradients.rows());
+            
             const auto l = lambdaL2 * L2;
-            gradients.mapThis([l](auto v){return v - l;});
+            
+            gradients.mapThis([l](auto v) noexcept {
+                return v - l;
+                });
         }
 
         const auto layerDeltas = Matrix<NeuronType>::multiply(gradients, layerDataTransposed);
@@ -519,9 +525,10 @@ bool Layer::backpropagation(const ValueVector& outValues, const ValueVector& exp
         auto weightsData =
             Matrix<NeuronType>::fromArray(lastLayer->m_neurons,
                                           prevLayer->size(), //fully connected, amount of weights is prev layer neurons
-        [prevLayer](const Neuron & n, Matrix<NeuronType>::index_type index) {
-            return n.isActive() && (*prevLayer)[index].isActive() ? n.weight(index) : 0.0;
-        });
+        
+            [prevLayer](const Neuron & n, Matrix<NeuronType>::index_type index) noexcept {
+                return n.isActive() && (*prevLayer)[index].isActive() ? n.weight(index) : 0.0;
+            });
 
 
 
@@ -946,10 +953,10 @@ bool Layer::isValid(bool testNext) const {
     auto weights =
             Matrix<NeuronType>::fromArray(m_neurons,
                                       prevLayer->size(), //fully connected, amount of weights is prev layer neurons
-    [](const Neuron & n, Matrix<NeuronType>::index_type index) {
+    [](const Neuron & n, Matrix<NeuronType>::index_type index) noexcept {
         return n.weight(index);
     });
-    const auto hasInvalidValue = weights.reduce<bool>(false, [](bool a, auto r){
+    const auto hasInvalidValue = weights.reduce<bool>(false, [](bool a, auto r) noexcept {
            return a || std::isnan(r) || std::isinf(r);
        });
     return !hasInvalidValue && (!testNext || !m_next || m_next->isValid(true));

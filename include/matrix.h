@@ -291,7 +291,7 @@ public:
     static Matrix<T> fromIterator(typename C::const_iterator begin,
                                   typename C::const_iterator end,
                                   int colLen = ASVECTOR,
-    std::function<T(decltype(*begin)) > adaptor = [](const auto& v) {return v;}) {
+    std::function<T(decltype(*begin)) > adaptor = [](const auto& v) noexcept {return v;}) {
         auto it = begin;
         const auto len = std::distance(begin, end);
         Matrix<T> m(
@@ -436,23 +436,23 @@ public:
     }
 
     friend Matrix<T> operator-(const Matrix<T>& m1, const Matrix<T>& m2) noexcept {
-        return Matrix<T>::map(m1, m2, [](const T & a, const T & b) {return a - b;});
+        return Matrix<T>::map(m1, m2, [](const T & a, const T & b) noexcept {return a - b;});
     }
 
     friend Matrix<T> operator+(const Matrix<T>& m1, const Matrix<T>& m2) noexcept {
-        return Matrix<T>::map(m1, m2, [](const T & a, const T & b) {return a + b;});
+        return Matrix<T>::map(m1, m2, [](const T & a, const T & b) noexcept {return a + b;});
     }
 
     friend Matrix<T> operator*(const Matrix<T>& m1, const Matrix<T>& m2) noexcept {
-        return Matrix<T>::map(m1, m2, [](const T & a, const T & b) {return a * b;});
+        return Matrix<T>::map(m1, m2, [](const T & a, const T & b) noexcept {return a * b;});
     }
 
     friend Matrix<T> operator*(const Matrix<T>& m1, const T& v) noexcept {
-        return m1.map([v](const T & a) {return a * v;});
+        return m1.map([v](const T & a) noexcept {return a * v;});
     }
 
     friend  Matrix<T> operator*(const T& v, const Matrix<T>& m1) noexcept {
-        return m1.map([v](const T & a) {return a * v;});
+        return m1.map([v](const T & a) noexcept {return a * v;});
     }
 
 
