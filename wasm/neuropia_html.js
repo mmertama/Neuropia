@@ -32,7 +32,7 @@
                 }
             }); 
             
-            neuropia = Module.create();
+            neuropia = Module.create(".");
             const terminal = document.getElementById("terminal")
             Module.setLogger(neuropia, setLog); 
             

@@ -137,18 +137,13 @@ bool load(const NeuropiaSimple::NeuropiaPtr& env, const std::string& filename) {
     return NeuropiaSimple::load(env, filename).has_value();
 }
 
-static 
-auto create() {
-    return NeuropiaSimple::create();
-}
-
 
 EMSCRIPTEN_BINDINGS(Neuropia) {
     class_<NeuropiaSimple::NeuropiaEnv>("Neuropia").smart_ptr_constructor("Neuropia", &std::make_shared<NeuropiaSimple::NeuropiaEnv, const std::string&>);
     register_vector<Neuropia::NeuronType>("ValueVector");
     register_vector<std::string>("StringVector");
     register_map<NeuropiaSimple::ParamMap::key_type, NeuropiaSimple::ParamMap::mapped_type>("ParamMap");
-    function("create", &::create);
+    function("create", &NeuropiaSimple::create);
     function("free", &NeuropiaSimple::free);
     function("feed", &::feed);
     function("setParam", &::setParam);
