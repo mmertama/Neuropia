@@ -39,6 +39,7 @@ if(DOXYGEN)
       ${CMAKE_SOURCE_DIR}/include/neuropia_feed.h
       neuropialib.h
   )
+  set(DOXYGEN_PROJECT_NAME "Neuropia")
   add_doxygen(${PROJECT_NAME})
 
 
