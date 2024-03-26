@@ -138,7 +138,7 @@ bool load(const NeuropiaSimple::NeuropiaPtr& env, const std::string& filename) {
 }
 
 static 
-bool create() {
+auto create() {
     return NeuropiaSimple::create();
 }
 
