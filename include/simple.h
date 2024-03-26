@@ -42,7 +42,7 @@ private:
             const auto buf = std::string(m_buffer, n);
             m_logger(buf);
         }
-        pbump(static_cast<int>(-n));
+        pbump(-(static_cast<int>(n)));
     }
 private:
     std::function<void (const std::string&)> m_logger;
