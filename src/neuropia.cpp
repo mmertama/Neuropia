@@ -966,7 +966,8 @@ const Layer* Layer::inputLayer() const {
     auto input = this;
     for(;;) {
         const auto prev = previousLayer(input);
-        return input;
+        if(!prev)
+            return input;
         input = prev;    
     }
 }
@@ -981,7 +982,7 @@ Sizes Layer::sizes() const {
 size_t Layer::consumption(bool cumulative) const {
     const auto c = sizeof(this) 
     + m_outBuffer.size() * sizeof(decltype(m_outBuffer)::value_type)
-    + std::accumulate(m_neurons.begin(), m_neurons.end(), 0U, [](const auto& a, const auto& n ) {
+    + std::accumulate(m_neurons.begin(), m_neurons.end(), static_cast<size_t>(0U), [](const auto& a, const auto& n ) {
         return a + n.consumption();
     });
 

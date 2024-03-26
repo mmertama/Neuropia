@@ -46,7 +46,7 @@ std::tuple<int, unsigned> Neuropia::verify(const Neuropia::Layer& network,
 
 
 #ifdef DEBUG_SHOW
-            Neuropia::printimage(image.data()); //ASCII print images
+            Neuropia::printimage(image.data(), testImages.size(1), testImages.size(2)); //ASCII print images
             std::cout << label << "->" << outputs << "->" << max << std::endl; // Print
             std::cout << label << " guessed as " << max << std::endl;
 #endif
@@ -57,7 +57,7 @@ std::tuple<int, unsigned> Neuropia::verify(const Neuropia::Layer& network,
         }
     }, "Verify");
 
-    return std::make_tuple(found, std::min(count, testLabels.size()) - from);
+    return std::make_tuple(found, static_cast<unsigned>(std::min(count, testLabels.size()) - from));
 }
 
 std::tuple<int, unsigned> Neuropia::verifyEnseble(const std::vector<Neuropia::Layer>& ensebles,
@@ -131,5 +131,5 @@ std::tuple<int, unsigned> Neuropia::verifyEnseble(const std::vector<Neuropia::La
         }
     }, "Verify");
 
-    return std::make_tuple(found, std::min(count, testLabels.size()) - from);
+    return std::make_tuple(found, static_cast<unsigned>(std::min(count, testLabels.size()) - from));
 }

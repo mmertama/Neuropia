@@ -43,7 +43,7 @@ bool Trainer::train() {
         const auto label = static_cast<unsigned>(m_labels.readAt(at));
 
 #ifdef DEBUG_SHOW
-            Neuropia::printimage(image.data()); //ASCII print images
+            Neuropia::printimage(image.data(), m_images.size(1), m_images.size(2)); //ASCII print images
             std::cout << label << std::endl;
 #endif
 

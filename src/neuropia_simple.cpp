@@ -1,146 +1,26 @@
 
+#include "simple.h"
 #include "neuropia_simple.h"
-#include <unordered_map>
 #include "params.h"
 #include "evotrain.h"
 #include "trainer.h"
 #include "paralleltrain.h"
 #include "verify.h"
-#include "default.h"
+#include <unordered_map>
+
 
 using namespace Neuropia;
+using namespace NeuropiaSimple;
 
-
-#ifdef __EMSCRIPTEN__
-#include <emscripten/bind.h>
-using namespace emscripten;
-#endif
-
-static
 bool fatal(const char* t, const char* f, int line, const char* file) {
     std::cerr << "Assert:" << t << " in line " << line << " at " << f << "  in "<< file << "." << std::endl;
     std::abort();
 }
-#define ASSERT(X) ((X) || fatal("Invalid", __FUNCTION__, __LINE__, __FILE__))
-#define ASSERT_X(X, T) ((X) || fatal((T), __FUNCTION__, __LINE__, __FILE__))
-
-using namespace NeuropiaSimple;
-
-template <size_t SZ>
-class LogStream : public std::streambuf {
-public:
-    LogStream(std::function<void (const std::string&)>& logger) : m_logger(logger), m_os(this) {
-        setp(m_buffer, m_buffer + SZ - 1);
-    }
-
-    ~LogStream() override {
-    }
-    /**
-     * Since m_logger can be very very slow (on WASM) the frequent updates can be frozen
-     */
-    void freeze(bool doFreeze) {
-        m_freeze = doFreeze;
-    }
-
-private:
-    int_type overflow(int_type ch) override {
-        if(ch != traits_type::eof()){
-            *pptr() = static_cast<char>(ch);
-            pbump(1);
-            write();
-        }
-        return ch;
-    }
-    int sync() override {
-        write();
-        return 1;
-    }
-    void write() {
-        const auto n = static_cast<size_t>(pptr() - pbase());
-        if(!m_freeze) {
-            const auto buf = std::string(m_buffer, n);
-            m_logger(buf);
-        }
-        pbump(static_cast<int>(-n));
-    }
-private:
-    std::function<void (const std::string&)> m_logger;
-    char m_buffer[SZ];
-    std::ostream m_os;
-    bool m_freeze = false;
-};
-
-using SimpleLogStream = LogStream<2048>;
-
-class SimpleTrainer : public TrainerBase {
-public:
-    SimpleTrainer(const std::string& root, const Neuropia::Params& params, bool quiet, const std::function<void (Layer&& layer, bool)>& onEnd) : 
-        TrainerBase(root, params, quiet), m_onEnd(onEnd) {}
-    bool train(unsigned its, SimpleLogStream& stream);
-    bool isOk() const {return isReady() && m_ok;}
-
-private:
-    bool train();
-    std::function<void (Layer&& layer, bool)> m_onEnd;
-    bool m_ok = true;
-};
-
-constexpr unsigned IoBufSz = 5;
-
-class SimpleVerifier {
-public:
-    SimpleVerifier(const Neuropia::Layer& network, const std::string& imageFile, const std::string& labelFile) : m_network(network),
-        m_testImages(imageFile, IoBufSz), m_testLabels(labelFile, IoBufSz) {
-    }
-    bool verify();
-    NeuronType verifyResult() const {return m_testLabels.size() ? static_cast<NeuronType>(m_found) / static_cast<NeuronType>(m_testLabels.size()) : -1.0;}
-private:
-    const Neuropia::Layer& m_network;
-    Neuropia::IdxReader<unsigned char> m_testImages;
-    Neuropia::IdxReader<unsigned char> m_testLabels;
-    size_t m_position = 0;
-    unsigned m_found = 0;
-};
 
 NeuropiaPtr NeuropiaSimple::create(const std::string& root) {
-    return std::make_shared<NeuropiaEnv>(root);
+    return std::make_shared<NeuropiaSimple::NeuropiaEnv>(root);
 }
 
-
-class NeuropiaSimple::NeuropiaEnv {
-public:
-    NeuropiaEnv(const NeuropiaEnv&) = delete;
-    NeuropiaEnv& operator=(const NeuropiaEnv&) = delete;
-    NeuropiaEnv(const std::string& root) :  m_root(root) {
-        m_params.addHelp( topologyRe, "\',\'-separated list of integers");
-        m_params.addHelp( activationFunctionRe, "\',\'-separated list of activation functions: \"sigmoid, relu or elu\"");
-        m_params.addHelp( dropoutRateRe, "\',\'-separated of list of real numbers");
-    }
-    virtual ~NeuropiaEnv();
-    void setLogger(std::function<void (const std::string&)> logger) {
-        if(m_prevStreamBufCerr) {
-            std::cerr.rdbuf(m_prevStreamBufCerr);
-        }
-        if(m_prevStreamBufCout) {
-            std::cout.rdbuf(m_prevStreamBufCout);
-        }
-        m_logStream = std::make_unique<SimpleLogStream>(logger);
-        m_prevStreamBufCout = std::cout.rdbuf(m_logStream.get());
-        m_prevStreamBufCerr = std::cerr.rdbuf(m_logStream.get());
-    }
-    Layer m_network = {};
-    Params m_params = {
-        DEFAULT_PARAMS
-};
-    const std::string m_root;
-    std::unique_ptr<SimpleLogStream> m_logStream = {};
-    std::streambuf* m_prevStreamBufCout = nullptr;
-    std::streambuf* m_prevStreamBufCerr = nullptr;
-    bool m_once = false;
-
-    std::unique_ptr<SimpleTrainer> m_trainer = {};
-    std::unique_ptr<SimpleVerifier> m_verifier = {};
-};
 
 // to avoid warning
 NeuropiaEnv::~NeuropiaEnv() {
@@ -356,7 +236,7 @@ bool SimpleTrainer::train() {
     const auto label = static_cast<unsigned>(m_labels.readAt(at));
 
 #ifdef DEBUG_SHOW
-    Neuropia::printimage(image.data()); //ASCII print images
+    Neuropia::printimage(image.data(), m_images.size(1), m_images.size(2)); //ASCII print images
     std::cout << label << std::endl;
 #endif
 
@@ -413,149 +293,4 @@ bool SimpleVerifier::verify() {
     return true;
 }
 
-#ifdef __EMSCRIPTEN__
-static
-bool train(const NeuropiaPtr& env, unsigned iteration) {
-    ASSERT(env);
-
-    if(iteration == 0 || !env->m_trainer) {
-        env->m_logStream->freeze(false);
-        std::cout << "Create trainer"  << std::endl;;
-        env->m_trainer = std::make_unique<SimpleTrainer>(env->m_root, env->m_params, false, [env](Layer&& layer, bool){
-            env->m_network = layer;
-        });
-    }
-
-    return env->m_trainer->train(iteration, *env->m_logStream);
-}
-
-static
-bool verify(const NeuropiaPtr& env, int iteration) {
-    if(iteration == 0 || !env->m_verifier) {
-        ASSERT(env->m_network.isValid());
-        env->m_logStream->freeze(false);
-        std::cout << "Create verifier"  << std::endl;;
-        env->m_verifier.reset(new SimpleVerifier(env->m_network, Neuropia::absPath(env->m_root, env->m_params["ImagesVerify"]), Neuropia::absPath(env->m_root,env->m_params["LabelsVerify"])));
-        Neuropia::percentage(0, 1);
-    }
-    return env->m_verifier->verify();
-}
-
-
-static
-ParamMap basicParams(const NeuropiaPtr& env) {
-    auto p = NeuropiaSimple::params(env);
-    p.erase("Jobs");    //mt
-    p.erase("BatchSize"); //mt
-    p.erase("BatchVerifySize"); //mt
-    p.erase("Hard"); //for ensenble
-    p.erase("Extra"); //this is for ensemble
-    p.erase("LearningRate"); //use only min and max
-    return p;
-}
-
-static
-bool isNetworkValid(const NeuropiaPtr& env) {
-    ASSERT(env);
-    if(env->m_trainer) {
-        env->m_logStream->freeze(false);
-    }
-    return env->m_network.isValid();
-}
-
-static
-NeuronType verifyResult(const NeuropiaPtr& env) {
-    ASSERT(env);
-    if(env->m_verifier) {
-        env->m_logStream->freeze(false);
-        return env->m_verifier->verifyResult();
-    }
-    return -2.0; //arbitrary negative number, but not -1
-}
-
-
-static
-int showImage(const NeuropiaPtr& env, const std::string& imageName, const std::string& labelName, unsigned index) {
-    ASSERT(env);
-    Neuropia::IdxReader<std::array<unsigned char, 28 * 28>> idxi(Neuropia::absPath(env->m_root, imageName));
-    if(!idxi.ok() || idxi.dimensions() != 3)
-        return -1;
-
-    Neuropia::IdxReader<unsigned char> idxl(Neuropia::absPath(env->m_root, labelName));
-    if(!idxl.ok() || idxl.dimensions() != 1)
-        return -2;
-
-    const auto data = idxi.readAt(index);
-    Neuropia::printimage(data.data());
-    return idxl.readAt(index);
-}
-#endif
-
-#ifdef __EMSCRIPTEN__
-void setLogger(const NeuropiaPtr& env, emscripten::val cb) {
-    NeuropiaSimple::setLogger(env, [cb](const std::string& str){
-        cb(str);
-    });
-}
-
-
-template <typename T>
-std::vector<T> fromJSArray(const emscripten::val& v) {
-    const auto l = v["length"].as<unsigned>();
-    std::vector<T> vec(l);
-    emscripten::val memoryView(emscripten::typed_memory_view(l, vec.data()));
-    memoryView.call<void>("set", v);
-    return vec;
-}
-
-std::vector<NeuronType> feed(NeuropiaPtr env, emscripten::val a) {
-    const auto image = fromJSArray<NeuronType>(a);
-
-    std::vector<unsigned char> test(image.size());
-    std::transform(image.begin(), image.end(), test.begin(), [](NeuronType c) {
-        ASSERT(c >=  0 && c <= 255);
-        return static_cast<unsigned char>(c);
-    });
-/* debug the map
-    Neuropia::printimage(test.data());
-    std::cout << std::endl;
-
-    std::cout << "reference" << std::endl;
-    std::cout << showImage(env, "train-images-idx3-ubyte", "train-labels-idx1-ubyte", 3) << std::endl;
-*/
-
-    std::vector<Neuropia::NeuronType> inputs(image.size());
-    std::transform(image.begin(), image.end(), inputs.begin(), [](NeuronType c) {
-        return Neuropia::normalize(static_cast<Neuropia::NeuronType>(c), 0., 255.);
-    });
-    return NeuropiaSimple::feed(env, inputs);
-}
-
-
-#endif
-
-
-
-
-#ifdef __EMSCRIPTEN__
-EMSCRIPTEN_BINDINGS(Neuropia) {
-    class_<NeuropiaEnv>("Neuropia").smart_ptr_constructor("Neuropia", &std::make_shared<NeuropiaEnv, const std::string&>);
-    register_vector<NeuronType>("ValueVector");
-    register_vector<std::string>("StringVector");
-    register_map<ParamMap::key_type, ParamMap::mapped_type>("ParamMap");
-    function("create", &NeuropiaSimple::create);
-    function("free", &NeuropiaSimple::free);
-    function("feed", &::feed);
-    function("setParam", &NeuropiaSimple::setParam);
-    function("params", &::basicParams);
-    function("train", &::train);
-    function("save", &NeuropiaSimple::save);
-    function("load", &NeuropiaSimple::load);
-    function("verify", &::verify);
-    function("setLogger", &::setLogger);
-    function("isNetworkValid", &::isNetworkValid);
-    function("verifyResult", &::verifyResult);
-    function("showImage", &::showImage);
-}
-#endif
 

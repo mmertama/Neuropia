@@ -50,6 +50,7 @@ inline bool doAssert(const std::string& s, int line, const char* file, const std
 #endif
 
 namespace Neuropia {
+    /// @brief @Value type used in Neuropia (NEUROPIA_TYPE is compile time defined- see a CMakeLists.txt)
     using NeuronType = NEUROPIA_TYPE;
     class Layer;
     class Neuron;
@@ -78,6 +79,7 @@ using ValueMap = std::unordered_map<int, NeuronType>;
  */
 using ValueVector = std::vector<NeuronType>;
 
+/// @brief Network creation parameters map type - See Params
 using MetaInfo = std::unordered_map<std::string, std::string>;
 
 /**

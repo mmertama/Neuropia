@@ -36,7 +36,7 @@ enum class TrainType {
  * @param root file path root
  * @return NeuropiaPtr 
  */
-NeuropiaPtr create(const std::string& root);
+NeuropiaPtr create(const std::string& root = "");
 
 /**
  * @brief Free up the env

@@ -32,7 +32,7 @@
                 }
             }); 
             
-            neuropia = Module.create("mnist");
+            neuropia = Module.create(".");
             const terminal = document.getElementById("terminal")
             Module.setLogger(neuropia, setLog); 
             
@@ -42,10 +42,11 @@
                 setLog("Demo network loaded" + String.fromCharCode(10));
            
            
-            Module.setParam(neuropia, "Images", "train-images-idx3-ubyte");
-            Module.setParam(neuropia, "ImagesVerify", "t10k-images-idx3-ubyte");
-            Module.setParam(neuropia, "Labels", "train-labels-idx1-ubyte");
-            Module.setParam(neuropia, "LabelsVerify", "t10k-labels-idx1-ubyte");
+            Module.setParam(neuropia, "Images", "./mnist/train-images-idx3-ubyte");
+            Module.setParam(neuropia, "ImagesVerify", "./mnist/t10k-images-idx3-ubyte");
+            Module.setParam(neuropia, "Labels", "./mnist/train-labels-idx1-ubyte");
+            Module.setParam(neuropia, "LabelsVerify", "./mnist/t10k-labels-idx1-ubyte");
+            Module.setParam(neuropia, "Classes", "10");
             
             const params = Module.params(neuropia); 
             const keys = params.keys();
