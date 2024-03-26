@@ -966,7 +966,8 @@ const Layer* Layer::inputLayer() const {
     auto input = this;
     for(;;) {
         const auto prev = previousLayer(input);
-        return input;
+        if(!prev)
+            return input;
         input = prev;    
     }
 }
