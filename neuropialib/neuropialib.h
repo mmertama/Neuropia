@@ -16,9 +16,14 @@ namespace Neuropia
     using Bytes = std::vector<uint8_t>;
     using Values = std::vector<NeuronType>;
     
+    /**
+     * @brief a simple class to load and feed a Neuropia network 
+     */
     class Network {
         public:
+            /// @brief Constructor
             Network() {}
+            /// @brief Destructor
             ~Network() {}
             /**
              * @brief Load a network

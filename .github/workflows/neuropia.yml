@@ -83,7 +83,7 @@ jobs:
         if: startsWith(matrix.config.arch, 'wasm')
         shell: bash
         run: |
-            ./build.sh
+            ./wasm/build.sh
             exit $!
 
       - name: Configure
