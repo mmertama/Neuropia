@@ -128,10 +128,11 @@ std::vector<NeuronType> feed(NeuropiaPtr env, emscripten::val a) {
     return NeuropiaSimple::feed(env, inputs);
 }
 
-
-
-
-
+// just help find type (cast would do as well)
+static 
+bool set_param(const NeuropiaPtr& env, const std::string& name, const std::string& value) {
+    bool NeuropiaSimple::setParam(env, name, value);
+}
 
 
 EMSCRIPTEN_BINDINGS(Neuropia) {
@@ -142,7 +143,7 @@ EMSCRIPTEN_BINDINGS(Neuropia) {
     function("create", &NeuropiaSimple::create);
     function("free", &NeuropiaSimple::free);
     function("feed", &::feed);
-    function("setParam", &NeuropiaSimple::setParam);
+    function("setParam", &::setParam);
     function("params", &::basicParams);
     function("train", &::train);
     function("save", &NeuropiaSimple::save);
