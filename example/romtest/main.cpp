@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
             Neuropia::percentage(i, iterations);                                     
 
 #ifdef DEBUG_SHOW
-            Neuropia::printimage(image.data()); //ASCII print images
+            Neuropia::printimage(image.data(), testImages.size(1), testImages.size(2)); //ASCII print images
             std::cout << label << "->" << outputs << "->" << max << std::endl; // Print
             std::cout << label << " guessed as " << max << std::endl;
 #endif

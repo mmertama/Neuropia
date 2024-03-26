@@ -25,7 +25,8 @@ add_executable(${NAME}
     ../src/trainerbase.cpp
     ../src/trainer.cpp 
     ../src/verify.cpp
-    ../src/neuropia_simple.cpp  
+    ../src/neuropia_simple.cpp
+    neuropia_wasm.cpp  
 )
 
 set(EMCC_LINKER_FLAGS "-o neuropia.js \
