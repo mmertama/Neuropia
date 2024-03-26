@@ -178,7 +178,7 @@ jobs:
       - name: Make WASM
         if: startsWith(matrix.config.arch, 'wasm')
         shell: bash
-        run: cp ./wasm/* ./build/
+        run: cp -r /wasm/* ./build/
 
 
       - name: Upload
