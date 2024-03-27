@@ -175,15 +175,6 @@ jobs:
           rm -rf build/aspell
           rm -rf build/_deps
       
-      - name: Make WASM
-        if: startsWith(matrix.config.arch, 'wasm')
-        shell: bash
-        run: |
-          cp -r ./wasm/* ./build/
-          rm ./build/CMakeLists.txt
-          rm ./build/*.sh
-
-
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
