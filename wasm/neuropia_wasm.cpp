@@ -43,7 +43,7 @@ bool verify(const WasmNeuropiaPtr& env, int iteration) {
     if(iteration == 0 || !env->m_verifier) {
         ASSERT(env->m_network.isValid());
         env->m_logStream->freeze(false);
-        std::cout << "Create verifier" << std::endl;;
+        std::cout << "Start verification" << std::endl;;
         env->m_verifier = std::make_unique<NeuropiaSimple::SimpleVerifier>(env->m_network, Neuropia::absPath(env->m_root, env->m_params["ImagesVerify"]), Neuropia::absPath(env->m_root,env->m_params["LabelsVerify"]));
         Neuropia::percentage(0, 1);
     }
