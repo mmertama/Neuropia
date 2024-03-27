@@ -12,6 +12,11 @@
 #include <string_view>
 #include "neuropia.h"
 
+bool fatal(const char* t, const char* f, int line, const char* file);
+
+#define ASSERT(X) ((X) || fatal("Invalid", __FUNCTION__, __LINE__, __FILE__))
+#define ASSERT_X(X, T) ((X) || fatal((T), __FUNCTION__, __LINE__, __FILE__))
+
 namespace Neuropia {
 
 void timed(const std::function<void ()>& f, const std::string& label = "");
@@ -38,7 +43,7 @@ void printVerify(const std::tuple<size_t, size_t>& result, const std::string& tx
 
 template <typename T1, typename T2>
 void percentage(T1 fraction, T2 total, const std::string& extra = "") {
-        const auto f = 100.0 * (static_cast<double>(fraction + 1) / static_cast<double>(total));
+        const auto f = 100.0 * (static_cast<double>(fraction) / static_cast<double>(total));
         std::cout << "\r" << std::fixed << std::setprecision(3) << f << '%' << extra << std::flush;
 }
 

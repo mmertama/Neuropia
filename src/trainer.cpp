@@ -7,10 +7,11 @@ using namespace Neuropia;
 Trainer::Trainer(const std::string & root, const Neuropia::Params& params, bool quiet) : TrainerBase (root, params, quiet) {
 }
 
-bool Trainer::train() {
+bool Trainer::doTrain() {
     #ifdef DO_DUMP_DEBUG
     std::ofstream strm("dump.text", std::ios::app);
 #endif
+
     auto testVerify = m_testVerifyFrequency;
 
     bool failed = false;

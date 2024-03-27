@@ -8,6 +8,11 @@
 
 using namespace Neuropia;
 
+bool fatal(const char* t, const char* f, int line, const char* file) {
+    std::cerr << "Assert:" << t << " in line " << line << " at " << f << "  in "<< file << "." << std::endl;
+    std::abort();
+}
+
 static char mapGrey(unsigned char m) {
     constexpr char greys[] = " .:-=+*#%@";
     const auto p = m / 26;
@@ -144,6 +149,7 @@ Random::Random() : m_gen(
 ) {}
 
 size_t Random::random(size_t atop) {
+    neuropia_assert(atop > 0);
     return (m_gen() % atop);
     }
 

@@ -22,7 +22,7 @@ For embedded system the compiled network size can be reduced with -d float param
 
 e.g.
 ```
-$neuropia mnist/t10k-images-idx3-ubyte mnist/t10k-labels-idx1-ubyte neuropia.bin Iterations=10000 Hard=true
+$neuropia mnist/t10k-images-idx3-ubyte mnist/t10k-labels-idx1-ubyte neuropia.bin Iterations=10000 Hard=true Classes=10
 
 ```
 
@@ -210,6 +210,10 @@ another swapfile with following snippet:
 ```
 
 On next reboot thaw swapfile should be removed.
+
+
+## Documents
+[documentation](https://mmertama.github.io/Neuropia/docs/)
 
 ## Testing
 For testing copy the Mnist data from [huggingface](https://huggingface.co/datasets/mnist)

@@ -128,7 +128,7 @@ TrainerBase::TrainerBase(const std::string & root, const Neuropia::Params& param
                                                })){}
 
     bool TrainerBase::init() {
-
+        m_passedIterations = 0;
         if(!m_images.ok()) {
             std::cerr << "Cannot open images from \"" << m_imageFile << "\"" << std::endl;
             return false;
@@ -167,7 +167,7 @@ TrainerBase::TrainerBase(const std::string & root, const Neuropia::Params& param
 }
 
 bool TrainerBase::isReady() const {
-    return m_images.ok() && m_labels.ok() && m_network.size() > 0;
+    return m_images.ok() && m_labels.ok() && m_network.size() > 0 && m_passedIterations < m_iterations;
 }
 
 void TrainerBase::setDropout() {
@@ -181,5 +181,43 @@ void TrainerBase::setDropout() {
     }
 }
 
+bool TrainerBase::train() {
+    if(m_images.size() == 0) {
+        std::cerr << "train has not initialized" << std::endl;
+        return false;
+        }
+    if(m_images.size(1) * m_images.size(2) == 0) {
+        std::cerr << "Bad dimensions" << std::endl;
+        return false;
+        }    
+    if(m_images.size() != m_labels.size()) {
+        std::cerr << "Mismatch data" << m_images.size() << " vs. " << m_labels.size() << std::endl;
+        return false;
+        }          
+    if(m_classes == 0) {
+        std::cerr << "Invalid Classes" << std::endl;
+        return false;
+    }
+    if(m_topology.size() < 1) {
+        std::cerr << "Invalid  topology" << std::endl;
+        return false;
+    }
+    if(m_iterations < 1) {
+        std::cerr << "Invalid iterations" << std::endl;
+        return false;
+    }
+    const auto image_sz = m_images.size(1) * m_images.size(2); 
+    if(static_cast<int>(image_sz) <= m_topology.front() || 
+        (m_topology.size() > 1 && std::adjacent_find(m_topology.begin(), m_topology.end(), std::less<int>()) != m_topology.end()) ||
+        m_topology.back() <= static_cast<int>(m_classes))  {
+            std::cerr << "Fishy topology ";
+            std::cerr << image_sz << ", ";
+            for(const auto& i : m_topology)
+                std::cerr << i << ", ";
+            std::cerr << m_classes << std::endl;
+            return false;
+        }      
+    return doTrain();
+}
 
 

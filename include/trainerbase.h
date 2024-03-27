@@ -18,7 +18,7 @@ class TrainerBase {
 public:
     TrainerBase(const std::string& root, const Neuropia::Params& params, bool quiet);
     void setDropout();
-    virtual bool train() = 0;
+    bool train();
     virtual ~TrainerBase() = default;
     Neuropia::Layer&& network() {return std::move(m_network);}
     bool isReady() const;
@@ -26,13 +26,15 @@ public:
     /// @return 
     bool init();
 protected:
+    virtual bool doTrain() = 0;
+protected:
     const std::string m_imageFile;
     const std::string m_labelFile;
     Neuropia::IdxReader<unsigned char> m_images;
     Neuropia::IdxReader<unsigned char> m_labels;
     Neuropia::Layer m_network;
     const std::vector<NeuronType> m_dropoutRate;
-    size_t m_passedIterations = 0;
+    size_t m_passedIterations = std::numeric_limits<size_t>::max();
     std::chrono::high_resolution_clock::time_point m_start;
     NeuronType m_learningRate;
     const NeuronType m_learningRateMin;

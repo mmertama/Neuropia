@@ -35,17 +35,17 @@
             neuropia = Module.create(".");
             const terminal = document.getElementById("terminal")
             Module.setLogger(neuropia, setLog); 
-            
+            setLogl("Neuropia constructed");
             const fopen = Module.load(neuropia, "default_out.bin");
             document.getElementById("verifyBtn").disabled = !fopen;
             if(fopen)
-                setLog("Demo network loaded" + String.fromCharCode(10));
+                setLogl("Demo network loaded" + String.fromCharCode(10));
            
            
-            Module.setParam(neuropia, "Images", "./mnist/train-images-idx3-ubyte");
-            Module.setParam(neuropia, "ImagesVerify", "./mnist/t10k-images-idx3-ubyte");
-            Module.setParam(neuropia, "Labels", "./mnist/train-labels-idx1-ubyte");
-            Module.setParam(neuropia, "LabelsVerify", "./mnist/t10k-labels-idx1-ubyte");
+            Module.setParam(neuropia, "Images", "mnist/train-images-idx3-ubyte");
+            Module.setParam(neuropia, "ImagesVerify", "mnist/t10k-images-idx3-ubyte");
+            Module.setParam(neuropia, "Labels", "mnist/train-labels-idx1-ubyte");
+            Module.setParam(neuropia, "LabelsVerify", "mnist/t10k-labels-idx1-ubyte");
             Module.setParam(neuropia, "Classes", "10");
             
             const params = Module.params(neuropia); 
@@ -100,12 +100,23 @@
                 paramList.appendChild(tr)
             }
             
+            if(!fopen) {
+                setLogl("Demo network is missing, train one, please wait");
+                startTrain();
+            }
+
          //   if(!Module.showImage(neuropia, "train-images-idx3-ubyte", 0))
         //        console.log("OHO")
         }
     };
         
         /* Functions */
+
+        function uiNumber(value) {
+            var val = value + "";
+            var pos = Utils.find(val, '.') + 3; // 3 == two digits
+            return Utils.substr(val, 0, pos);
+        }
 
          function setLog(str) {
                 const  r = str.indexOf('\r');
@@ -115,7 +126,30 @@
                     const lastNewLine = terminal.value.lastIndexOf('\n');
                     terminal.value = terminal.value.slice(0, lastNewLine) + str;
                 }
-            }    
+            }
+        
+        
+        function setLogl(str) {
+            setLog(str + '\n')
+        }
+        
+        function logMEMFS(directory) {
+            let entries = [];
+            try {
+                entries = FS.readdir(directory);
+            } catch(err) { // just ignore
+                return;
+            }
+            entries.forEach(function(entry) {
+                if(entry[0] == '.')
+                    return;
+                const path = directory + '/' + entry;
+                console.log(path);
+                if (FS.isDir(FS.lookupPath(path).node.mode)) {
+                    logMEMFS(path);
+                }
+            });
+        }
                           
         function startTrain() {
             document.getElementById("verifyBtn").disabled = true;
@@ -131,31 +165,34 @@
                 let status = document.getElementsByName("name_" + name); 
                 if(!isOk) {
                     status[0].setAttribute("style", "color:#ff0000");
+                    setLogl("Bad parameter " + name);
                 }
-            }
+            } 
             if(ok) {
                 const iterations = Module.params(neuropia).get('Iterations').get(1);
-                console.log("Ready for Training", iterations);
+                const batch_size = Module.batchSize();
+                console.log("Ready for Training", iterations, batch_size);
+                console.assert(batch_size > 0);
                 if(iterations === 0)
-                    return false;
+                    return;
                 let iteration = 0;
-                
                 function doTrain() {
-                    if(iteration <= iterations && Module.train(neuropia, iteration)) {
+                    if(iteration < iterations && Module.train(neuropia, batch_size)) {
                         setTimeout(doTrain, 0);
-                        iteration += 100;
+                        iteration += batch_size;
                     } else {
                         if(Module.isNetworkValid(neuropia)) {
                             console.log("Training done");
                             document.getElementById("verifyBtn").disabled = false;
                         }
-                        else 
-                            alert("Training failed");
+                        else {
+                            setLogl("Training failed");
+                            logMEMFS("/");
+                        }
                     }
                 }
                 doTrain();
             }
-            return false;
         }
             
         function verify() {
@@ -169,7 +206,7 @@
                     const verifyResult = Module.verifyResult(neuropia);
                     if(verifyResult >= 0) {
                         console.log("Verify done");
-                        document.getElementById("verificationResult").innerHTML = "Verification: " + verifyResult * 100 + "%";
+                        document.getElementById("verificationResult").innerHTML = "Verification: " +  uiNumber(verifyResult * 100) + "%";
                     } else {
                         alert("Training failed");
                     }
