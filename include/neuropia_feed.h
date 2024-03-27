@@ -3,6 +3,7 @@
 #include "neuropia.h"
 #include <string_view>
 #include <array>
+#include <iterator>
 
 namespace Neuropia {
     template<const uint8_t* D, size_t SZ, typename SType = float>
@@ -212,7 +213,7 @@ namespace Neuropia {
          * @return OutValues 
          */
         static OutValues feed(IT begin, IT end) {
-            static_assert(std::is_same<typename IT::value_type, SType>::value);
+            static_assert(std::is_same<typename std::iterator_traits<IT>::value_type, SType>::value);
             std::array<SType, std::get<LAYER_SIZE>(get_layer_info(1))> a_buffer; // - a buffer is 1st write buffer... the maximum buffer size as next layer < previous, and input is outside
             const auto af_1 = name_to_function(std::get<LAYER_ACTIVATION>(get_layer_info(1)));
             constexpr auto off_1 = std::get<LAYER_NEURONS>(get_layer_info(1)); // 0 is input layer , structured bind cannot be constexpr
