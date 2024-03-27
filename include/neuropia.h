@@ -352,7 +352,7 @@ public:
      */
 
     template<typename IT>
-    NeuronType feed(const IT& begin, const IT& end) const;
+    NeuronType feed(IT begin, IT end) const;
 
     /**
      * @brief size
@@ -580,7 +580,7 @@ public:
      * @param values
      * @return
      */
-    const ValueVector& feed(const IT& begin, const IT& end) const;
+    const ValueVector& feed(IT begin, IT end) const;
 
     /**
      * @brief feed
@@ -866,7 +866,7 @@ private:
 Layer::InitStrategy initStrategyMap(ActivationFunction activation_function);
 
 template<typename IT>
-NeuronType Neuron::feed(const IT& begin, const IT& end) const {
+NeuronType Neuron::feed(IT begin, IT end) const {
     neuropia_assert(m_af);
     NeuronType sum = m_bias;
     const auto sz = static_cast<size_t>(std::distance(begin, end));
@@ -878,7 +878,7 @@ NeuronType Neuron::feed(const IT& begin, const IT& end) const {
 }
 
     template<typename IT>
-    const ValueVector& Layer::feed(const IT& begin, const IT& end) const {
+    const ValueVector& Layer::feed(IT begin, IT end) const {
         neuropia_assert(m_activationFunction);
         if(!isInput()) {
             neuropia_assert(m_outBuffer.size() >= m_neurons.size());

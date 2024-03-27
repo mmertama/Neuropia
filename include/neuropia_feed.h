@@ -189,7 +189,7 @@ namespace Neuropia {
 
 
         template<typename IT>
-        static SType feed_neuron(const Neuron& neuron, const IT& begin, const IT& end, const ActivationFunction& activation_function) {
+        static SType feed_neuron(const Neuron& neuron, IT begin, IT end, const ActivationFunction& activation_function) {
             auto sum = read_real(std::get<NEURON_BIAS>(neuron));
             const auto sz = std::distance(begin, end);
             auto pos = std::get<NEURON_WEIGHTS>(neuron).first;
@@ -211,7 +211,7 @@ namespace Neuropia {
          * @param end 
          * @return OutValues 
          */
-        static OutValues feed(const IT& begin, const IT& end) {
+        static OutValues feed(IT begin, IT end) {
             static_assert(std::is_same<typename IT::value_type, SType>::value);
             std::array<SType, std::get<LAYER_SIZE>(get_layer_info(1))> a_buffer; // - a buffer is 1st write buffer... the maximum buffer size as next layer < previous, and input is outside
             const auto af_1 = name_to_function(std::get<LAYER_ACTIVATION>(get_layer_info(1)));

@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
     }
 
      if(!testLabels.ok()) {
-        std::cerr << " LABELS_IDX " << argv[2] << std::endl;
+        std::cerr << " Bad LABELS_IDX " << argv[2] << std::endl;
         return 1;
     }
 
