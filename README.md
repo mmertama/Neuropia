@@ -90,9 +90,15 @@ using NeuropiaFeed = Neuropia::Feed<neuropia_bin, sizeof(neuropia_bin)>;
 
 ```
 
+#### Playground
+The [Neuropia Live](https://mmertama.github.io/Neuropia/neuropia.html) is running on WebAssembly.
 
+## Build
+Use cmake
 
-##### Hints for CMake
+Supports Windows MSVC, GCC and Clang, Emscripten (Web Assembly)
+
+#### Hints for CMake
 
 ```
 FetchContent_Declare(
@@ -190,10 +196,6 @@ NeuropiaSimple::save(neuropia, "neuropia.bin" , Neuropia::SaveType::Double);
     * `mit2idx.py by_class.zip TARGET_FOLDER NAME_PREFIX IMAGE_WIDTH IMAGE_HEIGHT`
     * Convert 'mit' to idx (in practice https://data.world/nist/nist-handprinted-form-charactezip to idx)
 
-## Build
-Use cmake
-
-Supports Windows MSVC, GCC and Clang, Emscripten (Web Assembly)
 
 ##### Out of memory when building
 Compiling the `neuropia_feed.h` uses a lot of memory. My Ubuntu 32G with 2G swap was far too small. Even
@@ -213,7 +215,7 @@ On next reboot thaw swapfile should be removed.
 
 
 ## Documents
-[documentation](https://mmertama.github.io/Neuropia/docs/)
+[Doxygen documentation](https://mmertama.github.io/Neuropia/docs/)
 
 ## Testing
 For testing copy the Mnist data from [huggingface](https://huggingface.co/datasets/mnist)
