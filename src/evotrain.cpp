@@ -10,7 +10,7 @@ TrainerEvo::TrainerEvo(const std::string& root, const Neuropia::Params& params, 
       m_batchVerifySize(params.uinteger("BatchVerifySize")){
 }
 
-bool TrainerEvo::train() {
+bool TrainerEvo::doTrain() {
     //copy network for jobs
     std::vector<Neuropia::Layer> offsprings(m_jobs);
     std::fill(offsprings.begin(), offsprings.end(), this->m_network);

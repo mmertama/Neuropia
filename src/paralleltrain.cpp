@@ -12,7 +12,7 @@ TrainerParallel::TrainerParallel(const std::string& root, const Neuropia::Params
 }
 
 
-bool TrainerParallel::train() {
+bool TrainerParallel::doTrain() {
 //copy network for jobs
     std::vector<Neuropia::Layer> offsprings(m_jobs);
     std::vector<std::thread> threads(m_jobs);

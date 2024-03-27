@@ -5,6 +5,15 @@ project (neuropia) #  neuropia as referred by this name
 
 include_directories(../include)
 
+set(WEB_FILES
+    histogram.js
+    minimap.js
+    neuropia_html.js
+    painter.js
+    neuropia.css 
+    neuropia.html
+    favicon.ico)
+
 add_executable(${PROJECT_NAME}
     ../src/idxreader.cpp
     ../src/neuropia.cpp
@@ -14,17 +23,37 @@ add_executable(${PROJECT_NAME}
     ../src/trainer.cpp 
     ../src/verify.cpp
     ../src/neuropia_simple.cpp
-    neuropia_wasm.cpp  
+    neuropia_wasm.cpp
+    simple.cpp
+    ${WEB_FILES}  
 )
 
+
+add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/mnist ${CMAKE_CURRENT_BINARY_DIR}/mnist
+    COMMENT "Copy MNIST data"
+    )
+
+foreach(f_i ${WEB_FILES})
+    add_custom_target(${f_i}
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${f_i} ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "Copy ${f_i}"
+    DEPENDS ${f_i})
+    add_dependencies(${PROJECT_NAME} ${f_i})
+endforeach()
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE 
+    ITERATION_BATCH_SIZE=20
+)
 
 include (../compiler.cmake)
 SET_COMPILER_FLAGS()
 
-set(EMCC_LINKER_FLAGS "-o neuropia.js \
+set(EMCC_LINKER_FLAGS "-o neuropia.js ${DEBUG_FLAGS} \
       --bind --no-heap-copy -s ASSERTIONS=1 -s SAFE_HEAP=0 -s SAFE_HEAP_LOG=0 -s ALIASING_FUNCTION_POINTERS=0\
        -s WARN_UNALIGNED=0 -s WASM=1 -O3 -s INVOKE_RUN=0 -s ERROR_ON_UNDEFINED_SYMBOLS=1 -s FORCE_FILESYSTEM=1\
-        -s ALLOW_MEMORY_GROWTH=0 -s TOTAL_MEMORY=1024MB --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/mnist  -s EXIT_RUNTIME=1")
+        -s ALLOW_MEMORY_GROWTH=0 -s TOTAL_MEMORY=1024MB --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/mnist@/mnist  -s EXIT_RUNTIME=1")
 
 set(CMAKE_REQUIRED_FLAGS "${EMCC_LINKER_FLAGS}")
 

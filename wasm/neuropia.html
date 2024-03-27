@@ -17,16 +17,17 @@
         </span>
         <div id="content">
         <p>
-            Neuropia is a C++ feed forward neural network framework. It is open source and available on <a href="https://github.com/mmertama/Neuropia">GitHub</a>. There is a blog text about the Neuropia behind the scenes on <a href="https://www.intopalo.com/blog/2019-06-19-road-to-neuropia/">Intopalo Digital</a> blogsphere. 
+            Neuropia is a C++ feed forward neural network framework. It is open source and available on <a href="https://github.com/mmertama/Neuropia">GitHub</a> There is a blog text about the Neuropia behind the scenes on <a href="https://www.insta.fi/en/expert-blog/road-to-neuropia">Road to Neuropia</a> series of blogs. 
         </p>
         <p>
             This page composes an interactive demo of Neuropia running on <a href="https://webassembly.org">WebAssembly</a> aka WASM. The Neuropia C++ source code is compiled and build as a WASM module and therefore it can be run directly on any browser supporting it. I used <a href="https://emscripten.org/index.html">Emscripten</a> as a compiler and framework for the Javascript bindings. That let me write this user interface using common web stuff where engine is written on C++.  
         </p>
         <p>
-            On load a pre-calculated neural network is provided and you can try that immediately. You are supposed to draw numbers on <a href="#drawarea">drawing area</a> and then network tries to figure out the number. The number is given neural network as pixels and neural network outputs the likehoods how well the figure match with each digit. The <a href="#histogram">histogram</a> and the best <a href="#guess">likehood</a> gives you idea how sure the network is about its conclusion.
+            On load a pre-calculated neural network is provided and you can try that immediately. You are supposed to draw numbers on <a href="#drawarea">drawing 
+            area</a> and then network tries to figure out the number.The number is given neural network as pixels and neural network outputs the likehoods how well the figure match with each digit. The <a href="#histogram">histogram</a> and the best <a href="#guess">likehood</a> gives you idea how sure the network is about its conclusion.
         </p>
         <p>
-            You may <a href="#training">train</a> your own network by changing the parameters (see the <a href="https://www.intopalo.com/blog/2019-06-19-road-to-neuropia/">blog</a> text about information of the values).
+            You may <a href="#training">train</a> your own network by changing the parameters (see the <a href="https://www.insta.fi/en/expert-blog/road-to-neuropia">blog</a> text about information of the values).
         </p>
         <p>
             The <a href="#verify">verify</a> button calculates independent test material over the network to give an objective and comparative value of network match accuracy.  
@@ -48,11 +49,12 @@
             </canvas>
         </div>
         <div id="training_area">
-            <form name="params" onsubmit="return startTrain()">
+            <form name="params" onsubmit="startTrain()">
                 <table id="paramList">
                     <tr><th>Name</th><th>Value</th><th>Info</th></tr></tr>
                 </table>
-                <input type="submit" name="Train" value="Train"/>
+                <!--input type="submit" name="Train" value="Train"/-->
+                <button type="button" onclick="startTrain()">Train</button>
             </form>
         </div>
         <div id="verify_area">
