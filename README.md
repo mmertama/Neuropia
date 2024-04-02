@@ -1,7 +1,7 @@
 # Neuropia
 Minimalistic C++ Neural Network library.
 
-The comprehensive introduction [article series](https://www.insta.fi/en/expert-blog/road-to-neuropia) that closely elaborates Neuropia.
+The comprehensive introduction [article series](https://www.insta.fi/en/software-consulting/news/expert-blogs/road-to-neuropia/) that closely elaborates Neuropia.
 
 Markus Mertama 2019, 2024
 
