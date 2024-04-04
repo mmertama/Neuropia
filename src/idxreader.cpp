@@ -1,7 +1,9 @@
 #include "idxreader.h"
+#include <iostream>
 #include <fstream>
 #include <string>
 #include <cassert>
+#include <cstring> // strerror
 
 //http://yann.lecun.com/exdb/mnist/
 
@@ -110,9 +112,15 @@ IdxReaderBase::IdxReaderBase(const std::string& name, unsigned iobufsz) : m_iobu
             }
         }
         m_headerSize = position();
+    } else {
+        std::cerr << "ERROR: Cannot open " << name << ": " << std::strerror(errno)  << std::endl;
     }
 }
 
 void IdxReaderBase::moveTo(size_t position) {
     m_stream.seekg(static_cast<std::streamoff>(m_headerSize + position));
+}
+
+void IdxReaderBase::perror() {
+    std::cerr << (m_stream.good() ? "" : "Bad stream") << " " << (size() > 0 ? "" : "Zero size") << " " << (m_type != Type::Invalid ? "" : "Invalid type");
 }

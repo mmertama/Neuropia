@@ -111,12 +111,16 @@ class Verifier::Private {
             bool is_random) : m_testImages(imageFile), m_testLabels(labelFile), m_quiet(quiet) {
                 
                 if(!m_testImages.ok()) {
-                    std::cerr << "Cannot open images from \"" << imageFile << "\"" << std::endl;
+                    std::cerr << "Cannot open images from \"" << imageFile << "\" ";
+                    m_testImages.perror(); 
+                    std::cerr << std::endl;
                     return;
                 }
 
                 if(!m_testLabels.ok()) {
-                    std::cerr << "Cannot open labels from \"" << labelFile << "\"" << std::endl;
+                    std::cerr << "Cannot open labels from \"" << labelFile << "\" "; 
+                    m_testLabels.perror(); 
+                    std::cerr << std::endl;
                     return;
                 }
 

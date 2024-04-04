@@ -64,6 +64,8 @@ public:
      */
     bool ok() const {return m_stream.good() && size() > 0 && m_type != Type::Invalid;}
 
+    /// @brief Print error
+    void perror();
 
 protected:
     /**

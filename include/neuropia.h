@@ -839,6 +839,7 @@ public:
 
     template<typename IteratorIt>
     const ValueVector& feedTrain(IteratorIt begin, IteratorIt end) const {
+        neuropia_assert_always(begin < end, "Invalid iterators");
         if(!isInput()) {
             const auto p = 1.0  - m_dropOut;
             for(size_t i = 0; i < m_neurons.size(); i++) {
