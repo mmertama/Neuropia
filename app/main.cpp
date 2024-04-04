@@ -75,7 +75,18 @@ int main(int argc, char* argv[]) {
     if(!NeuropiaSimple::train(neuropia, NeuropiaSimple::TrainType::Basic)) {
          std::cerr << "Train failed" << std::endl;
             return 2;
-    } 
+    }
+
+    const auto params = NeuropiaSimple::params(neuropia);
+    const auto verify_images = params.find("ImagesVerify");
+    const auto verify_labels = params.find("LabelsVerify");
+    if(verify_labels != params.end() && verify_images != params.end()) {
+        const auto result = NeuropiaSimple::verify(neuropia, 3000);
+        if(result < 1000) {
+            std::cerr << "Supposedly network training was not successful" << std::endl;
+            return 3;
+        }
+    }
 
     NeuropiaSimple::save(neuropia, argparse.param(3), save_type);
 
