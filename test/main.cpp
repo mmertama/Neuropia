@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
                                            Neuropia::absPath(root, params["ImagesVerify"]),
                                            Neuropia::absPath(root, params["LabelsVerify"]), true).busy(), "Verify");
                 } else {
-                    std::cerr << "Training failed ";
+                    std::cerr << "Test training failed ";
                     auto l = &network;
                     while(l) {
                         std::cerr << (l->isValid() ? "valid" : "invalid") << " ";

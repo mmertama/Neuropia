@@ -116,7 +116,7 @@ bool NeuropiaSimple::train(const NeuropiaPtr& env, TrainType type) {
         return false;
     }
     if(!trainer->busy()) {
-        std::cerr << "Training failed" << std::endl;
+        std::cerr << "Training failed ready: " <<  Neuropia::to_string(trainer->isReady()) << ", ok: " << Neuropia::to_string(trainer->isOk()) << std::endl;
         return false;
     }
     env->m_network = std::move(trainer->network());

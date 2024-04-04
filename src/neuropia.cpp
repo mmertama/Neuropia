@@ -970,7 +970,7 @@ bool Layer::isValid(bool testNext) const {
     return !hasInvalidValue && (!testNext || !m_next || m_next->isValid(true));
 }
 
-const Layer* Layer::inputLayer() const {
+const Layer* Layer::inLayer() const {
     auto input = this;
     for(;;) {
         const auto prev = previousLayer(input);
@@ -980,9 +980,15 @@ const Layer* Layer::inputLayer() const {
     }
 }
 
+
+void Layer::clear() {
+    auto l = const_cast<Layer*>(inLayer());
+    l->m_next.reset();
+}
+
 Sizes Layer::sizes() const {
     return Sizes{
-                static_cast<unsigned>(inputLayer()->size()),
+                static_cast<unsigned>(inLayer()->size()),
                 static_cast<unsigned>(outLayer()->size())
                 };
 }

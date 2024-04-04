@@ -183,3 +183,10 @@ bool Neuropia::isnumber(std::string_view s, bool allow_negative, std::optional<c
             return !std::isdigit(c);
         }) == s.end();
 }
+
+
+std::string_view Neuropia::to_string(bool value) {
+    static constexpr auto TRUE = "true";
+    static constexpr auto FALSE = "false";
+    return value ? TRUE : FALSE;
+}

@@ -44,7 +44,6 @@ protected:
     const NeuronType m_lambdaL2;
 private:
     const std::vector<NeuronType> m_dropoutRate;
-    size_t m_passedIterations = std::numeric_limits<size_t>::max();
     std::chrono::high_resolution_clock::time_point m_start;
     const NeuronType m_learningRateMin;
     const NeuronType m_learningRateMax;

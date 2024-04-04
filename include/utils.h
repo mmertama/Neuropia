@@ -82,6 +82,8 @@ private:
 };
 
 std::string_view to_string(Neuropia::SaveType st);
+std::string_view to_string(bool value);
+
 }
 
 
@@ -95,8 +97,6 @@ std::ostream& operator << (std::ostream& strm, const std::vector<T>& values) {
     strm << ']';
     return strm;
 }
-
-
 
 
 

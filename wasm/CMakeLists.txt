@@ -24,7 +24,6 @@ add_executable(${PROJECT_NAME}
     ../src/verify.cpp
     ../src/neuropia_simple.cpp
     neuropia_wasm.cpp
-    simple.cpp
     ${WEB_FILES}  
 )
 

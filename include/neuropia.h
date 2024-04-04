@@ -811,8 +811,13 @@ public:
      * 
      * @return const Layer* 
      */
-    const Layer* inputLayer() const;
+    const Layer* inLayer() const;
 
+    /**
+     * @brief clear, drop other than input layer
+     * 
+     */
+   void clear();
 
     /**
      * @brief next

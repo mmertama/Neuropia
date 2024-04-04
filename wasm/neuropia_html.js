@@ -170,22 +170,21 @@
             } 
             if(ok) {
                 const iterations = Module.params(neuropia).get('Iterations').get(1);
-                console.log("Ready for Training", iterations, batch_size);
-                console.assert(batch_size > 0);
+                console.log("Ready for Training", iterations);
                 if(iterations === 0)
                     return;
                 let iteration = 0;
                 function doTrain() {
                     if(iteration < iterations && Module.train(neuropia)) {
                         setTimeout(doTrain, 0);
-                        iteration += batch_size;
+                        iteration++;
                     } else {
                         if(Module.isNetworkValid(neuropia)) {
                             console.log("Training done");
                             document.getElementById("verifyBtn").disabled = false;
                         }
                         else {
-                            setLogl("Training failed");
+                            setLogl("Training failed", iteration, " of ", iterations);
                             logMEMFS("/");
                         }
                     }

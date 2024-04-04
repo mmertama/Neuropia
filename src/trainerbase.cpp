@@ -126,7 +126,7 @@ TrainerBase::TrainerBase(const std::string & root, const Neuropia::Params& param
         static_cast<decltype (m_control)>(Neuropia::timed) :
         static_cast<decltype (m_control)>([this](const std::function<void ()>& f, const std::string & label) {
             f();
-            std::cout << (!label.empty() ? label + " " : "") << "iterations:" << m_passedIterations << std::endl;
+            std::cout << (!label.empty() ? label + " " : "") << "iterations:" << m_current << std::endl;
         })),
     m_iterations(params.uinteger("Iterations"))
         {}
@@ -177,7 +177,8 @@ TrainerBase::TrainerBase(const std::string & root, const Neuropia::Params& param
     }    
 
     bool TrainerBase::init() {
-        m_passedIterations = 0;
+        m_network.clear();
+        m_current = 0;
         m_testVerify = m_testVerifyFrequency;
         if(!m_images.ok()) {
             std::cerr << "Cannot open images from \"" << m_imageFile << "\"" << std::endl;
@@ -215,7 +216,7 @@ TrainerBase::TrainerBase(const std::string & root, const Neuropia::Params& param
 }
 
 bool TrainerBase::isReady() const {
-    return m_images.ok() && m_labels.ok() && m_network.size() > 0 && m_passedIterations < m_iterations;
+    return m_images.ok() && m_labels.ok() && m_network.size() > 0 && m_current < m_iterations;
 }
 
 void TrainerBase::setDropout() {
@@ -251,7 +252,6 @@ bool TrainerBase::update() {
                 percentage(m_current + 1, m_iterations);
             m_learningRate += (1.0 / static_cast<NeuronType>(m_iterations)) * (m_learningRateMin - m_learningRateMax);
         } else {
-            m_passedIterations = m_current;
             const auto stop = std::chrono::high_resolution_clock::now();
             const auto delta = static_cast<NeuronType>(std::chrono::duration_cast<std::chrono::seconds>(stop - m_start).count());
             if(delta > m_maxTrainTime) {
