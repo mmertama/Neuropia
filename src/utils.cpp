@@ -175,7 +175,7 @@ bool Neuropia::isnumber(std::string_view s, bool allow_negative, std::optional<c
     if(digit_sep && *begin == *digit_sep)
         digit_sep = std::nullopt;    
     ++begin;
-#if defined(__GNUC__) || defined(__GNUG__)    
+#if !defined(__clang__) && !defined(__EMSCRIPTEN__) && (defined(__GNUC__) || defined(__GNUG__))   
 #pragma GCC diagnostic push  // GCC bug?
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif       
