@@ -181,11 +181,15 @@ TrainerBase::TrainerBase(const std::string & root, const Neuropia::Params& param
         m_current = 0;
         m_testVerify = m_testVerifyFrequency;
         if(!m_images.ok()) {
-            std::cerr << "Cannot open images from \"" << m_imageFile << "\"" << std::endl;
+            std::cerr << "Cannot read images from \"" << m_imageFile << "\" ";
+            m_images.perror();
+            std::cerr << std::endl;
             return false;
         }
         if(!m_labels.ok()) {
-            std::cerr << "Cannot open labels from \"" << m_labelFile << "\"" << std::endl;
+            std::cerr << "Cannot read labels from \"" << m_labelFile << "\" ";
+            m_images.perror(); 
+            std::cerr << std::endl;
             return false;
         }
         //  tree("/");

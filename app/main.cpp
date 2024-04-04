@@ -84,8 +84,10 @@ int main(int argc, char* argv[]) {
         const size_t vers = 10000;   
         const auto result = NeuropiaSimple::verify(neuropia, vers);
         if(std::get<0>(result) < (vers / 3U)) {
-            std::cerr << "Supposedly network training was not successful " << std::get<1>(result) * 100 << "%" << std::endl;
+            std::cerr << "Supposedly network training was not successful " << std::get<1>(result) * 100 << "% (" << std::get<0>(result) << ")" << std::endl;
             return 3;
+        } else {
+            std::cerr << "Saving valid: " << std::get<1>(result) * 100 << "%" << " as " << argparse.param(3) << std::endl;
         }
     }
 

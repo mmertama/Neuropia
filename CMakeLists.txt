@@ -4,6 +4,10 @@ project(neuropiaML VERSION 1.0.2)
 
 file(CREATE_LINK ${CMAKE_SOURCE_DIR}/wasm/mnist ${CMAKE_SOURCE_DIR}/data SYMBOLIC) # tests expects one location, WASM another, copy not ok :-D
 
+if(MSVC)
+add_compile_definitions(_CRT_SECURE_NO_WARNINGS=1)
+endif()
+
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
