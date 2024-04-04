@@ -8,7 +8,6 @@
 #include "utils.h"
 
 namespace Neuropia {
-    using VerifyResult = std::tuple<size_t, double>;
     /// @brief Verifier class
     class Verifier {
         public:

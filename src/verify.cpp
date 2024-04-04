@@ -95,6 +95,10 @@ class Verifier::Private {
 
         auto result() const {
             return m_iterations > 0 ? static_cast<Neuropia::NeuronType>(m_found) / static_cast<Neuropia::NeuronType>(m_iterations) : 0.;
+        }
+
+        size_t size() const {
+            return std::min(m_testLabels.size(), m_testImages.size());
         }   
 
     private:
@@ -174,7 +178,7 @@ size_t Verifier::found() const {
 }
 
 VerifyResult Verifier::result() const {
-    return { m_private->found(), m_private->result()};
+    return { m_private->found(), m_private->result(), m_private->size()};
 }
 
 VerifyResult Verifier::busy(bool quiet) {

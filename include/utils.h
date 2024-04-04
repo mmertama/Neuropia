@@ -39,7 +39,7 @@ void printimage(const unsigned char* c, int width, int height);
 
 std::string absPath(const std::string& root, const std::string& relativePath);
 
-void printVerify(const std::tuple<size_t, size_t>& result, const std::string& txt);
+void printVerify(const Neuropia::VerifyResult& result, std::string_view txt);
 
 template <typename T1, typename T2>
 void percentage(T1 fraction, T2 total, const std::string& extra = "") {

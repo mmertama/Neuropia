@@ -55,6 +55,7 @@ namespace Neuropia {
     class Layer;
     class Neuron;
     class StreamBase;
+    using VerifyResult = std::tuple<size_t, double, size_t>;
 }
 
 //Not in namespace

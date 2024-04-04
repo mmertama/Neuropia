@@ -5,6 +5,7 @@
 #include "neuropia.h"
 #include "utils.h"
 #include "matrix.h"
+#include "verify.h"
 
 using namespace Neuropia;
 
@@ -32,11 +33,11 @@ void Neuropia::printimage(const unsigned char* c, int width, int height)  {
 }
 
 
-void Neuropia::printVerify(const std::tuple<size_t, size_t>& result, const std::string& txt) {
+void Neuropia::printVerify(const Neuropia::VerifyResult& result, std::string_view txt) {
     std::cout.flush();
-    std::cout << txt << ", rate:" << 100.0 * (static_cast<NeuronType>(std::get<0>(result)) / static_cast<NeuronType>(std::get<1>(result)))
+    std::cout << txt << ", rate:" <<  std::get<1>(result) * 100.
           << "%, found:" << std::get<0>(result)
-          << " of " << std::get<1>(result)<< std::endl;
+          << " of " << std::get<2>(result) << std::endl;
     std::cout.flush();      
 }
 
