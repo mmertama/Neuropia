@@ -175,7 +175,7 @@ bool Neuropia::isnumber(std::string_view s, bool allow_negative, std::optional<c
     if(digit_sep && *begin == *digit_sep)
         digit_sep = std::nullopt;    
     ++begin;    
-    return std::find_if(begin, s.end(), [&digit_sep](auto c) {
+    return std::find_if(begin, s.end(), [&digit_sep](auto c) mutable {
         if(digit_sep && c == *digit_sep) {
             digit_sep = std::nullopt;
             return true;

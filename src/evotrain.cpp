@@ -22,8 +22,7 @@ bool TrainerEvo::train() {
         batchData.resize(m_batchSize);
 
         m_completed = 0;
-        const auto iterations = this->iterations();
-        std::get<std::thread>(m_offsprings[job]) = std::move(std::thread([iterations, inputSize, this, batchData = std::move(batchData)](unsigned currentJob) {
+        std::get<std::thread>(m_offsprings[job]) = std::thread([inputSize, this, batchData = std::move(batchData)](unsigned currentJob) {
 
             for(auto i = 0U; i < m_batchSize; i++) {
                 std::vector<Neuropia::NeuronType> inputData(inputSize);
@@ -46,7 +45,7 @@ bool TrainerEvo::train() {
             const auto result = Neuropia::Verifier(std::get<Layer>(m_offsprings[currentJob]), m_imageFile, m_labelFile, true, 0, m_batchVerifySize, true).busy(true);
             m_results[currentJob] = std::get<0>(result);
             return true;
-        }, job));
+        }, job);
     }
     return true;
 }
