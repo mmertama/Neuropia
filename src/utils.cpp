@@ -175,8 +175,10 @@ bool Neuropia::isnumber(std::string_view s, bool allow_negative, std::optional<c
     if(digit_sep && *begin == *digit_sep)
         digit_sep = std::nullopt;    
     ++begin;
+#if defined(__GNUC__) || defined(__GNUG__)    
 #pragma GCC diagnostic push  // GCC bug?
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"       
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif       
     return std::find_if(begin, s.end(), [&digit_sep](auto c) mutable {
         if(digit_sep && c == *digit_sep) {
             digit_sep = std::nullopt;
@@ -184,7 +186,9 @@ bool Neuropia::isnumber(std::string_view s, bool allow_negative, std::optional<c
         }     
             return !std::isdigit(c);
         }) == s.end();
-#pragma GCC diagnostic push        
+#if defined(__GNUC__) || defined(__GNUG__)            
+#pragma GCC diagnostic push      
+#endif  
 }
 
 
