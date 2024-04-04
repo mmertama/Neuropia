@@ -61,7 +61,7 @@ bool TrainerParallel::train() {
         }
 
         // start thread
-        std::get<std::thread>(m_offsprings[job]) = std::move(std::thread([inputSize, this, batchData = std::move(batchData)](unsigned currentJob) {
+        std::get<std::thread>(m_offsprings[job]) = std::thread([inputSize, this, batchData = std::move(batchData)](unsigned currentJob) {
             //first we train
             for(auto i = 0U; i < m_batchSize; i++) {
 
@@ -81,7 +81,7 @@ bool TrainerParallel::train() {
             ++m_completed;
 
             // end thread
-            }, job));
+            }, job);
         }
         return true;
 }
