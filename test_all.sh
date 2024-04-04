@@ -1,6 +1,6 @@
 #!/bin/bash
-BIN=$(find .. -name neuropia_test)
-DATA=$(find .. -name train-images-idx3-ubyte -exec dirname {} \;)
+BIN=$(find build/release -name neuropia_test)
+DATA=$(find . -name train-images-idx3-ubyte -exec dirname {} \;)
 for fname in tests/tests*.txt; do
     echo ${fname}
     ${BIN} ${fname} -v -r ${DATA}

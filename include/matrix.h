@@ -37,7 +37,7 @@ namespace Neuropia {
  *
  * However there is only pretty limited amount of different
  * Matrix sizes used (in Neuropia < 10) I have a pool for each
- * size. To avoid any conflict there is own pool for eaach thread.
+ * size. To avoid any conflict there is own pool for each thread.
  *
 */
 template <class T>

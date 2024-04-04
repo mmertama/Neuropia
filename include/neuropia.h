@@ -50,7 +50,7 @@ inline bool doAssert(const std::string& s, int line, const char* file, const std
 #endif
 
 namespace Neuropia {
-    /// @brief @Value type used in Neuropia (NEUROPIA_TYPE is compile time defined- see a CMakeLists.txt)
+    /// @brief type used in Neuropia (NEUROPIA_TYPE is compile time defined- see a CMakeLists.txt)
     using NeuronType = NEUROPIA_TYPE;
     class Layer;
     class Neuron;
@@ -106,6 +106,7 @@ struct Header {
 
 
 inline constexpr
+/// @Brief utility to tell endianness
 bool isBigEndian() {
    // before supports C++20, then this can be written reliably
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -161,8 +162,12 @@ private:
  */
 class ActivationFunction : public NFunction<NeuronType, NeuronType> {
 public:
+/// @brief Constructor
    ActivationFunction() {}
+/// @cond
    ActivationFunction(void* t) {(void)t;}
+/// @endcond   
+/// @brief Constructor
    ActivationFunction(std::function<NeuronType(NeuronType value)> f, const std::string& name) :  NFunction(f, name){}
 };
 
@@ -172,8 +177,12 @@ public:
  */
 class DerivativeFunction : public NFunction<NeuronType, NeuronType> {
 public:
+/// @brief Constructor
    DerivativeFunction();
+/// @cond  
    DerivativeFunction(void* t) {(void)t;}
+/// @endcond      
+/// @brief Constructor   
    DerivativeFunction(std::function<NeuronType(NeuronType value)> f, const std::string& name) :  NFunction(f, name){}
 };
 
@@ -181,7 +190,10 @@ public:
 #define ACTIVATION_FUNCTION(name, f) const ActivationFunction name(f, #name);
 #define DERIVATIVE_FUNCTION(name, f) const DerivativeFunction name(f, #name);
 
+/// @brief Predefined LeakyReLuFactor 
 constexpr NeuronType LeakyReLuFactor = static_cast<NeuronType>(0.05); //too small makes backpropagation not working
+
+/// @brief Predefined EluFactor 
 constexpr NeuronType EluFactor = static_cast<NeuronType>(1.0);
 
 /// @brief Signum function
@@ -347,7 +359,8 @@ public:
     /**
      * @brief feed
      * Set input from array
-     * @param inputs
+     * @param begin
+     * @param end
      * @return
      */
 
@@ -383,6 +396,7 @@ public:
     /**
      * @brief save
      * @param stream
+     * @param saveType
      */
     void save(std::ofstream& stream, SaveType saveType = SaveType::SameAsNeuronType) const;
 
@@ -416,10 +430,10 @@ public:
      */
     size_t consumption() const;
 
+    /// @cond 
     friend std::ostream& ::operator<<(std::ostream& output, const Neuron& neuron);
-
-    // @internal
     [[nodiscard]] bool loadNeuron(StreamBase& stream, SaveType saveType);
+    /// @endcond
 private:
     
     std::function<NeuronType (NeuronType)> m_af = nullptr;
@@ -465,27 +479,27 @@ public:
      * @brief Layer
      * @param other
      */
-    Layer(Layer&& other) noexcept;
+    Layer(Layer&& other);
 
     /**
      * @brief Layer
      * @param other
      */
-    Layer(const Layer& other) noexcept;
+    Layer(const Layer& other);
 
     /**
      * @brief operator =
      * @param other
      * @return
      */
-    Layer& operator=(Layer&& other) noexcept;
+    Layer& operator=(Layer&& other);
 
     /**
      * @brief operator =
      * @param other
      * @return
      */
-    Layer& operator=(const Layer& other) noexcept;
+    Layer& operator=(const Layer& other);
 
     /**
      * @brief destructor
@@ -577,7 +591,8 @@ public:
     template<typename IT>
     /**
      * @brief feed
-     * @param values
+     * @param begin
+     * @param end
      * @return
      */
     const ValueVector& feed(IT begin, IT end) const;
@@ -680,7 +695,7 @@ public:
 
     /**
      * @brief load
-     * @param stream
+     * @param bytes
      * @return
      */
     std::optional<MetaInfo> load(const uint8_t* bytes, size_t sz);

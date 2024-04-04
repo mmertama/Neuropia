@@ -64,6 +64,7 @@ public:
      */
     bool ok() const {return m_stream.good() && size() > 0 && m_type != Type::Invalid;}
 
+
 protected:
     /**
      * @brief read inherit your own class if dynamic sizes are needed and use this to access bytes
@@ -94,6 +95,8 @@ template <typename T>
  */
 class IdxReader : public IdxReaderBase {
 public:
+    /// @brief Value type
+    using value_type = T;
     /**
      * @brief IdxReader
      * @param name filename
@@ -155,6 +158,10 @@ template <typename T, size_t S>
  */
 class IdxReader<std::array<T, S>> : public IdxReaderBase {
 public:
+    /// @brief Value type
+    using value_type = T;
+    /// @brief Value size
+    static constexpr size_t value_size = S;
     /**
      * @brief IdxReader
      * @param name as above

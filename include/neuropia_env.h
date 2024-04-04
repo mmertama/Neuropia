@@ -3,6 +3,7 @@
 #include "neuropia.h"
 #include "params.h"
 #include "logstream.h"
+#include "trainerbase.h"
 #include <iostream>
 
 namespace NeuropiaSimple { 

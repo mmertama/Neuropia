@@ -173,7 +173,7 @@ auto neuropia = NeuropiaSimple::create("");
 // most of parameters you can use defaults
 NeuropiaSimple::setParam(neuropia, "Images", "images.idx");
 NeuropiaSimple::setParam(neuropia, "Labels", "labels.idx");
-// Set output layers default is 10, input layers it get from images dimensions
+// Set number of output layer outputs, input layers it get from images dimensions
 NeuropiaSimple::setParam(neuropia, "Classes", 10); 
 NeuropiaSimple::setParam(neuropia, "Iterations", 10000);
 // do train

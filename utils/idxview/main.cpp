@@ -65,7 +65,7 @@ void app_main(Gempyre::Ui& ui, int argc, char** argv) {
 
     const auto label = labels.readAt(*index);
     std::stringstream ss;
-    ss <<  "\"" << label << "\", 0x" << right(GempyreUtils::to_hex(static_cast<int>(label)), 2) << ", " + std::to_string(static_cast<unsigned>(label));  
+    ss <<  "\"" << label << "\", 0x" << GempyreUtils::right(GempyreUtils::to_hex(static_cast<int>(label)), 2) << ", " + std::to_string(static_cast<unsigned>(label));  
     Gempyre::Element(ui, "content").set_html(ss.str());
  }
 

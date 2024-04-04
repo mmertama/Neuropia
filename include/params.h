@@ -37,6 +37,7 @@ namespace Neuropia {
         {"InitStrategy", "auto", R"((auto|logistic|norm|relu)$)"},
         {"DropoutRate", "0.0", dropoutRateRe},
         {"TestFrequency", "9999999", Neuropia::Params::Int},
+        {"TestSamples", "200", Neuropia::Params::Int},
         {"L2", "0.0", Neuropia::Params::Real},
         {"Classes", "10", Neuropia::Params::Int}
     };

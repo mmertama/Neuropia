@@ -13,7 +13,9 @@
  */
 namespace Neuropia
 {
+    /// @brief Byte vector
     using Bytes = std::vector<uint8_t>;
+    /// @brief Value vector using defined NeuronType
     using Values = std::vector<NeuronType>;
     
     /**

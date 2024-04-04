@@ -111,15 +111,14 @@ bool NeuropiaSimple::train(const NeuropiaPtr& env, TrainType type) {
     default:
         neuropia_assert_always(true, "bad");    
     }
-    if(!trainer->init()) {
-        std::cerr << "Invalid trainer" << std::endl;
-        return false;
-    }
     if(!trainer->isReady()) {
         std::cerr << "Training data is not ready" << std::endl;
         return false;
     }
-    trainer->train();
+    if(!trainer->busy()) {
+        std::cerr << "Training failed" << std::endl;
+        return false;
+    }
     env->m_network = std::move(trainer->network());
    return true;
 }
@@ -147,11 +146,12 @@ std::optional<Neuropia::Sizes> NeuropiaSimple::load(const NeuropiaPtr& env, cons
     return std::nullopt;
 }
 
-int NeuropiaSimple::verify(const NeuropiaPtr& env) {
+int NeuropiaSimple::verify(const NeuropiaPtr& env, size_t count) {
     ASSERT(env && env->m_network.isValid());
-    const auto t = Neuropia::verify(env->m_network, Neuropia::absPath(env->m_root, env->m_params["ImagesVerify"]),
+    Neuropia::Verifier ver(env->m_network, Neuropia::absPath(env->m_root, env->m_params["ImagesVerify"]),
                              Neuropia::absPath(env->m_root, env->m_params["LabelsVerify"]),
-                             false);
+                             false, 0, count, count >= static_cast<size_t>(std::numeric_limits<int>::max())); // random if not max
+    const auto t = ver.busy();                         
     return std::get<0>(t);
 }
 

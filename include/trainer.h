@@ -11,6 +11,9 @@ namespace Neuropia {
 class Trainer : public TrainerBase {
 public:
    Trainer(const std::string& root, const Neuropia::Params& params, bool m_quiet);
+private:
+   bool doInit() override;
+   bool complete() override;
    bool doTrain() override;
 };
 

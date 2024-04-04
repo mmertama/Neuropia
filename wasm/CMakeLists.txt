@@ -43,10 +43,6 @@ foreach(f_i ${WEB_FILES})
     add_dependencies(${PROJECT_NAME} ${f_i})
 endforeach()
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE 
-    ITERATION_BATCH_SIZE=20
-)
-
 include (../compiler.cmake)
 SET_COMPILER_FLAGS()
 

@@ -47,6 +47,31 @@ void percentage(T1 fraction, T2 total, const std::string& extra = "") {
         std::cout << "\r" << std::fixed << std::setprecision(3) << f << '%' << extra << std::flush;
 }
 
+
+bool isnumber(std::string_view s, bool allow_negative = false, std::optional<char> digit_sep = std::nullopt);
+
+template<typename IT, typename C>
+void ordered_container(IT begin, C& order) {
+    for(unsigned o = 0; o < order.size(); ++o)
+        order[o] = std::make_pair(o, *(begin + o));
+    std::sort(order.begin(), order.end(), [](const auto& a, const auto& b){return a.second > b.second;});    
+}
+
+template<typename IT, size_t SZ>
+auto ordered(IT begin) {
+    std::array<std::pair<unsigned, typename IT::value_type>, SZ> array;
+    ordered_container(begin, array);
+    return array;
+}
+
+template<typename IT>
+auto ordered(IT begin, IT end) {
+    std::vector<std::pair<unsigned, typename IT::value_type>> vector(static_cast<size_t>(std::distance(begin, end)));
+    ordered_container(begin, vector);
+    return vector;
+}
+
+
 class Random {
 public:
     explicit Random(unsigned seed);

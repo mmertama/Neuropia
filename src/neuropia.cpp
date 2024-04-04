@@ -344,7 +344,7 @@ Layer::Layer(size_t count, const ActivationFunction& activationFunction, const N
     m_outBuffer.resize(m_neurons.size());
 }
 
-Layer::Layer(Layer&& other) noexcept :
+Layer::Layer(Layer&& other) :
     m_neurons(std::move(other.m_neurons)),
     m_next(std::move(other.m_next)),
     m_activationFunction(other.m_activationFunction),
@@ -354,7 +354,7 @@ Layer::Layer(Layer&& other) noexcept :
     }
 }
 
-Layer::Layer(const Layer& other) noexcept:
+Layer::Layer(const Layer& other) :
     m_neurons(other.m_neurons),
     m_next(other.m_next != nullptr ? new Layer(*other.m_next) : nullptr),
     m_activationFunction(other.m_activationFunction),
@@ -741,7 +741,7 @@ bool Layer::loadLayer(StreamBase &strm, SaveType saveType, unsigned layer_index)
 }
 
 
-Layer& Layer::operator=(Layer&& other) noexcept {
+Layer& Layer::operator=(Layer&& other) {
     m_neurons = std::move(other.m_neurons);
     m_outBuffer.resize(m_neurons.size());
     m_next = std::move(other.m_next);
@@ -752,7 +752,8 @@ Layer& Layer::operator=(Layer&& other) noexcept {
     return *this;
 }
 
-Layer& Layer::operator=(const Layer& other) noexcept {
+
+Layer& Layer::operator=(const Layer& other) {
     m_neurons = other.m_neurons;
     m_outBuffer.resize(m_neurons.size());
     m_activationFunction = other.m_activationFunction;
@@ -764,6 +765,7 @@ Layer& Layer::operator=(const Layer& other) noexcept {
     }
     return *this;
 }
+
 
 void Layer::merge(const Layer& other, NeuronType factor) {
     neuropia_assert(other.size() == size());
@@ -950,15 +952,21 @@ bool Layer::isValid(bool testNext) const {
     if(isInput())
         return !testNext || !m_next || m_next->isValid(true);
     const auto prevLayer = previousLayer(this);
+
     auto weights =
             Matrix<NeuronType>::fromArray(m_neurons,
                                       prevLayer->size(), //fully connected, amount of weights is prev layer neurons
     [](const Neuron & n, Matrix<NeuronType>::index_type index) noexcept {
         return n.weight(index);
     });
+
     const auto hasInvalidValue = weights.reduce<bool>(false, [](bool a, auto r) noexcept {
            return a || std::isnan(r) || std::isinf(r);
        });
+
+    neuropia_assert(!hasInvalidValue || m_neurons.empty());
+    neuropia_assert(!hasInvalidValue || prevLayer->size() == 0);
+
     return !hasInvalidValue && (!testNext || !m_next || m_next->isValid(true));
 }
 

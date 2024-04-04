@@ -170,14 +170,13 @@
             } 
             if(ok) {
                 const iterations = Module.params(neuropia).get('Iterations').get(1);
-                const batch_size = Module.batchSize();
                 console.log("Ready for Training", iterations, batch_size);
                 console.assert(batch_size > 0);
                 if(iterations === 0)
                     return;
                 let iteration = 0;
                 function doTrain() {
-                    if(iteration < iterations && Module.train(neuropia, batch_size)) {
+                    if(iteration < iterations && Module.train(neuropia)) {
                         setTimeout(doTrain, 0);
                         iteration += batch_size;
                     } else {

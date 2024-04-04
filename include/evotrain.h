@@ -6,21 +6,26 @@
 #include <thread>
 #include <iomanip>
 #include <array>
+#include <atomic>
 #include "neuropia.h"
 #include "idxreader.h"
 #include "utils.h"
-#include "trainerbase.h"
+#include "paralleltrain.h"
 
 namespace Neuropia {
 
-class TrainerEvo : public TrainerBase {
+class TrainerEvo : public TrainerThreaded {
 public:
     TrainerEvo(const std::string & root, const Neuropia::Params& params, bool quiet);
-    bool doTrain() override;
+    ~TrainerEvo() = default;
+private:
+   bool complete() override;
+   bool doTrain() override;
+   bool train() override;
 protected:
-    unsigned m_jobs;
-    size_t m_batchSize;
-    size_t m_batchVerifySize;
+    unsigned m_batchVerifySize;
+    unsigned m_maxNet = 0;
+    std::vector<int> m_results = {};
 };
 
 }

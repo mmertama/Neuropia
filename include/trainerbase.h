@@ -17,40 +17,52 @@ constexpr NeuronType MaxTrainTime = 999999;
 class TrainerBase {
 public:
     TrainerBase(const std::string& root, const Neuropia::Params& params, bool quiet);
-    void setDropout();
-    bool train();
     virtual ~TrainerBase() = default;
     Neuropia::Layer&& network() {return std::move(m_network);}
     bool isReady() const;
-    /// @brief must be called before train
-    /// @return 
-    bool init();
+    bool next();
+    bool busy();
+    bool isOk() const;
+    virtual bool complete() = 0; 
 protected:
     virtual bool doTrain() = 0;
+    virtual bool doInit() = 0;
+    bool verify();
+    unsigned iterations() const {return m_iterations;}
+    bool update();
+private:
+    bool init();
+    void setDropout();
 protected:
     const std::string m_imageFile;
     const std::string m_labelFile;
     Neuropia::IdxReader<unsigned char> m_images;
     Neuropia::IdxReader<unsigned char> m_labels;
     Neuropia::Layer m_network;
+    Neuropia::Random m_random = {};
+    NeuronType m_learningRate;
+    const NeuronType m_lambdaL2;
+private:
     const std::vector<NeuronType> m_dropoutRate;
     size_t m_passedIterations = std::numeric_limits<size_t>::max();
     std::chrono::high_resolution_clock::time_point m_start;
-    NeuronType m_learningRate;
     const NeuronType m_learningRateMin;
     const NeuronType m_learningRateMax;
     NeuronType m_gap = 0;
-    unsigned m_iterations;
-    unsigned m_testVerifyFrequency;
-    NeuronType m_lambdaL2;
-    bool m_quiet;
+    const unsigned m_testVerifyFrequency;
+    const unsigned m_testSamples;
+    const bool m_quiet;
     const unsigned m_classes;
     const std::vector<int> m_topology;
     const std::vector<Neuropia::ActivationFunction> m_afs;
     const Layer::InitStrategy m_initStrategy;
     const NeuronType m_maxTrainTime;
     const std::function<void (const std::function<void ()>&, const std::string&)> m_control;
-    Neuropia::Random m_random = {};
+private:
+    const unsigned m_iterations;
+    unsigned m_current = 0;
+    unsigned m_testVerify = 0;
+    
 };
 }
 

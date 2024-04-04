@@ -33,9 +33,11 @@ void Neuropia::printimage(const unsigned char* c, int width, int height)  {
 
 
 void Neuropia::printVerify(const std::tuple<size_t, size_t>& result, const std::string& txt) {
+    std::cout.flush();
     std::cout << txt << ", rate:" << 100.0 * (static_cast<NeuronType>(std::get<0>(result)) / static_cast<NeuronType>(std::get<1>(result)))
           << "%, found:" << std::get<0>(result)
           << " of " << std::get<1>(result)<< std::endl;
+    std::cout.flush();      
 }
 
 size_t Neuropia::iterator(size_t iterations, const std::function<bool ()>& f) {
@@ -51,14 +53,16 @@ size_t Neuropia::iterator(size_t iterations, const std::function<bool (size_t)>&
     return iterations;
 }
 
+
 void Neuropia::timed(const std::function<void ()>& f, const std::string& label) {
-    const auto start = std::chrono::high_resolution_clock::now();
+    const auto start = std::chrono::high_resolution_clock::now(); 
     f();
     const auto stop = std::chrono::high_resolution_clock::now();
-    std::cout << "\n" << (!label.empty() ? label + " " : "")
+    std::cout << std::endl; // flush!
+    std::cout << (!label.empty() ? label + " " : "")
               << "timed:" << std::chrono::duration_cast<std::chrono::seconds>(stop - start).count()
               << "." <<  std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count()
-              - std::chrono::duration_cast<std::chrono::seconds>(stop - start).count() * 1000000 << std::endl;
+              - std::chrono::duration_cast<std::chrono::seconds>(stop - start).count() * 1000000 << std::endl;      
 }
 
 void Neuropia::save(const std::string& filename, const Neuropia::Layer& network, const std::unordered_map<std::string, std::string>& map, Neuropia::SaveType savetype) {
@@ -160,4 +164,22 @@ std::string_view Neuropia::to_string(Neuropia::SaveType st) {
         {Neuropia::SaveType::Float, "Float"}, 
         {Neuropia::SaveType::LongDouble, "LongDouble"}};
     return map.at(st);    
-}    
+}
+
+bool Neuropia::isnumber(std::string_view s, bool allow_negative, std::optional<char> digit_sep) {
+    if(s.empty())
+        return false;
+    auto begin = s.begin();
+    if(!((*begin == '-' && allow_negative) || std::isdigit(*begin) || (digit_sep && *begin == *digit_sep)))
+        return false;
+    if(digit_sep && *begin == *digit_sep)
+        digit_sep = std::nullopt;    
+    ++begin;    
+    return std::find_if(begin, s.end(), [&digit_sep](auto c) {
+        if(digit_sep && c == *digit_sep) {
+            digit_sep = std::nullopt;
+            return true;
+        }     
+            return !std::isdigit(c);
+        }) == s.end();
+}

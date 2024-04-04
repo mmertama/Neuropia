@@ -20,7 +20,7 @@ class WasmNeuropiaEnv : public NeuropiaSimple::NeuropiaEnv {
 using WasmNeuropiaPtr = std::shared_ptr<WasmNeuropiaEnv>;
 
 static
-bool train(const WasmNeuropiaPtr& env, unsigned batch_size) {
+bool train(const WasmNeuropiaPtr& env) {
     ASSERT(env);
 
     if(!env->m_trainer || !env->m_trainer->isReady()) {
@@ -30,12 +30,12 @@ bool train(const WasmNeuropiaPtr& env, unsigned batch_size) {
             env->m_network = layer;
         });
          
-        if(!env->m_trainer->init()) {
+        if(!env->m_trainer->isReady()) {
             std::cerr << "Init failed" << std::endl;
             return false;
         }
     }
-    return env->m_trainer->train(batch_size, *env->m_logStream);
+    return env->m_trainer->train();
 }
 
 static
@@ -160,10 +160,6 @@ bool load(const WasmNeuropiaPtr& env, const std::string& filename) {
     return NeuropiaSimple::load(env, filename).has_value();
 }
 
-static 
-int batchSize() {
-    return ITERATION_BATCH_SIZE;
-}
 
 static
 auto create(const std::string root) {
@@ -189,5 +185,4 @@ EMSCRIPTEN_BINDINGS(Neuropia) {
     function("isNetworkValid", &::isNetworkValid);
     function("verifyResult", &::verifyResult);
     function("showImage", &::showImage);
-    function("batchSize", &::batchSize);
 }
