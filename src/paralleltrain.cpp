@@ -36,7 +36,8 @@ using namespace Neuropia;
  }
 
 TrainerThreaded::~TrainerThreaded() {
-    for(auto& o : m_offsprings) { // wait em all
+    for(const auto& o : m_offsprings) { // wait em all
+        (void) o;
         neuropia_assert(!std::get<std::thread>(o).joinable());
     }
 }  
