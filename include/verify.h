@@ -8,7 +8,7 @@
 #include "utils.h"
 
 namespace Neuropia {
-
+    using VerifyResult = std::tuple<size_t, double>;
     /// @brief Verifier class
     class Verifier {
         public:
@@ -52,16 +52,16 @@ namespace Neuropia {
         bool next();
         /// @brief get results
         /// @return 
-        std::tuple<int, unsigned> result() const;
+        VerifyResult result() const;
 
         /// @brief 
         /// @return 
-        NeuronType result_value() const;
+        size_t found() const;
 
         /// @brief timed busy loop and result
         /// @param quiet 
         /// @return 
-        std::tuple<int, unsigned> busy(bool quiet = false);
+        VerifyResult busy(bool quiet = false);
 
         private:
             class Private;

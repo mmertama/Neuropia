@@ -89,12 +89,12 @@ class Verifier::Private {
             return true;                                     
         }
 
-        auto result() const {
-            return std::make_tuple(m_found, static_cast<unsigned>(std::min(m_iterations, m_testLabels.size()) - m_from));
+        auto found() const {
+            return m_found;
         }
 
-        auto result_value() const {
-            return m_testLabels.size() ? static_cast<Neuropia::NeuronType>(m_found) / static_cast<Neuropia::NeuronType>(m_testLabels.size()) : -1.0;
+        auto result() const {
+            return m_iterations > 0 ? static_cast<Neuropia::NeuronType>(m_found) / static_cast<Neuropia::NeuronType>(m_iterations) : 0.;
         }   
 
     private:
@@ -104,7 +104,7 @@ class Verifier::Private {
             bool quiet,
             size_t from,
             size_t count,
-            bool is_random) : m_testImages(imageFile), m_testLabels(labelFile), m_quiet(quiet), m_from(from) {
+            bool is_random) : m_testImages(imageFile), m_testLabels(labelFile), m_quiet(quiet) {
                 
                 if(!m_testImages.ok()) {
                     std::cerr << "Cannot open images from \"" << imageFile << "\"" << std::endl;
@@ -138,7 +138,6 @@ class Verifier::Private {
         Neuropia::IdxReader<unsigned char> m_testImages;
         Neuropia::IdxReader<unsigned char> m_testLabels;
         const bool m_quiet;
-        const size_t m_from;
         size_t m_iterations = 0;
         ReadFunction read_function = nullptr;
         VerifyFunction verify_function = nullptr;
@@ -170,15 +169,15 @@ bool Verifier::next() {
     return m_private->next();
 }
 
-std::tuple<int, unsigned> Verifier::result() const {
-    return m_private->result();
+size_t Verifier::found() const {
+    return m_private->found();
 }
 
-NeuronType Verifier::result_value() const {
-    return m_private->result_value();
+VerifyResult Verifier::result() const {
+    return { m_private->found(), m_private->result()};
 }
 
-std::tuple<int, unsigned> Verifier::busy(bool quiet) {
+VerifyResult Verifier::busy(bool quiet) {
     const auto loop = [this]() {
         while(next());
     };

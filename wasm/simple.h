@@ -47,7 +47,7 @@ public:
     }
 
     Neuropia::NeuronType verifyResult() const {
-        return m_verifier.result_value();
+        return std::get<1>(m_verifier.result());
     }
 private:
     Neuropia::Verifier m_verifier;

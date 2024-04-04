@@ -25,7 +25,7 @@ private:
 protected:
     unsigned m_batchVerifySize;
     unsigned m_maxNet = 0;
-    std::vector<int> m_results = {};
+    std::vector<size_t> m_results = {};
 };
 
 }

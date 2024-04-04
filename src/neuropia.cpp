@@ -1009,5 +1009,6 @@ std::optional<Header> Neuropia::isValidFile(const std::string& filename) {
     if(!is.is_open())
         return std::nullopt;
     IfStream i(is);
+    
     return read_header(i);
 }

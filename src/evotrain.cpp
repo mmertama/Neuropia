@@ -59,7 +59,7 @@ bool TrainerEvo::doTrain() {
     wait();
 
     //then find best network
-    int maxmax = 0;
+    size_t maxmax = 0;
     for(auto index = 0U;  index < m_jobs ; index++) {
         if(m_results[index] > maxmax) {
             maxmax = m_results[index];

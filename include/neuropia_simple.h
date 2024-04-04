@@ -9,6 +9,7 @@
 #include <variant>
 #include <functional>
 #include "neuropia.h"
+#include "verify.h"
 
 
 /**
@@ -121,7 +122,7 @@ std::optional<Neuropia::Sizes> load(const NeuropiaPtr& env, const std::string& f
  * @param count, only read count first values from file - when using count verify that data is in random enough
  * @return int items correctly found from the training material
  */
-int verify(const NeuropiaPtr& env, size_t count = std::numeric_limits<size_t>::max());
+Neuropia::VerifyResult verify(const NeuropiaPtr& env, size_t count = std::numeric_limits<size_t>::max());
 
 /**
  * @brief Set the logging output handler.

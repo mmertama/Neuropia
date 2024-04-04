@@ -146,13 +146,12 @@ std::optional<Neuropia::Sizes> NeuropiaSimple::load(const NeuropiaPtr& env, cons
     return std::nullopt;
 }
 
-int NeuropiaSimple::verify(const NeuropiaPtr& env, size_t count) {
+Neuropia::VerifyResult NeuropiaSimple::verify(const NeuropiaPtr& env, size_t count) {
     ASSERT(env && env->m_network.isValid());
     Neuropia::Verifier ver(env->m_network, Neuropia::absPath(env->m_root, env->m_params["ImagesVerify"]),
                              Neuropia::absPath(env->m_root, env->m_params["LabelsVerify"]),
                              false, 0, count, count >= static_cast<size_t>(std::numeric_limits<int>::max())); // random if not max
-    const auto t = ver.busy();                         
-    return std::get<0>(t);
+    return ver.busy();
 }
 
 void NeuropiaSimple::setLogger(const NeuropiaPtr& env, std::function<void (const std::string&)> cb) {

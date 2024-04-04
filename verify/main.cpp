@@ -113,8 +113,8 @@ int main(int argc, char* argv[]) {
                 count = static_cast<size_t>(std::stoi(count_param));
             }
             const auto index_param = argparse.option("index");   
-            const auto v = NeuropiaSimple::verify(neuropia, count);
-            std::cout << "Verify match:" << (static_cast<double>(v) * 100.) / static_cast<double>(idx.size()) << "% size:" << idx.size() << " looked:" << std::min(idx.size(), count) << std::endl; 
+            const auto r = NeuropiaSimple::verify(neuropia, count);
+            std::cout << "Verify match:" << std::get<1>(r) << "% size:" << idx.size() << " looked:" << std::min(idx.size(), count) << " found:" << std::get<0>(r)  << std::endl; 
         }
     }
 

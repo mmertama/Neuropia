@@ -81,9 +81,10 @@ int main(int argc, char* argv[]) {
     const auto verify_images = params.find("ImagesVerify");
     const auto verify_labels = params.find("LabelsVerify");
     if(verify_labels != params.end() && verify_images != params.end()) {
-        const auto result = NeuropiaSimple::verify(neuropia, 3000);
-        if(result < 1000) {
-            std::cerr << "Supposedly network training was not successful" << std::endl;
+        const size_t vers = 10000;   
+        const auto result = NeuropiaSimple::verify(neuropia, vers);
+        if(std::get<0>(result) < (vers / 3U)) {
+            std::cerr << "Supposedly network training was not successful " << std::get<1>(result) * 100 << "%" << std::endl;
             return 3;
         }
     }
