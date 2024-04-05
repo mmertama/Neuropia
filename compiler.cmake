@@ -9,8 +9,13 @@ function (SET_COMPILER_FLAGS)
     target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
     set(PEDANTIC_WARNINGS FALSE)
+    set(SANITIZER FALSE)
+    set(SANITIZER_THREAD FALSE)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         set(PEDANTIC_WARNINGS TRUE)
+        if(${CMAKE_BUILD_TYPE} STREQUAL "RELWITHDEBINFO")
+            set(SANITIZER TRUE)
+        endif()
     endif()  
 
 
@@ -53,4 +58,50 @@ function (SET_COMPILER_FLAGS)
             #-Wuseless-cast cmake defined types wont be happy with types
         )
     endif()
+
+    if(SANITIZER)
+        message(WARNING "Sanitizers enabled")
+        set(ASAN_FLAGS
+            -fsanitize=address
+            -fsanitize=pointer-compare
+            -fsanitize=pointer-subtract
+            -fsanitize=leak
+            -fsanitize=undefined
+            -fsanitize=shift
+            -fsanitize=shift-exponent
+            -fsanitize=shift-base
+            -fsanitize=integer-divide-by-zero
+            -fsanitize=unreachable
+            -fsanitize=vla-bound
+            -fsanitize=null
+            -fsanitize=return
+            -fsanitize=signed-integer-overflow
+            -fsanitize=bounds
+            -fsanitize=bounds-strict
+            -fsanitize=alignment
+            -fsanitize=object-size
+            -fsanitize=float-divide-by-zero
+            -fsanitize=float-cast-overflow
+            -fsanitize=nonnull-attribute
+            -fsanitize=returns-nonnull-attribute
+            -fsanitize=bool
+            -fsanitize=enum
+            -fsanitize=vptr
+            -fsanitize=pointer-overflow
+            -fsanitize=builtin)
+        add_compile_options(${ASAN_FLAGS})
+        add_link_options(${ASAN_FLAGS})
+    endif()
+
+    if(SANITIZER_THREAD)
+        if(SANITIZER)
+            message(FATAL_ERROR "SANITIZER_THREAD cannot co exists with SANITIZER flag!")
+        endif()
+        message(WARNING "Thread sanitizers enabled")
+        set(ASAN_FLAGS -fsanitize=thread) 
+        add_compile_options(${ASAN_FLAGS})
+        add_link_options(${ASAN_FLAGS})
+    endif()
+
+
 endfunction()

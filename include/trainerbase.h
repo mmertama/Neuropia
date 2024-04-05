@@ -29,6 +29,7 @@ protected:
     virtual bool doInit() = 0;
     bool verify();
     unsigned iterations() const {return m_iterations;}
+    unsigned classes() const {return m_classes;}
     bool update();
 private:
     bool init();
@@ -61,7 +62,6 @@ private:
     const unsigned m_iterations;
     unsigned m_current = 0;
     unsigned m_testVerify = 0;
-    
 };
 }
 

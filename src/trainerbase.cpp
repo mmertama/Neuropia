@@ -160,6 +160,17 @@ TrainerBase::TrainerBase(const std::string & root, const Neuropia::Params& param
                 return false;
             }
 
+            if(m_labels.size() != m_labels.bytes_size()) {
+                std::cerr << "Corrupted labels, expectation: " << m_labels.size() << " bytes, has " << m_labels.bytes_size() << " bytes in " << m_labelFile << std::endl;
+                return false;
+            }
+
+            if(m_images.size(0) * m_images.size(1) * m_images.size(2) != m_images.bytes_size()) {
+                std::cerr << "Corrupted images, expectation: " << m_images.size(0) * m_images.size(1) * m_images.size(2) 
+                << " bytes, has " << m_images.bytes_size() << " bytes in " << m_imageFile << std::endl;
+                return false;
+            }
+
             const auto image_sz = m_images.size(1) * m_images.size(2); 
             if(static_cast<int>(image_sz) <= m_topology.front() || 
                 (m_topology.size() > 1 && std::adjacent_find(m_topology.begin(), m_topology.end(), std::less<int>()) != m_topology.end()) ||
@@ -192,14 +203,21 @@ TrainerBase::TrainerBase(const std::string & root, const Neuropia::Params& param
             std::cerr << std::endl;
             return false;
         }
-        //  tree("/");
+       
+        if(m_labels.size() != m_images.size()) {
+             std::cerr  << "Images and labels sizes must match: images: \"";
+             std::cerr  << m_imageFile << "\" " << m_images.size() << " ";
+             std::cerr  << m_labelFile << "\" " << m_labels.size() << " ";
+             std::cerr  << std::endl;
+             return false; 
+        }
 
         if(m_topology.begin() == m_topology.end()) {
             std::cerr << "Bad topology " << std::endl;
             return false; 
         }
 
-        if(m_classes == 0) {
+        if(m_classes == 0 || m_classes > 255) {
             std::cerr << "Bad classes " << std::endl;
             return false;
         }

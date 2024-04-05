@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 #include <memory>
-
+#include <iostream>
 
 
 
@@ -65,7 +65,39 @@ public:
     bool ok() const {return m_stream.good() && size() > 0 && m_type != Type::Invalid;}
 
     /// @brief Print error
-    void perror();
+    void perror() const;
+
+    /// @brief Verify that all values are in range)
+    /// @param begin 
+    /// @param end 
+    /// @param from 
+    /// @param to 
+    /// @return 
+    template<typename T>
+    bool verify(size_t begin, size_t count, T from, T to) {
+        const auto pos = position();
+        moveTo(begin);
+        T data;
+        bool ok = true;
+        for(size_t i = 0; i < count; ++i) {
+            if(read(reinterpret_cast<char*>(&data), sizeof(T), 1) < sizeof(T)) {
+                std::cerr << "EOF reached" << std::endl;
+                ok = false;
+                break;
+            }
+            if(data < from || data > to) {
+                std::cerr << static_cast<int>(data) << " is not in range" << std::endl;
+                ok = false;
+                break;
+            }
+        }
+        moveTo(pos);
+        return ok;    
+    }
+
+    size_t bytes_size() const {
+        return m_size - m_headerSize;
+    }
 
 protected:
     /**
@@ -84,10 +116,11 @@ protected:
 private:
     void readBE(char* data, size_t size);
 private:
+    std::unique_ptr<char[]> m_iobuf = {};
+    const size_t m_size;
     mutable std::ifstream m_stream = {};
     Type m_type = Type::Invalid;
     std::vector<size_t> m_dimensions = {};
-    std::unique_ptr<char[]> m_iobuf = {};
     size_t m_headerSize = {};
 };
 
@@ -162,8 +195,6 @@ class IdxReader<std::array<T, S>> : public IdxReaderBase {
 public:
     /// @brief Value type
     using value_type = T;
-    /// @brief Value size
-    static constexpr size_t value_size = S;
     /**
      * @brief IdxReader
      * @param name as above

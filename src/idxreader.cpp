@@ -1,5 +1,4 @@
 #include "idxreader.h"
-#include <iostream>
 #include <fstream>
 #include <string>
 #include <cassert>
@@ -86,10 +85,19 @@ void IdxReaderBase::readBE(char* data, size_t size) {
 
 #define BSZ(x) ((x) * 1024)
 
-IdxReaderBase::IdxReaderBase(const std::string& name, unsigned iobufsz) : m_iobuf(iobufsz > 0 ? new char[BSZ(iobufsz)] : nullptr) {
+static size_t get_size(const std::string& name) {
+    std::ifstream in_file(name, std::ios::binary);
+    if(!in_file.is_open())
+        return 0;
+    in_file.seekg(0, std::ios::end);
+    return static_cast<size_t>(in_file.tellg());
+}
+
+IdxReaderBase::IdxReaderBase(const std::string& name, unsigned iobufsz) : m_iobuf(iobufsz > 0 ? new char[BSZ(iobufsz)] : nullptr), m_size(get_size(name)) {
     if(iobufsz > 0) {
         m_stream.rdbuf()->pubsetbuf(m_iobuf.get(), BSZ(iobufsz));
     }
+
     m_stream.open(name, std::ios::binary);
     if(m_stream.is_open()) {
         unsigned magic;
@@ -121,6 +129,6 @@ void IdxReaderBase::moveTo(size_t position) {
     m_stream.seekg(static_cast<std::streamoff>(m_headerSize + position));
 }
 
-void IdxReaderBase::perror() {
+void IdxReaderBase::perror() const {
     std::cerr << (m_stream.good() ? "" : "Bad stream") << " " << (size() > 0 ? "" : "Zero size") << " " << (m_type != Type::Invalid ? "" : "Invalid type");
 }
