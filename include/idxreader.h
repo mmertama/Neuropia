@@ -74,7 +74,7 @@ public:
     /// @param to 
     /// @return 
     template<typename T>
-    bool verify(size_t begin, size_t count, T from, T to) {
+    bool is_valid(size_t begin, size_t count, const std::initializer_list<std::pair<T,T>>& ranges) {
         const auto pos = position();
         moveTo(begin);
         T data;
@@ -85,7 +85,15 @@ public:
                 ok = false;
                 break;
             }
-            if(data < from || data > to) {
+            bool match = false;
+            for(const auto& range : ranges) {
+                if(match || (data >= range.first && data <= range.second)) {
+                   match = true;
+                   break; 
+                }
+            }
+
+            if(!match) {
                 std::cerr << static_cast<int>(data) << " is not in range" << std::endl;
                 ok = false;
                 break;

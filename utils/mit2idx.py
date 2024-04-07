@@ -30,7 +30,11 @@ def label_byte(ascii):
     assert ascii < 255
     byte = ascii.to_bytes(1, byteorder='big')
     return byte
-    
+
+def write(f, bytes):
+    for b in bytes:
+        f.write(b) 
+
 def progress_bar(progress, all, bar_length = 60):
     fraction = float(progress) / all
     percent = int(round(fraction * 100))
@@ -53,10 +57,12 @@ if __name__ == "__main__":
     hsf_entries = 0
     with zipfile.ZipFile(zip_file, 'r') as zip:
         entries = zip.namelist()
-        elen = len(entries)
-        hsf_images, hsf_labels = create_idx("hsf-" + name_prefix, target_folder, elen, w, h)
-        train_images, train_labels = create_idx("train-" + name_prefix, target_folder, elen, w, h)
+        entries_len = len(entries)
         progress = 0
+        hsf_images = []
+        hsf_labels = []
+        train_images = []
+        train_labels = []
         for e in entries:
             path = e.split('/')
             if len(path[1]) == 0:
@@ -80,9 +86,18 @@ if __name__ == "__main__":
                 images = hsf_images
                 hsf_entries += 1            
             with zip.open(e) as infile:
-                progress_bar(progress, elen)
+                progress_bar(progress, entries_len)
                 progress += 1  
-                labels.write(label_byte(ascii))
+                labels.append(label_byte(ascii))
                 bytes = infile.read()
-                images.write(image_bytes(bytes, w, h))
-    print("\nhsf: ", hsf_entries, "train: ", train_entries, "classes: ", len(label_set), " ", [chr(x) for x in label_set]) # newline when progressbar is gone
+                images.append(image_bytes(bytes, w, h))
+    
+    hsf_images_file, hsf_labels_file = create_idx("hsf-" + name_prefix, target_folder, hsf_entries, w, h)
+    train_images_file, train_labels_file = create_idx("train-" + name_prefix, target_folder, train_entries, w, h)
+    
+    print("\nWrite files...")
+    write(hsf_labels_file, hsf_labels)
+    write(hsf_images_file, hsf_images)
+    write(train_labels_file, train_labels)
+    write(train_images_file, train_images)
+    print("hsf: ", hsf_entries, "train: ", train_entries, "classes: ", len(label_set), " ", [chr(x) for x in label_set]) # newline when progressbar is gone
