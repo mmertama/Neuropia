@@ -40,10 +40,10 @@ bool Trainer::doTrain() {
         if(label >= outputs.size()) {
             std::cerr << "\nError due data mismatch! The labels refers to value at " << label << " when size is " << outputs.size() << std::endl;
             std::cerr << "Images size: " <<  m_images.size() << " Labels size:" <<  m_labels.size() << " a label " << at << std::endl;
-            if(!m_labels.is_valid<unsigned char>(0, m_labels.size(), {
-                std::make_pair<unsigned char, unsigned char>('0','9'),
-                std::make_pair<unsigned char, unsigned char>('A','Z'),
-                std::make_pair<unsigned char, unsigned char>('a','z')})) {
+            if(!m_labels.is_valid<unsigned char>(0, m_labels.size(), {{0, classes()}})) {
+                //std::make_pair<unsigned char, unsigned char>('0','9'),
+                //std::make_pair<unsigned char, unsigned char>('A','Z'),
+                //std::make_pair<unsigned char, unsigned char>('a','z')})) {
                 std::cerr << "Bad labels data in " <<  m_labelFile << std::endl;
             }
 
