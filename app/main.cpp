@@ -83,12 +83,18 @@ int main(int argc, char* argv[]) {
     if(verify_labels != params.end() && verify_images != params.end()) {
         const size_t vers = 10000;   
         const auto result = NeuropiaSimple::verify(neuropia, vers);
-        if(std::get<0>(result) < (vers / 3U)) {
-            std::cerr << "Supposedly network training was not successful " << std::get<1>(result) * 100 << "% (" << std::get<0>(result) << ")" << std::endl;
-            return 3;
+        std::ostream* stream = nullptr;
+        bool fail = std::get<0>(result) < (vers / 3U);
+        if(fail) {
+            stream = &std::cerr;
+            (*stream) << "Supposedly network training was not successful ";
         } else {
-            std::cerr << "Saving valid: " << std::get<1>(result) * 100 << "%" << " as " << argparse.param(3) << std::endl;
+            stream = &std::cout;
+            (*stream) << "Saving valid: " << std::get<1>(result) * 100 << "%" << " as " << argparse.param(3) << std::endl;
         }
+        (*stream) << std::get<1>(result) * 100 << "% " << std::get<0>(result) << "/" << std::get<2>(result) << " as " << argparse.param(3) << std::endl;
+        if(fail)
+            return 3;
     }
 
     NeuropiaSimple::save(neuropia, argparse.param(3), save_type);

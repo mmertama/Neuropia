@@ -13,7 +13,7 @@ VALUES = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
               'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 
               'w', 'x', 'y', 'z']
 
-values = [ord(x) for x in VALUES]
+values = [VALUES.index(x) if x in VALUES else -1 for x in map(chr, range(256))]
 
 def create_idx(prefix, folder, size: int, width: int, height: int):
     pathlib.Path(folder).mkdir(parents=True, exist_ok=True)
@@ -35,11 +35,11 @@ def image_bytes(image_data, width: int, height: int):
     assert len(bytes) == width * height, "except " + str(width * height) + " get " + str(len(bytes)) + " " + str(image.size)
     return bytes
 
- 
 
 def label_byte(ascii):
     global values   
-    index = values.index(ascii)
+    index = values[ascii]
+    assert(index >= 0)
     byte = index.to_bytes(1, byteorder='big')
     return byte
 
@@ -58,7 +58,7 @@ def progress_bar(progress, all, bar_length = 60):
     print("\r[{0}] {1}%".format(hashes + spaces, percent), end='')
 progress_bar.pre_percent = -1
 
-if __name__ == "__main__":
+if __name__ == "__main__":    
     zip_file = sys.argv[1]
     target_folder = sys.argv[2]
     name_prefix = sys.argv[3]
@@ -112,4 +112,4 @@ if __name__ == "__main__":
     write(hsf_images_file, hsf_images)
     write(train_labels_file, train_labels)
     write(train_images_file, train_images)
-    print("hsf: ", hsf_entries, "train: ", train_entries, "classes: ", len(label_set), " ", [(VALUES[x], x) for x in label_set]) # newline when progressbar is gone
+    print("hsf: ", hsf_entries, "train: ", train_entries, "classes: ", len(label_set)) # newline when progressbar is gone
